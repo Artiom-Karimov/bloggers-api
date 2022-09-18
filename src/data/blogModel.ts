@@ -11,8 +11,9 @@ export class BlogModel {
     public clone(): BlogModel {
         return new BlogModel(this.id, this.name, this.youtubeUrl)
     }
-    public update(name: string, youtubeUrl: string) {
+    public update(name: string, youtubeUrl: string): BlogModel {
         this.name = name
         this.youtubeUrl = youtubeUrl
+        return this
     }
 }

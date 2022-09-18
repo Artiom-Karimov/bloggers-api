@@ -15,7 +15,7 @@ export class Blogs {
         return blog.clone()
     }
     public create(name: string, youtubeUrl: string): BlogModel {
-        const newBlog = new BlogModel(Number(new Date()).toString(), name, youtubeUrl)
+        const newBlog = new BlogModel(this.generateId(), name, youtubeUrl)
         return this.add(newBlog)
     }
     public update(blog: BlogModel): boolean {
@@ -37,5 +37,10 @@ export class Blogs {
     }
     public deleteAll() {
         this.blogs = []
+    }
+    private generateId():string {
+        let result = Number(new Date())
+        result -= Math.floor(Math.random()*1024)
+        return result.toString()
     }
 }
