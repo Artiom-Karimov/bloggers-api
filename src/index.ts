@@ -7,6 +7,7 @@ import { postsRouter, clearPostsData } from './presentation/posts/postsRouter'
 const port = process.env.PORT || 3034
 
 const app = express()
+app.use(bodyParser.json())
 
 app.use('/blogs', blogsRouter)
 app.use('/posts', postsRouter)

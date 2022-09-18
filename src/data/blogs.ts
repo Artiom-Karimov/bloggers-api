@@ -14,6 +14,10 @@ export class Blogs {
         this.blogs.push(blog)
         return blog.clone()
     }
+    public create(name: string, youtubeUrl: string): BlogModel {
+        const newBlog = new BlogModel(Number(new Date()).toString(), name, youtubeUrl)
+        return this.add(newBlog)
+    }
     public update(blog: BlogModel): boolean {
         const existingBlog = this.blogs.find((b) => b.id === blog.id)
         if(existingBlog) {
