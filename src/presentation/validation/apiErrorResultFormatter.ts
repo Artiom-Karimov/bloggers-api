@@ -6,7 +6,7 @@ type FieldError = {
     field: string
 }
 
-const errorFormatter = ({ location, msg, param, value, nestedErrors }: ValidationError) => {
+const errorFormatter = ({ location, msg, param, value, nestedErrors }: ValidationError): FieldError => {
     return { message:msg, field:param };
 };
 

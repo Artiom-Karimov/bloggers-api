@@ -6,7 +6,6 @@ const httpsRegex = /^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]
 const nameErrorMessage = 'name should be a string of 1-15 chars'
 const youtubeUrlErrorMessage = 'youtubeUrl should be a valid url of 100 chars max'
 
-
 export const nameValidation = body('name')
     .isString().withMessage(nameErrorMessage)
     .trim().withMessage(nameErrorMessage)

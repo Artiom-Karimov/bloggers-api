@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express'
 
-import { Blogs } from '../../data/blogs'
+import { Blogs } from '../../data/blogs/blogs'
 import { blogValidationMiddleware, nameValidation, youtubeUrlValidation } from '../validation/blogValidationMiddleware'
 
 const blogs = new Blogs()
@@ -28,7 +28,7 @@ blogsRouter.post('/',
     youtubeUrlValidation,
     blogValidationMiddleware,
     (req:Request, res:Response) => {
-        res.status(201).send(blogs.create(req.body.name, req.body.youtubeUrl))
+        res.status(201).send(blogs.create({ name:req.body.name, youtubeUrl:req.body.youtubeUrl }))
 })
 
 blogsRouter.put('/:id',
@@ -40,8 +40,7 @@ blogsRouter.put('/:id',
         if(blog === undefined)
             res.send(404)
         else {
-            blog.update(req.body.name, req.body.youtubeUrl)
-            blogs.update(blog)
+            blogs.update(req.params.id, { name:req.body.name, youtubeUrl:req.body.youtubeUrl })
             res.send(204)
         }
     })

@@ -1,5 +1,4 @@
-import { forEachChild } from "typescript";
-import { BlogModel } from "./blogModel";
+import { BlogModel, BlogInputModel } from "./blogModel";
 
 export class Blogs {
     private blogs: Array<BlogModel> = []
@@ -14,14 +13,14 @@ export class Blogs {
         this.blogs.push(blog)
         return blog.clone()
     }
-    public create(name: string, youtubeUrl: string): BlogModel {
-        const newBlog = new BlogModel(this.generateId(), name, youtubeUrl)
+    public create(data: BlogInputModel): BlogModel {
+        const newBlog = new BlogModel(this.generateId(), data)
         return this.add(newBlog)
     }
-    public update(blog: BlogModel): boolean {
-        const existingBlog = this.blogs.find((b) => b.id === blog.id)
+    public update(id: string, data: BlogInputModel): boolean {
+        const existingBlog = this.blogs.find((b) => b.id === id)
         if(existingBlog) {
-            existingBlog.update(blog.name, blog.youtubeUrl)
+            existingBlog.update(data)
             return true
         }
         else return false
