@@ -1,27 +1,35 @@
 import express, { Request, Response } from 'express'
+import http from 'http'
 import bodyParser from 'body-parser'
 
-import { blogsRouter, clearBlogsData } from './presentation/blogs/blogsRouter'
-import { postsRouter, clearPostsData } from './presentation/posts/postsRouter'
+import { setupBlogsRouter } from './presentation/blogs/blogsRouter'
+import { setupPostsRouter } from './presentation/posts/postsRouter'
+import { Blogs } from './data/blogs/blogs'
+import { Posts } from './data/posts/posts'
 
 const port = process.env.PORT || 3034
 
+const blogRepository = new Blogs()
+const postRepository = new Posts()
+
 const app = express()
+export const server = http.createServer(app)
+
 app.use(bodyParser.json())
 
-app.use('/blogs', blogsRouter)
-app.use('/posts', postsRouter)
+app.use('/blogs', setupBlogsRouter(blogRepository))
+app.use('/posts', setupPostsRouter(postRepository, blogRepository))
 
 app.get('/', (req: Request, res: Response) => {
-    res.send(404)
+    res.sendStatus(404)
 })
 
 app.delete('/testing/all-data', (req: Request, res: Response) => {
-    clearBlogsData()
-    clearPostsData()
-    res.send(204)
+    blogRepository.deleteAll()
+    postRepository.deleteAll()
+    res.sendStatus(204)
 })
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Listenning on port ${port}`)
 })

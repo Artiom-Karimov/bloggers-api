@@ -1,9 +1,9 @@
 import { expect, test} from '@jest/globals';
 import { Blogs } from './blogs'
-import { BlogModel } from './blogModel'
+import { BlogInputModel } from './blogModel'
 
 let blogs: Blogs
-let exampleData: Array<{name:string,youtubeUrl:string}>
+let exampleData: Array<BlogInputModel>
 
 beforeEach(() => {
     blogs = new Blogs()
@@ -19,7 +19,7 @@ beforeEach(() => {
 
 const fillData = () => {
     exampleData.forEach((obj) => {
-        blogs.create(obj.name, obj.youtubeUrl)
+        blogs.create(obj)
     })
 }
 
@@ -28,20 +28,18 @@ test('New blogs should be empty', () => {
 })
 
 test('Create should return the right model', () => {
-    const name = 'privet'
-    const url = 'poka'
+    const sample = exampleData[0]
 
-    const blog = blogs.create(name, url)
+    const blog = blogs.create(sample)
     expect(blog.id).toBeTruthy()
-    expect(blog.name).toBe(name)
-    expect(blog.youtubeUrl).toBe(url)
+    expect(blog.name).toBe(sample.name)
+    expect(blog.youtubeUrl).toBe(sample.youtubeUrl)
 })
 
 test('Create should add the right model', () => {
-    const name = 'privet'
-    const url = 'poka'
+    const sample = exampleData[1]
 
-    const blog = blogs.create(name, url)
+    const blog = blogs.create(sample)
     const obtainedBlog = blogs.getById(blog.id)
     expect(blog.id).toBe(obtainedBlog?.id)
     expect(blog.name).toBe(obtainedBlog?.name)
@@ -62,7 +60,8 @@ test('GetAll should return the right array', () => {
 test('Delete should delete', () => {
     fillData()
     let array = blogs.getAll()
-    blogs.delete(array[array.length - 2].id)
+    const success = blogs.delete(array[array.length - 2].id)
+    expect(success).toBe(true)
     array = blogs.getAll()
 
     expect(array.length).toBe(exampleData.length - 1)

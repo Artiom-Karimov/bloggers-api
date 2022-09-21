@@ -1,21 +1,23 @@
 import { Router, Request, Response } from 'express'
 
 import { Blogs } from '../../data/blogs/blogs'
-import { blogValidationMiddleware, nameValidation, youtubeUrlValidation } from '../validation/blogValidationMiddleware'
+import { nameValidation, youtubeUrlValidation } from '../validation/blogValidation'
+import { authorizationMiddleware } from '../authorizationMiddleware'
+import { validationMiddleware } from '../validation/validationMiddleware'
 
-const blogs = new Blogs()
+let blogs: Blogs
+const router = Router()
 
-export const blogsRouter = Router()
-
-export const clearBlogsData = () => {
-    blogs.deleteAll()
+export const setupBlogsRouter = (blogRepository: Blogs): Router => {
+    blogs = blogRepository
+    return router
 }
 
-blogsRouter.get('/', (req:Request, res:Response) => {
+router.get('/', (req:Request, res:Response) => {
     res.status(200).send(blogs.getAll())
 })
 
-blogsRouter.get('/:id', (req:Request, res:Response) => {
+router.get('/:id', (req:Request, res:Response) => {
     const blog = blogs.getById(req.params.id)
     if(blog === undefined)
         res.send(404)
@@ -23,18 +25,18 @@ blogsRouter.get('/:id', (req:Request, res:Response) => {
         res.status(200).send(blog)
 })
 
-blogsRouter.post('/', 
-    nameValidation,
-    youtubeUrlValidation,
-    blogValidationMiddleware,
+router.post('/',
+    authorizationMiddleware,
+    nameValidation, youtubeUrlValidation,
+    validationMiddleware,
     (req:Request, res:Response) => {
         res.status(201).send(blogs.create({ name:req.body.name, youtubeUrl:req.body.youtubeUrl }))
 })
 
-blogsRouter.put('/:id',
-    nameValidation,
-    youtubeUrlValidation,
-    blogValidationMiddleware,
+router.put('/:id',
+    authorizationMiddleware,
+    nameValidation, youtubeUrlValidation,
+    validationMiddleware,
     (req:Request,res:Response) => {
         const blog = blogs.getById(req.params.id)
         if(blog === undefined)
@@ -45,7 +47,9 @@ blogsRouter.put('/:id',
         }
     })
 
-blogsRouter.delete('/:id', (req:Request,res:Response) => {
+router.delete('/:id', 
+    authorizationMiddleware,
+    (req:Request,res:Response) => {
     if(blogs.delete(req.params.id))
         res.send(204)
     else

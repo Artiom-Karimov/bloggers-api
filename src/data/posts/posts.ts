@@ -26,13 +26,15 @@ export class Posts {
         else return false
     }
     public delete(id: string): boolean {
+        let success = false
         this.posts.forEach((post, index) => {
             if(post.id === id) {
                 this.posts.splice(index, 1)
-                return true
+                success = true
+                return
             }
         })
-        return false
+        return success
     }
     public deleteAll() {
         this.posts = []

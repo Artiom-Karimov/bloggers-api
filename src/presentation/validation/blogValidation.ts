@@ -1,6 +1,4 @@
-import { Request, Response, NextFunction } from "express";
-import { body, validationResult } from "express-validator";
-import { formatErrors } from "./apiErrorResultFormatter";
+import { body } from "express-validator";
 
 const httpsRegex = /^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/
 const nameErrorMessage = 'name should be a string of 1-15 chars'
@@ -16,9 +14,3 @@ export const youtubeUrlValidation = body('youtubeUrl')
     .trim().withMessage(youtubeUrlErrorMessage)
     .matches(httpsRegex).withMessage(youtubeUrlErrorMessage)
     .isLength({max:100}).withMessage(youtubeUrlErrorMessage)
-    
-export const blogValidationMiddleware = (req:Request,res:Response,next:NextFunction) => {
-    const errors = formatErrors(req)
-    if(errors.isEmpty()) next()
-    else res.status(400).send(errors)
-}
