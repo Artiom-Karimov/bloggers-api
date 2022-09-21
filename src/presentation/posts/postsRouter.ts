@@ -3,10 +3,19 @@ import { Blogs } from '../../data/blogs/blogs'
 import { Posts } from '../../data/posts/posts'
 import { authorizationMiddleware } from '../authorizationMiddleware'
 import { validationMiddleware } from '../validation/validationMiddleware'
-import { titleValidation, shortDescriptionValidation, contentValidation, blogIdValidation } from '../validation/postValidation'
+import { titleValidation, shortDescriptionValidation, contentValidation } from '../validation/postValidation'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
+import { body } from "express-validator";
 
-const blogNotFoundResult = new APIErrorResult([{message:'blog does not exist',field:'blogId'}])
+const blogIdErrorMessage = 'blogId should be an existing blog id'
+const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
+
+const blogIdValidation = body('blogId').custom(value => {
+    const blog = blogs.getById(value)
+    if(blog === undefined)
+        throw new Error(blogIdErrorMessage)
+    else return true;
+})
 
 let posts: Posts
 let blogs: Blogs

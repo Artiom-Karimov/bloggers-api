@@ -68,6 +68,18 @@ describe('postsRouter crud tests', () => {
         })       
     })
 
+    it('post with wrong data should fail', async () => {
+        const invalidData = {
+            title:'lorem', 
+            shortDescription:'ipsum', 
+            content:'dolor', 
+            blogId:'non-existing blog', 
+        }
+        const created = await request(server).post(base).auth(userName, password).send(invalidData)
+        expect(created.statusCode).toBe(400)
+        expect(created.body.errorsMessages[0].field).toBe('blogId')
+    })
+
     // Post, GetAll
     it('post should create valid models', async () => {
         await fillPosts()

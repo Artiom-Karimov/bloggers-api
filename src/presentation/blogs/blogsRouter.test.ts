@@ -17,7 +17,9 @@ const fillBlogs = async () => {
 
 describe('blogsRouter crud tests', () => {
 
-    beforeAll(async () => {        
+    beforeAll(async () => {
+        await request(server)
+            .delete('/testing/all-data')    
         sampleBlogInputs = [
             {name:'odin',youtubeUrl:'https://you.tube'},
             {name:'tri',youtubeUrl:'https://youtu.be'},
@@ -25,11 +27,6 @@ describe('blogsRouter crud tests', () => {
             {name:'sem',youtubeUrl:'https://youtub.e'},
             {name:'devyat',youtubeUrl:'https://y.o.u.tu/be'}
         ]
-    })
-
-    beforeEach(async () => {
-        await request(server)
-            .delete('/testing/all-data')
     })
 
     // GetAll (empty)

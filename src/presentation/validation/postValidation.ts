@@ -1,9 +1,9 @@
 import { body } from "express-validator";
+import { Blogs } from "../../data/blogs/blogs";
 
 const titleErrorMessage = 'title should be a string of 1-30 chars'
 const shortDescriptionErrorMessage = 'shortDescription should be a string of 1-100 chars'
 const contentErrorMessage = 'content should be a string of 1-1000 chars'
-const blogIdErrorMessage = 'blogId should be a non-empty string'
 
 const stringValidation = (param:string, maxLength:number, message:string) => {
     return body(param).isString().withMessage(message)
@@ -13,4 +13,4 @@ const stringValidation = (param:string, maxLength:number, message:string) => {
 export const titleValidation = stringValidation('title', 30, titleErrorMessage)
 export const shortDescriptionValidation = stringValidation('shortDescription', 100, shortDescriptionErrorMessage)
 export const contentValidation = stringValidation('content', 1000, contentErrorMessage)
-export const blogIdValidation = stringValidation('blogId', 1000, blogIdErrorMessage)
+ 
