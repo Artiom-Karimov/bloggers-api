@@ -1,94 +1,95 @@
 import { Router, Request, Response } from 'express'
-import { Blogs } from '../../data/blogs/blogs'
-import { Posts } from '../../data/posts/posts'
+import { PostRepository } from '../../data/posts/postRepository'
 import { authorizationMiddleware } from '../authorizationMiddleware'
 import { validationMiddleware } from '../validation/validationMiddleware'
 import { titleValidation, shortDescriptionValidation, contentValidation } from '../validation/postValidation'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
-import { body } from "express-validator";
+import { body, CustomValidator } from "express-validator";
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
 
-const blogIdValidation = body('blogId').custom(value => {
-    const blog = blogs.getById(value)
-    if(blog === undefined)
-        throw new Error(blogIdErrorMessage)
-    else return true;
-})
+export class PostsRouter {
+    public readonly router: Router
+    private readonly posts: PostRepository
 
-let posts: Posts
-let blogs: Blogs
+    constructor(posts:PostRepository) {
+        this.posts = posts
+        this.router = Router()
+        this.setRoutes()
+    }
 
-const router = Router()
+    private setRoutes() {
+        this.router.get('/', async (req:Request, res:Response) => {
+            res.status(200).send(await this.posts.getAll())
+        })
 
-export const setupPostsRouter = (postRepository: Posts,blogRepository: Blogs): Router => {
-    posts = postRepository
-    blogs = blogRepository
-    return router
-}
+        this.router.get('/:id', async (req:Request, res:Response) => {
+            const post = await this.posts.get(req.params.id)
+            if(post === undefined)
+                res.send(404)
+            else
+                res.status(200).send(post)
+        })
 
-router.get('/', (req:Request, res:Response) => {
-    res.status(200).send(posts.getAll())
-})
-
-router.get('/:id', (req:Request, res:Response) => {
-    const post = posts.getById(req.params.id)
-    if(post === undefined)
-        res.send(404)
-    else
-        res.status(200).send(post)
-})
-
-router.post('/',
-    authorizationMiddleware,
-    titleValidation, shortDescriptionValidation, contentValidation, blogIdValidation,
-    validationMiddleware,
-    (req:Request, res:Response) => {
-        const blog = blogs.getById(req.body.blogId)
-        if(blog === undefined)
-            res.status(400).send(blogNotFoundResult)
-        else {
-            res.status(201).send(posts.create({ 
+        this.router.post('/',
+            authorizationMiddleware,
+            titleValidation, shortDescriptionValidation, contentValidation, this.blogIdValidation,
+            validationMiddleware,
+        async (req:Request, res:Response) => {
+            const blog = await this.posts.getBlog(req.body.blogId)
+            if(!blog) { 
+                res.send(404)
+                return;
+            }
+            const created = await this.posts.create({
                 title: req.body.title,
                 shortDescription: req.body.shortDescription,
                 content: req.body.content,
                 blogId: req.body.blogId,
                 blogName: blog.name
-            }))
-        }
-})
-
-router.put('/:id',
-    authorizationMiddleware,
-    titleValidation, shortDescriptionValidation, contentValidation, blogIdValidation,
-    validationMiddleware,
-    (req:Request,res:Response) => {
-        const post = posts.getById(req.params.id)
-        if(post === undefined)
-            res.send(404)
-        else {
-            const blog = blogs.getById(req.body.blogId)
-            if(blog === undefined)
-                res.status(400).send(blogNotFoundResult)
-            else {
-                posts.update(req.params.id, { 
-                    title: req.body.title,
-                    shortDescription: req.body.shortDescription,
-                    content: req.body.content,
-                    blogId: req.body.blogId,
-                    blogName: blog.name
                 })
-                res.send(204)
-            }
-        }
-    })
+            if(created) res.status(201).send(created)
+            else res.send(404)
+        })
 
-router.delete('/:id', 
-    authorizationMiddleware,
-    (req:Request,res:Response) => {
-    if(posts.delete(req.params.id))
-        res.send(204)
-    else
-        res.send(404)
-})
+        this.router.put('/:id',
+            authorizationMiddleware,
+            titleValidation, shortDescriptionValidation, contentValidation, this.blogIdValidation,
+            validationMiddleware,
+        async (req:Request,res:Response) => {
+            const post = await this.posts.get(req.params.id)
+            if(post === undefined)
+                res.send(404)
+            else {
+                const blog = await this.posts.getBlog(req.body.blogId)
+                if(blog === undefined)
+                    res.status(400).send(blogNotFoundResult)
+                else {
+                    const updated = await this.posts.update(req.params.id, { 
+                        title: req.body.title,
+                        shortDescription: req.body.shortDescription,
+                        content: req.body.content,
+                        blogId: req.body.blogId,
+                        blogName: blog.name
+                    })
+                    res.send(updated? 204 : 500)
+                }
+            }
+        })
+
+        this.router.delete('/:id', 
+            authorizationMiddleware,
+        async (req:Request,res:Response) => {
+            const deleted = await this.posts.delete(req.params.id)
+            res.send(deleted? 204 : 404)
+        })
+    }
+
+    private blogIdValidator: CustomValidator = value => {
+        return this.posts.getBlog(value).then((result) => {
+            if(!result) return Promise.reject(blogIdErrorMessage)
+        })
+    }
+    private blogIdValidation = body('blogId').custom(this.blogIdValidator)
+}

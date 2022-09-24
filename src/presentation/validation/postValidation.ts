@@ -1,5 +1,4 @@
 import { body } from "express-validator";
-import { Blogs } from "../../data/blogs/blogs";
 
 const titleErrorMessage = 'title should be a string of 1-30 chars'
 const shortDescriptionErrorMessage = 'shortDescription should be a string of 1-100 chars'
