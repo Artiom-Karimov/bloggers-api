@@ -2,6 +2,7 @@ import { BloggersMongDb } from "../bloggersMongoDb";
 import { BlogInputModel, BlogModel } from "./blogModel";
 import { IdGenerator } from '../idGenerator';
 import { Collection } from "mongodb";
+import { removeMongoId } from "../mongoIdRemover";
 
 export class BlogRepository {
     private readonly db: BloggersMongDb
@@ -14,7 +15,7 @@ export class BlogRepository {
     public async getAll(): Promise<Array<BlogModel>> {
         try {
             const result = await this.blogs.find({}).toArray()
-            return result.map((b) => b as BlogModel)          
+            return result.map((b) => removeMongoId(b) as BlogModel)          
         } catch {
             return []
         }
@@ -22,7 +23,7 @@ export class BlogRepository {
     public async get(id:string): Promise<BlogModel|undefined> {
         try {            
             const result = await this.blogs.findOne({ 'id': id })
-            return result? result as BlogModel : undefined
+            return result? removeMongoId(result) as BlogModel : undefined
         } catch {
             return undefined
         }

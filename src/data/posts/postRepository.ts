@@ -3,6 +3,7 @@ import { PostInputModel, PostModel } from "./postModel";
 import { IdGenerator } from '../idGenerator';
 import { Collection } from "mongodb";
 import { BlogModel } from "../blogs/blogModel";
+import { removeMongoId } from "../mongoIdRemover";
 
 export class PostRepository {
     private readonly db:BloggersMongDb
@@ -14,11 +15,11 @@ export class PostRepository {
     }
     public async getAll(): Promise<Array<PostModel>> {
         const result = await this.posts.find({}).toArray()
-        return result.map((p) => p as PostModel)
+        return result.map((p) => removeMongoId(p) as PostModel)
     }
     public async get(id: string): Promise<PostModel|undefined> {
         const result = await this.posts.findOne({'id':id})
-        return result? result as PostModel : undefined
+        return result? removeMongoId(result) as PostModel : undefined
     }
     public async create(data: PostInputModel): Promise<PostModel|undefined> {
         const id = IdGenerator.generate()
