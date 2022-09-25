@@ -1,3 +1,5 @@
+import { getDate } from "../dateGenerator"
+
 export type PostInputModel = {
     title: string,
     shortDescription: string,
@@ -13,6 +15,7 @@ export class PostModel {
     public content: string
     public blogId: string
     public blogName: string
+    public createdAt: string
 
     constructor(id:string, data: PostInputModel) {
         this.id = id
@@ -21,9 +24,10 @@ export class PostModel {
         this.content = data.content
         this.blogId = data.blogId
         this.blogName = data.blogName
+        this.createdAt = getDate()
     }
     public clone(): PostModel {
-        return new PostModel(
+        const clone =  new PostModel(
             this.id, {
                 title: this.title,
                 shortDescription: this.shortDescription,
@@ -32,6 +36,8 @@ export class PostModel {
                 blogName: this.blogName 
             }
         )
+        clone.createdAt = this.createdAt
+        return clone
     }
     public update(data: PostInputModel): PostModel {
         this.title = data.title
@@ -48,7 +54,8 @@ export class PostModel {
             this.shortDescription === another.shortDescription &&
             this.content === another.content &&
             this.blogId === another.blogId &&
-            this.blogName === another.blogName
+            this.blogName === another.blogName &&
+            this.createdAt === another.createdAt
         )
     }
 }
