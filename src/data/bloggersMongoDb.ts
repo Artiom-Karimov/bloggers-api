@@ -1,21 +1,21 @@
 import { MongoClient, Db, Collection } from "mongodb"
-import { BlogModel } from "./blogs/blogModel"
-import { PostModel } from "./posts/postModel"
+import MongoBlogModel from "./models/mongoBlogModel"
+import MongoPostModel from "./models/mongoPostModel"
 
-export class BloggersMongDb {
-    public readonly blogCollection: Collection<BlogModel>
-    public readonly postCollection: Collection<PostModel>
+export default class BloggersMongoDb {
+    public readonly blogCollection: Collection<MongoBlogModel>
+    public readonly postCollection: Collection<MongoPostModel>
 
     private readonly mongoUri: string
     private readonly client: MongoClient
     private readonly db: Db
     
-    constructor() {
-        this.mongoUri = process.env.mongoUri || 'mongodb://0.0.0.0:27017'
+    constructor(mongoUri:string) {
+        this.mongoUri = mongoUri
         this.client = new MongoClient(this.mongoUri)
         this.db = this.client.db('bloggers')
-        this.blogCollection = this.db.collection<BlogModel>('blogs')
-        this.postCollection = this.db.collection<PostModel>('posts')
+        this.blogCollection = this.db.collection<MongoBlogModel>('blogs')
+        this.postCollection = this.db.collection<MongoPostModel>('posts')
     }
     public async connect() {
         try {

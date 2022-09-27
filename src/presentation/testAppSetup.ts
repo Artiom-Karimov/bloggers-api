@@ -1,9 +1,10 @@
-import { BloggersApp } from './bloggersApp'
+import * as config from '../config/config'
+import BloggersApp from './bloggersApp'
 
-export class TestApp {
-    public static readonly userName = 'admin'
-    public static readonly password = 'qwerty'
-    public static readonly app = new BloggersApp(3034)
+export default class TestApp {
+    public static readonly userName = config.userName
+    public static readonly password = config.password
+    public static readonly app = new BloggersApp()
     public static readonly server = this.app.server
     public static async start() { await this.app.startDbOnly() }
     public static async stop() { await this.app.stop() }

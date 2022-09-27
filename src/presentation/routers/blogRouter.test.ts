@@ -1,6 +1,6 @@
 import request from 'supertest'
-import { BlogInputModel, BlogModel } from '../../data/blogs/blogModel'
-import { TestApp } from '../testAppSetup'
+import BlogModel, { BlogInputModel } from '../../logic/models/blogModel'
+import TestApp from '../testAppSetup'
 
 const base = '/blogs'
 

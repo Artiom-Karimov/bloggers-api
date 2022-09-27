@@ -1,26 +1,25 @@
-import { getDate } from "../dateGenerator"
-
 export type BlogInputModel = {
     name: string,
     youtubeUrl: string
 }
 
-export class BlogModel {
+export default class BlogModel {
     public id: string
     public name: string
     public youtubeUrl: string
     public createdAt: string
 
-    constructor(id: string, data: BlogInputModel) {
+    constructor(id: string, data: BlogInputModel, createdAt: string) {
         this.id = id
         this.name = data.name
         this.youtubeUrl = data.youtubeUrl
-        this.createdAt = getDate()
+        this.createdAt = createdAt
     }
     public clone(): BlogModel {
-        const clone = new BlogModel(this.id, { name:this.name, youtubeUrl:this.youtubeUrl })
-        clone.createdAt = this.createdAt
-        return clone
+        return new BlogModel(
+            this.id, 
+            { name:this.name, youtubeUrl:this.youtubeUrl }, 
+            this.createdAt)
     }
     public update(data: BlogInputModel): BlogModel {
         this.name = data.name

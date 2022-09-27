@@ -1,20 +1,25 @@
 import { Router, Request, Response } from 'express'
-import { PostRepository } from '../../data/posts/postRepository'
+import { body, CustomValidator } from "express-validator";
+
+import * as config from '../../config/config'
+import PostService from '../../logic/postService'
 import { authorizationMiddleware } from '../authorizationMiddleware'
 import { validationMiddleware } from '../validation/validationMiddleware'
-import { titleValidation, shortDescriptionValidation, contentValidation } from '../validation/postValidation'
+import { postValidation } from '../validation/validators'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
-import { body, CustomValidator } from "express-validator";
+import BlogService from '../../logic/blogService';
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
 
-export class PostsRouter {
+export default class PostRouter {
     public readonly router: Router
-    private readonly posts: PostRepository
+    private readonly posts: PostService
+    private readonly blogs: BlogService
 
-    constructor(posts:PostRepository) {
-        this.posts = posts
+    constructor() {
+        this.posts = new PostService()
+        this.blogs = new BlogService()
         this.router = Router()
         this.setRoutes()
     }
@@ -34,10 +39,10 @@ export class PostsRouter {
 
         this.router.post('/',
             authorizationMiddleware,
-            titleValidation, shortDescriptionValidation, contentValidation, this.blogIdValidation,
+            postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
-            const blog = await this.posts.getBlog(req.body.blogId)
+            const blog = await this.blogs.get(req.body.blogId)
             if(!blog) { 
                 res.send(404)
                 return;
@@ -55,14 +60,14 @@ export class PostsRouter {
 
         this.router.put('/:id',
             authorizationMiddleware,
-            titleValidation, shortDescriptionValidation, contentValidation, this.blogIdValidation,
+            postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
             const post = await this.posts.get(req.params.id)
             if(post === undefined)
                 res.send(404)
             else {
-                const blog = await this.posts.getBlog(req.body.blogId)
+                const blog = await this.blogs.get(req.body.blogId)
                 if(blog === undefined)
                     res.status(400).send(blogNotFoundResult)
                 else {
@@ -87,7 +92,7 @@ export class PostsRouter {
     }
 
     private blogIdValidator: CustomValidator = value => {
-        return this.posts.getBlog(value).then((result) => {
+        return this.blogs.get(value).then((result) => {
             if(!result) return Promise.reject(blogIdErrorMessage)
         })
     }

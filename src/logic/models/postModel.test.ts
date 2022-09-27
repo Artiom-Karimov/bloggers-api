@@ -1,6 +1,6 @@
-import { expect, test} from '@jest/globals';
-import { dateRegex } from '../dateGenerator';
-import { PostModel, PostInputModel } from './postModel'
+import { expect } from '@jest/globals';
+import DateGenerator from '../utils/dateGenerator';
+import PostModel, { PostInputModel } from './postModel'
 
 const exampleData = {
     id: '',
@@ -38,18 +38,18 @@ describe('postModel operatons test', () => {
     })
     
     it('Constructor should set the right fields', () => {
-        const model = new PostModel(exampleData.id, exampleInput)
+        const model = new PostModel(exampleData.id, exampleInput, DateGenerator.generate())
         expect(exampleData.id).toBe(model.id)
         expect(exampleData.title).toBe(model.title)
         expect(exampleData.shortDescription).toBe(model.shortDescription)
         expect(exampleData.content).toBe(model.content)
         expect(exampleData.blogId).toBe(model.blogId)
         expect(exampleData.blogName).toBe(model.blogName)
-        expect(model.createdAt).toMatch(dateRegex)
+        expect(DateGenerator.validate(model.createdAt)).toBe(true)
     })
     
     it('Clone should return same values, but not the same object', () => {
-        const model = new PostModel(exampleData.id, exampleInput)
+        const model = new PostModel(exampleData.id, exampleInput, DateGenerator.generate())
         const clone = model.clone()
         expect(clone.id).toBe(model.id)
         expect(clone.title).toBe(model.title)
@@ -66,7 +66,7 @@ describe('postModel operatons test', () => {
     })
     
     it('Update should return new values and the same object', () => {
-        const model = new PostModel(exampleData.id, exampleInput)
+        const model = new PostModel(exampleData.id, exampleInput, DateGenerator.generate())
         const id = model.id
     
         const newModel = model.update(updateModel)

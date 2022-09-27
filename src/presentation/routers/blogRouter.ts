@@ -1,17 +1,18 @@
 import { Router, Request, Response } from 'express'
 
-import { BlogRepository } from '../../data/blogs/blogRepository'
-import { nameValidation, youtubeUrlValidation } from '../validation/blogValidation'
+import * as config from '../../config/config'
+import BlogService from '../../logic/blogService'
+import { blogValidation } from '../validation/validators'
 import { authorizationMiddleware } from '../authorizationMiddleware'
 import { validationMiddleware } from '../validation/validationMiddleware'
 
-export class BlogsRouter {
+export default class BlogRouter {
     public readonly router: Router
-    private readonly blogs:BlogRepository
+    private readonly blogs: BlogService
 
-    constructor(blogs:BlogRepository) {
-        this.blogs = blogs
+    constructor() {
         this.router = Router()
+        this.blogs = new BlogService()
         this.setRoutes()
     }
 
@@ -30,7 +31,7 @@ export class BlogsRouter {
 
         this.router.post('/',
             authorizationMiddleware,
-            nameValidation, youtubeUrlValidation,
+            blogValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
             const created = await this.blogs.create({ name:req.body.name, youtubeUrl:req.body.youtubeUrl })
@@ -40,7 +41,7 @@ export class BlogsRouter {
 
         this.router.put('/:id',
             authorizationMiddleware,
-            nameValidation, youtubeUrlValidation,
+            blogValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
             const blog = await this.blogs.get(req.params.id)

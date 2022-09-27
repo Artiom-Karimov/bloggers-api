@@ -6,7 +6,7 @@
   "author": "Artiom Karimov <lunatic0259@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "watch": "nodemon ./src/index.ts -w",
+    "debug": "nodemon --exec \"node --inspect --require ts-node/register src/index.ts\"",
     "dev": "tsc -w",
     "test": "jest",
     "build": "tsc",

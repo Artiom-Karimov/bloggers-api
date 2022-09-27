@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals';
-import { BlogModel, BlogInputModel } from './blogModel'
-import { dateRegex } from '../dateGenerator';
+import DateGenerator from '../utils/dateGenerator';
+import BlogModel, { BlogInputModel } from './blogModel'
 
 const exampleData = {
     id: '',
@@ -18,15 +18,15 @@ describe('blogModel operations test', () => {
     })
    
     it('Constructor should set the right fields', () => {
-        const model = new BlogModel(exampleData.id, exampleInput)
+        const model = new BlogModel(exampleData.id, exampleInput, DateGenerator.generate())
         expect(exampleData.id).toBe(model.id)
         expect(exampleData.name).toBe(model.name)
         expect(exampleData.youtubeUrl).toBe(model.youtubeUrl)
-        expect(model.createdAt).toMatch(dateRegex)
+        expect(DateGenerator.validate(model.createdAt)).toBe(true)
     })
 
     it('Clone should return same values, but not the same object', () => {
-        const model = new BlogModel(exampleData.id, exampleInput)
+        const model = new BlogModel(exampleData.id, exampleInput, DateGenerator.generate())
         const clone = model.clone()
         expect(clone.id).toBe(model.id)
         expect(clone.name).toBe(model.name)
@@ -36,7 +36,7 @@ describe('blogModel operations test', () => {
     })
 
     it('Update should return new values and the same object', () => {
-        const model = new BlogModel(exampleData.id, exampleInput)
+        const model = new BlogModel(exampleData.id, exampleInput, DateGenerator.generate())
         const updatedModel = model.update({name:'vasya',youtubeUrl:'https://google.com'})
         expect(updatedModel.id).toBe(model.id)
         expect(updatedModel.name).toBe('vasya')
