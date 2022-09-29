@@ -1,4 +1,5 @@
 import request from 'supertest'
+import PostPageViewModel from '../../data/models/postPageViewModel'
 import { BlogInputModel } from '../../logic/models/blogModel'
 import PostModel, { PostInputModel } from '../../logic/models/postModel'
 import TestApp from '../testAppSetup'
@@ -47,7 +48,9 @@ describe('postsRouter crud tests', () => {
     it('getAll should return empty array', async () => {
         const response = await request(TestApp.server).get(base)
         expect(response.statusCode).toEqual(200)
-        expect(response.body).toEqual([])
+        const model = response.body as PostPageViewModel
+        expect(model.totalCount).toBe(0)
+        expect(model.items).toEqual([])
     })
 
     // Post
@@ -83,22 +86,22 @@ describe('postsRouter crud tests', () => {
     it('post should create valid models', async () => {
         await fillPosts()
         const response = await request(TestApp.server).get(base)
-        const body = response.body as Array<PostModel>
+        const body = response.body as PostPageViewModel
         expect(body).not.toBeUndefined()
-        expect(body.length).toBe(samplePostInputs.length)
+        expect(body.totalCount).toBe(samplePostInputs.length)
 
-        const allHaveIds = body.every((post) => {
+        const allHaveIds = body.items.every((post) => {
             return typeof post.id === 'string' && post.id.length > 0
         })
         expect(allHaveIds).toBe(true)
 
-        samplePostInputs.forEach((data) => {
-            const blog = body.find((b) => 
-                b.title === data.title && 
-                b.content === data.content && 
-                b.shortDescription === data.shortDescription &&
-                b.blogId === data.blogId)
-            expect(blog).not.toBeUndefined()
+        body.items.forEach((data) => {
+            const post = samplePostInputs.find((p) => 
+                p.title === data.title && 
+                p.content === data.content && 
+                p.shortDescription === data.shortDescription &&
+                p.blogId === data.blogId)
+            expect(post).not.toBeUndefined()
         })
     })
 

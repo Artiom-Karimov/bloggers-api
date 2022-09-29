@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals';
-import { APIErrorResult } from './apiErrorResultFormatter';
+import { APIErrorResult } from '../validation/apiErrorResultFormatter';
 import { removeDuplicates } from './validationMiddleware';  
 
 describe('validation logic tests', () => {

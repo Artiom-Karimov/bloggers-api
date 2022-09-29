@@ -12,14 +12,6 @@ export default class BlogRepository {
         this.db = config.db
         this.blogs = this.db.blogCollection
     }
-    public async getAll(): Promise<Array<BlogModel>> {
-        try {
-            const result = await this.blogs.find({}).toArray()
-            return result.map((b) => MongoBlogModel.convert(b))          
-        } catch {
-            return []
-        }
-    }
     public async get(id:string): Promise<BlogModel|undefined> {
         try {            
             const result = await this.blogs.findOne({ _id : id })

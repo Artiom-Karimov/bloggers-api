@@ -14,14 +14,6 @@ export default class PostRepository {
         this.db = config.db
         this.posts = this.db.postCollection
     }
-    public async getAll(): Promise<Array<PostModel>> {
-        try {
-            const result = await this.posts.find({}).toArray()
-            return result.map((p) => MongoPostModel.convert(p))
-        } catch {
-            return []
-        }       
-    }
     public async get(id: string): Promise<PostModel|undefined> {
         try {
             const result = await this.posts.findOne({_id : id})

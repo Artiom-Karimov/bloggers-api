@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import * as config from '../config/config'
+import * as config from '../../config/config'
 
 const base64 = Buffer.from(`${config.userName}:${config.password}`,'utf-8').toString('base64')
 const authString = `Basic ${base64}`

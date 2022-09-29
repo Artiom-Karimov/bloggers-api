@@ -3,11 +3,13 @@ import { body, CustomValidator } from "express-validator";
 
 import * as config from '../../config/config'
 import PostService from '../../logic/postService'
-import { authorizationMiddleware } from '../authorizationMiddleware'
-import { validationMiddleware } from '../validation/validationMiddleware'
-import { postValidation } from '../validation/validators'
+import { authorizationMiddleware } from '../middlewares/authorizationMiddleware'
+import { validationMiddleware } from '../middlewares/validationMiddleware'
+import { postValidation } from '../validation/bodyValidators'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logic/blogService';
+import GetPostsQueryParams from '../models/getPostsQueryParams';
+import QueryRepository from '../../data/repositories/queryRepository';
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
@@ -16,17 +18,26 @@ export default class PostRouter {
     public readonly router: Router
     private readonly posts: PostService
     private readonly blogs: BlogService
+    private readonly queryRepo: QueryRepository
 
     constructor() {
         this.posts = new PostService()
         this.blogs = new BlogService()
+        this.queryRepo = new QueryRepository()
         this.router = Router()
         this.setRoutes()
     }
 
     private setRoutes() {
         this.router.get('/', async (req:Request, res:Response) => {
-            res.status(200).send(await this.posts.getAll())
+            const query = new GetPostsQueryParams(req.query)
+            const result = await this.queryRepo.getPosts(
+                query.pageNumber,
+                query.pageSize,
+                query.sortBy,
+                query.sortDirection
+            )
+            res.status(200).send(result)
         })
 
         this.router.get('/:id', async (req:Request, res:Response) => {

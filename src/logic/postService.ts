@@ -1,4 +1,3 @@
-import * as config from '../config/config'
 import PostRepository from "../data/repositories/postRepository";
 import PostModel, { PostInputModel } from "./models/postModel";
 import DateGenerator from "./utils/dateGenerator";
@@ -9,9 +8,6 @@ export default class PostService {
 
     constructor() {
         this.repo = new PostRepository()
-    }
-    public async getAll(): Promise<Array<PostModel>> {
-        return this.repo.getAll()
     }
     public async get(id:string): Promise<PostModel|undefined> {
         return this.repo.get(id)

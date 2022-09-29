@@ -1,4 +1,3 @@
-import * as config from '../config/config'
 import BlogModel, { BlogInputModel } from "./models/blogModel";
 import BlogRepository from "../data/repositories/blogRepository";
 import { generateId } from "./utils/idGenerator";
@@ -9,9 +8,6 @@ export default class BlogService {
 
     constructor() {
         this.repo = new BlogRepository()
-    }
-    public async getAll(): Promise<Array<BlogModel>> {
-        return this.repo.getAll()
     }
     public async get(id:string): Promise<BlogModel|undefined> {
         return this.repo.get(id)

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { APIErrorResult, formatErrors } from "./apiErrorResultFormatter"
+import { APIErrorResult, formatErrors } from "../validation/apiErrorResultFormatter"
 
 export const removeDuplicates = (errors:APIErrorResult): APIErrorResult => {
     const result = new APIErrorResult([])
