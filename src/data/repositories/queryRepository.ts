@@ -99,13 +99,13 @@ export default class QueryRepository {
     }
     private getBlogCursor(filter: any, sortBy:string, sortDirection:string): FindCursor<MongoBlogModel> {
         const order = sortDirection === 'asc' ? 1 : -1
-        return this.blogs.find(filter).sort(sortBy, order)
+        return this.blogs.find(filter, {collation: {locale:'en_US',numericOrdering:false}}).sort(sortBy, order)
     }
     private getPostCursor(sortBy:string, sortDirection:string, blogId:string|null = null)
     : FindCursor<MongoPostModel> {
         const order = sortDirection === 'asc' ? 1 : -1
         const filter = blogId? {blogId:blogId} : {}
-        return this.posts.find(filter).sort(sortBy, order)
+        return this.posts.find(filter, {collation: {locale:'en_US',numericOrdering:false}}).sort(sortBy, order)
     }
     private calculateSkip(pageSize:number,page:number): number {
         return (page - 1) * pageSize
