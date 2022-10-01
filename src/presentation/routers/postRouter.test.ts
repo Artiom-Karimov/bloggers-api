@@ -1,5 +1,5 @@
 import request from 'supertest'
-import PostPageViewModel from '../../data/models/postPageViewModel'
+import PostPageViewModel from '../../data/models/pageViewModels/postPageViewModel'
 import { BlogInputModel } from '../../logic/models/blogModel'
 import PostModel, { PostInputModel } from '../../logic/models/postModel'
 import TestApp from '../testAppSetup'

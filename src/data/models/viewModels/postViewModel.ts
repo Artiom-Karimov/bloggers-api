@@ -1,5 +1,3 @@
-import MongoPostModel from "./mongoPostModel"
-
 export default class PostViewModel {
     public id: string
     public title: string
@@ -25,16 +23,5 @@ export default class PostViewModel {
         this.blogId = blogId
         this.blogName = blogName
         this.createdAt = createdAt
-    }
-    public static fromMongoModel(model:MongoPostModel): PostViewModel {
-        return new PostViewModel(
-            model._id,
-            model.title,
-            model.shortDescription,
-            model.content,
-            model.blogId,
-            model.blogName,
-            model.createdAt
-        )
     }
 }

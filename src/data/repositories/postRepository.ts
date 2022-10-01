@@ -2,9 +2,9 @@ import BloggersMongDb from "../bloggersMongoDb";
 import PostModel, { PostInputModel } from "../../logic/models/postModel";
 import { Collection } from "mongodb";
 import BlogModel from "../../logic/models/blogModel";
-import MongoPostModel from "../models/mongoPostModel";
+import MongoPostModel from "../models/mongoModels/mongoPostModel";
 import * as config from '../../config/config'
-import MongoBlogModel from "../models/mongoBlogModel";
+import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
 
 export default class PostRepository {
     private readonly db:BloggersMongDb
@@ -17,7 +17,7 @@ export default class PostRepository {
     public async get(id: string): Promise<PostModel|undefined> {
         try {
             const result = await this.posts.findOne({_id : id})
-            return result? MongoPostModel.convert(result) : undefined
+            return result? MongoPostModel.getBusinessModel(result) : undefined
         } catch {
             return undefined
         }       
@@ -44,6 +44,6 @@ export default class PostRepository {
     }
     public async getBlog(id:string): Promise<BlogModel|undefined> {
         const blog = await this.db.blogCollection.findOne({_id:id})
-        return blog? MongoBlogModel.convert(blog) : undefined
+        return blog? MongoBlogModel.getBusinessModel(blog) : undefined
     }
 }

@@ -1,4 +1,5 @@
-import PostModel from "../../logic/models/postModel"
+import PostModel from "../../../logic/models/postModel"
+import PostViewModel from "../viewModels/postViewModel"
 
 export default class MongoPostModel {
     public _id: string
@@ -18,7 +19,7 @@ export default class MongoPostModel {
         this.blogName = post.blogName
         this.createdAt = post.createdAt
     }
-    public static convert(mongoModel:MongoPostModel): PostModel {
+    public static getBusinessModel(mongoModel:MongoPostModel): PostModel {
         return new PostModel(
             mongoModel._id,
             {
@@ -28,6 +29,17 @@ export default class MongoPostModel {
                 blogId: mongoModel.blogId,
                 blogName: mongoModel.blogName
             },
+            mongoModel.createdAt
+        )
+    }
+    public static getViewModel(mongoModel:MongoPostModel): PostViewModel {
+        return new PostViewModel(
+            mongoModel._id,
+            mongoModel.title,
+            mongoModel.shortDescription,
+            mongoModel.content,
+            mongoModel.blogId,
+            mongoModel.blogName,
             mongoModel.createdAt
         )
     }

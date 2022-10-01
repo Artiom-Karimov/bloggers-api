@@ -1,6 +1,6 @@
 import { MongoClient, Db, Collection } from "mongodb"
-import MongoBlogModel from "./models/mongoBlogModel"
-import MongoPostModel from "./models/mongoPostModel"
+import MongoBlogModel from "./models/mongoModels/mongoBlogModel"
+import MongoPostModel from "./models/mongoModels/mongoPostModel"
 
 export default class BloggersMongoDb {
     public readonly blogCollection: Collection<MongoBlogModel>

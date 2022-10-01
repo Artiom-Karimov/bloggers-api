@@ -1,10 +1,10 @@
 import BloggersMongoDb from "../bloggersMongoDb";
 import * as config from '../../config/config'
-import BlogPageViewModel from "../models/blogPageViewModel";
+import BlogPageViewModel from "../models/pageViewModels/blogPageViewModel";
 import { Collection, FindCursor } from "mongodb";
-import MongoBlogModel from "../models/mongoBlogModel";
-import MongoPostModel from "../models/mongoPostModel";
-import PostPageViewModel from "../models/postPageViewModel";
+import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
+import MongoPostModel from "../models/mongoModels/mongoPostModel";
+import PostPageViewModel from "../models/pageViewModels/postPageViewModel";
 
 export default class QueryRepository {
     private readonly db:BloggersMongoDb
