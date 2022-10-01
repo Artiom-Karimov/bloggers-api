@@ -59,7 +59,7 @@ describe('blogsRouter crud tests', () => {
     it('getAll should return empty array', async () => {
         const response = await request(TestApp.server).get(base)
         expect(response.statusCode).toEqual(200)
-        const defaultResult = new BlogPageViewModel(0,1,10,0)
+        const defaultResult = new BlogPageViewModel(1,10,0)
         expect(response.body).toEqual(defaultResult)
     })
 

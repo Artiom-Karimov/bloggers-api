@@ -27,8 +27,7 @@ export default class QueryRepository {
             const cursor = this.getBlogCursor(filter,sortBy,sortDirection)
 
             const totalCount = await this.getBlogCount(filter)
-            const pagesCount = this.getPageCount(totalCount,pageSize)
-            const page = new BlogPageViewModel(pagesCount,pageNumber,pageSize,totalCount)
+            const page = new BlogPageViewModel(pageNumber,pageSize,totalCount)
             
             return await this.loadPageBlogs(page,cursor)
     }
@@ -40,8 +39,7 @@ export default class QueryRepository {
     ): Promise<PostPageViewModel> {
         const cursor = this.getPostCursor(sortBy,sortDirection)
         const totalCount = await this.getPostCount()
-        const pagesCount = this.getPageCount(totalCount,pageSize)
-        const page = new PostPageViewModel(pagesCount,pageNumber,pageSize,totalCount)
+        const page = new PostPageViewModel(pageNumber,pageSize,totalCount)
 
         return await this.loadPagePosts(page,cursor)
     }
@@ -57,13 +55,12 @@ export default class QueryRepository {
         const cursor = this.getPostCursor(sortBy,sortDirection,blogId)
 
         const totalCount = await this.getPostCount(blogId)
-        const pagesCount = this.getPageCount(totalCount,pageSize)
-        const page = new PostPageViewModel(pagesCount,pageNumber,pageSize,totalCount)
+        const page = new PostPageViewModel(pageNumber,pageSize,totalCount)
 
         return await this.loadPagePosts(page,cursor)
     }
     private getFilter(searchNameTerm:string|null): any {
-        return searchNameTerm? { name : RegExp(`${searchNameTerm}`, 'i') } : {}
+        return searchNameTerm? { name : RegExp(searchNameTerm, 'i') } : {}
     }
     private async getBlogCount(filter:any): Promise<number> {
         const count = await this.blogs.aggregate([
@@ -83,9 +80,6 @@ export default class QueryRepository {
         if(!count || count.length === 0 || !count[0])
             return 0
         return count[0].total
-    }
-    private getPageCount(totalCount:number,pageSize:number): number {
-        return Math.ceil(totalCount / pageSize)
     }
     private async loadPageBlogs(page:BlogPageViewModel,cursor:FindCursor<MongoBlogModel>): Promise<BlogPageViewModel> {
         const skip = this.calculateSkip(page.pageSize, page.page)

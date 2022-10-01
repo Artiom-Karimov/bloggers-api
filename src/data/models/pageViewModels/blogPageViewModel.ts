@@ -4,8 +4,8 @@ import PageViewModel from "./PageViewModel"
 
 export default class BlogPageViewModel extends PageViewModel<MongoBlogModel,BlogViewModel> {
     
-    constructor(pagesCount:number, page:number,pageSize:number,totalCount:number) {
-        super(pagesCount,page,pageSize,totalCount)
+    constructor(page:number,pageSize:number,totalCount:number) {
+        super(page,pageSize,totalCount)
     }
     public add(...mongoBlogs:MongoBlogModel[]): BlogPageViewModel {
         mongoBlogs.forEach((model) => {

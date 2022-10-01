@@ -6,15 +6,17 @@ export default abstract class PageViewModel<TdbModel,TviewModel> {
     public items: Array<TviewModel> = []
 
     constructor(
-        pagesCount:number,
         page:number,
         pageSize:number,
         totalCount:number
-    ) {
-        this.pagesCount = pagesCount
+    ) {        
         this.page = page
         this.pageSize = pageSize
         this.totalCount = totalCount
+        this.pagesCount = this.calcPagesCount()
     }
     public abstract add(...mongoModels:TdbModel[]): PageViewModel<TdbModel,TviewModel> 
+    private calcPagesCount(): number {
+        return Math.ceil(this.totalCount / this.pageSize)
+    }
 }

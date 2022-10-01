@@ -1,3 +1,9 @@
+export type UserInputModel = {
+    login: string,
+    email: string,
+    password: string
+}
+
 export default class UserModel {
     public id: string
     public login: string

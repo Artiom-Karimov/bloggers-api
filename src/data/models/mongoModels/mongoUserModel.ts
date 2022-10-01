@@ -9,20 +9,13 @@ export default class MongoUserModel {
     public passwordHash: string
     public salt: string
 
-    constructor(
-        _id: string,
-        login: string,
-        email: string,
-        createdAt: string,
-        passwordHash: string,
-        salt: string
-    ) {
-        this._id = _id
-        this.login = login
-        this.email = email
-        this.createdAt = createdAt
-        this.passwordHash = passwordHash
-        this.salt = salt
+    constructor(user:UserModel) {
+        this._id = user.id
+        this.login = user.login
+        this.email = user.email
+        this.createdAt = user.createdAt
+        this.passwordHash = user.passwordHash
+        this.salt = user.salt
     }
     public static getBusinessModel(mongoModel:MongoUserModel): UserModel {
         return new UserModel(
