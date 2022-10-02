@@ -34,3 +34,4 @@ const emailValidation = body('email').matches(emailRegex).withMessage(emailError
 export const blogValidation = [ nameValidation, ...youtubeUrlValidation ]
 export const postValidation = [ titleValidation, shortDescriptionValidation, contentValidation]
 export const userValidation = [ loginValidation, passwordValidation, emailValidation ]
+export const authValidation = [ loginValidation, passwordValidation ]

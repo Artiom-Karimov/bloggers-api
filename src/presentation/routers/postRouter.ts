@@ -10,6 +10,7 @@ import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logic/blogService';
 import GetPostsQueryParams from '../models/getPostsQueryParams';
 import QueryRepository from '../../data/repositories/queryRepository';
+import { authenticationMiddleware } from '../middlewares/authenticationMiddleware';
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
@@ -49,7 +50,7 @@ export default class PostRouter {
         })
 
         this.router.post('/',
-            authorizationMiddleware,
+            authenticationMiddleware,
             postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -70,7 +71,7 @@ export default class PostRouter {
         })
 
         this.router.put('/:id',
-            authorizationMiddleware,
+            authenticationMiddleware,
             postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
@@ -95,7 +96,7 @@ export default class PostRouter {
         })
 
         this.router.delete('/:id', 
-            authorizationMiddleware,
+            authenticationMiddleware,
         async (req:Request,res:Response) => {
             const deleted = await this.posts.delete(req.params.id)
             res.send(deleted? 204 : 404)

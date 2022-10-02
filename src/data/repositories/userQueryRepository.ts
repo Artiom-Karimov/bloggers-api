@@ -3,6 +3,7 @@ import * as config from '../../config/config'
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoModels/mongoUserModel";
 import UserPageViewModel from "../models/pageViewModels/userPageViewModel";
+import UserViewModel from "../models/viewModels/userViewModel";
 
 export default class UserQueryRepository {
     private readonly db:BloggersMongoDb
@@ -25,6 +26,10 @@ export default class UserQueryRepository {
         const total = await this.getTotalCount(filter)
         const result = new UserPageViewModel(pageNumber, pageSize, total)
         return await this.loadPageUsers(result, cursor)
+    }
+    public async getById(id:string): Promise<UserViewModel|undefined> {
+        const user = await this.users.findOne({_id:id}) 
+        return user? MongoUserModel.getViewModel(user) : undefined
     }
     private getFilter(
         searchLoginTerm:string|null,

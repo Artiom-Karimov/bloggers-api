@@ -1,10 +1,13 @@
 import express, { Request, Response } from 'express'
 import http from 'http'
 import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
 
 import * as config from '../config/config'
 import BlogRouter from './routers/blogRouter'
 import PostRouter from './routers/postRouter'
+import UserRouter from './routers/userRouter'
+import AuthRouter from './routers/authRouter'
 
 export default class BloggersApp {
     public readonly port: number
@@ -17,8 +20,11 @@ export default class BloggersApp {
         this.server = http.createServer(app)
 
         app.use(bodyParser.json())
+        app.use(cookieParser())
         app.use('/blogs', new BlogRouter().router)
         app.use('/posts', new PostRouter().router)
+        app.use('/users', new UserRouter().router)
+        app.use('/auth', new AuthRouter().router)
 
         app.get('/', (req: Request, res: Response) => {
             res.sendStatus(404)

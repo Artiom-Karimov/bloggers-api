@@ -20,11 +20,23 @@ export default class UserRepository {
             return undefined
         }
     }
-    public async create(user:UserModel): Promise<UserModel|undefined> {
+    public async getByLogin(login:string): Promise<UserModel|undefined> {
+        try {
+            const user = await this.users.findOne({login:login})
+            if(user) {
+                return MongoUserModel.getBusinessModel(user)
+            }
+            return undefined
+        } catch {
+            return undefined
+        }
+    }
+    public async create(user:UserModel): Promise<string|undefined> {
         try {
             const model = new MongoUserModel(user)
             const created = await this.users.insertOne(model)
-            if(created.acknowledged) return await this.get(user.id)
+            if(created.acknowledged) return user.id
+            return undefined
         } catch {
             return undefined
         }

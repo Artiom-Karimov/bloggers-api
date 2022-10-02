@@ -9,6 +9,7 @@ import GetBlogsQueryParams from '../models/getBlogsQueryParams'
 import GetPostsQueryParams from '../models/getPostsQueryParams'
 import PostService from '../../logic/postService'
 import { PostInputModel } from '../../logic/models/postModel'
+import { authenticationMiddleware } from '../middlewares/authenticationMiddleware'
 
 export default class BlogRouter {
     public readonly router: Router
@@ -54,7 +55,7 @@ export default class BlogRouter {
         })
 
         this.router.post('/',
-            authorizationMiddleware,
+            authenticationMiddleware,
             blogValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -64,7 +65,7 @@ export default class BlogRouter {
         })
 
         this.router.post('/:blogId/posts', 
-            authorizationMiddleware,
+            authenticationMiddleware,
             postValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -88,7 +89,7 @@ export default class BlogRouter {
         })
 
         this.router.put('/:id',
-            authorizationMiddleware,
+            authenticationMiddleware,
             blogValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
@@ -102,7 +103,7 @@ export default class BlogRouter {
         })
 
         this.router.delete('/:id', 
-            authorizationMiddleware,
+            authenticationMiddleware,
             async (req:Request,res:Response) => {
             if(await this.blogs.delete(req.params.id))
                 res.send(204)
