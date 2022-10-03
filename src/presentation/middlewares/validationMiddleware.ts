@@ -14,8 +14,6 @@ export const validationMiddleware = (req:Request,res:Response,next:NextFunction)
     const errors = formatErrors(req)
     if(errors.isEmpty()) next()
     else {
-        const logpass = errors.errorsMessages.some(err => err.field === 'login' || err.field === 'password')
-        const status = logpass? 401 : 400
-        res.status(status).send(removeDuplicates(errors))
+        res.status(400).send(removeDuplicates(errors))
     }
 }

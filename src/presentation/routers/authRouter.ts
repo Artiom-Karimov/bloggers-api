@@ -14,9 +14,11 @@ export default class AuthRouter {
     }
     private setRoutes() {
         this.router.post('/login',
-            authValidation, 
-            validationMiddleware,
         async (req:Request,res:Response) => {
+            if(!req.body.login || !req.body.password) {
+                res.send(401)
+                return
+            }
             const token = await this.users.authenticate(req.body.login,req.body.password)
             if(token) {
                 res.clearCookie('token')
