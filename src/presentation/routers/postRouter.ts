@@ -50,7 +50,7 @@ export default class PostRouter {
         })
 
         this.router.post('/',
-            authenticationMiddleware,
+            authorizationMiddleware,
             postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -71,7 +71,7 @@ export default class PostRouter {
         })
 
         this.router.put('/:id',
-            authenticationMiddleware,
+            authorizationMiddleware,
             postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
@@ -96,7 +96,7 @@ export default class PostRouter {
         })
 
         this.router.delete('/:id', 
-            authenticationMiddleware,
+            authorizationMiddleware,
         async (req:Request,res:Response) => {
             const deleted = await this.posts.delete(req.params.id)
             res.send(deleted? 204 : 404)

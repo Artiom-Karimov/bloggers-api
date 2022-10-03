@@ -55,7 +55,7 @@ export default class BlogRouter {
         })
 
         this.router.post('/',
-            authenticationMiddleware,
+            authorizationMiddleware,
             blogValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -65,7 +65,7 @@ export default class BlogRouter {
         })
 
         this.router.post('/:blogId/posts', 
-            authenticationMiddleware,
+            authorizationMiddleware,
             postValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -89,7 +89,7 @@ export default class BlogRouter {
         })
 
         this.router.put('/:id',
-            authenticationMiddleware,
+            authorizationMiddleware,
             blogValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
@@ -103,7 +103,7 @@ export default class BlogRouter {
         })
 
         this.router.delete('/:id', 
-            authenticationMiddleware,
+            authorizationMiddleware,
             async (req:Request,res:Response) => {
             if(await this.blogs.delete(req.params.id))
                 res.send(204)
