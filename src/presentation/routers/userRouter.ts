@@ -21,7 +21,6 @@ export default class UserRouter {
 
     private setRoutes() {
         this.router.get('/',
-            authorizationMiddleware,
         async (req:Request, res:Response) => {
             const query = new GetUsersQueryParams(req.query)
             const result = await this.queryRepo.get(
