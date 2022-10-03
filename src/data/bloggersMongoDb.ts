@@ -38,5 +38,6 @@ export default class BloggersMongoDb {
     public async clearAll() {
         await this.blogCollection.deleteMany({})
         await this.postCollection.deleteMany({})
+        await this.userCollection.deleteMany({})
     } 
 }
