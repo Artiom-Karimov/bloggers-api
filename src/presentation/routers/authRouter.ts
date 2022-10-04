@@ -1,7 +1,5 @@
 import { Router, Request, Response } from "express";
 import UserService from "../../logic/userService";
-import { validationMiddleware } from "../middlewares/validationMiddleware";
-import { authValidation } from "../validation/bodyValidators";
 
 export default class AuthRouter {
     public readonly router: Router
@@ -20,10 +18,8 @@ export default class AuthRouter {
                 return
             }
             const token = await this.users.authenticate(req.body.login,req.body.password)
-            if(token) {
-                res.clearCookie('token')
-                res.cookie('token', token)
-                res.send(204)
+            if(token) {                
+                res.status(201).send(token)
                 return
             }
             res.send(401)

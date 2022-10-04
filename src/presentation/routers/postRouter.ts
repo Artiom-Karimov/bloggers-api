@@ -3,14 +3,13 @@ import { body, CustomValidator } from "express-validator";
 
 import * as config from '../../config/config'
 import PostService from '../../logic/postService'
-import { authorizationMiddleware } from '../middlewares/authorizationMiddleware'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
 import { postValidation } from '../validation/bodyValidators'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logic/blogService';
 import GetPostsQueryParams from '../models/getPostsQueryParams';
 import QueryRepository from '../../data/repositories/queryRepository';
-import { authenticationMiddleware } from '../middlewares/authenticationMiddleware';
+import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authenticationMiddleware'
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
@@ -50,7 +49,7 @@ export default class PostRouter {
         })
 
         this.router.post('/',
-            authorizationMiddleware,
+            basicAuthMiddleware,
             postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -71,7 +70,7 @@ export default class PostRouter {
         })
 
         this.router.put('/:id',
-            authorizationMiddleware,
+            basicAuthMiddleware,
             postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
@@ -96,7 +95,7 @@ export default class PostRouter {
         })
 
         this.router.delete('/:id', 
-            authorizationMiddleware,
+            basicAuthMiddleware,
         async (req:Request,res:Response) => {
             const deleted = await this.posts.delete(req.params.id)
             res.send(deleted? 204 : 404)

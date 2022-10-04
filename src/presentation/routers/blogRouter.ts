@@ -2,14 +2,13 @@ import { Router, Request, Response } from 'express'
 
 import BlogService from '../../logic/blogService'
 import { blogValidation, postValidation } from '../validation/bodyValidators'
-import { authorizationMiddleware } from '../middlewares/authorizationMiddleware'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
 import QueryRepository from '../../data/repositories/queryRepository'
 import GetBlogsQueryParams from '../models/getBlogsQueryParams'
 import GetPostsQueryParams from '../models/getPostsQueryParams'
 import PostService from '../../logic/postService'
 import { PostInputModel } from '../../logic/models/postModel'
-import { authenticationMiddleware } from '../middlewares/authenticationMiddleware'
+import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authenticationMiddleware'
 
 export default class BlogRouter {
     public readonly router: Router
@@ -55,7 +54,7 @@ export default class BlogRouter {
         })
 
         this.router.post('/',
-            authorizationMiddleware,
+            basicAuthMiddleware,
             blogValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -65,7 +64,7 @@ export default class BlogRouter {
         })
 
         this.router.post('/:blogId/posts', 
-            authorizationMiddleware,
+            basicAuthMiddleware,
             postValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -89,7 +88,7 @@ export default class BlogRouter {
         })
 
         this.router.put('/:id',
-            authorizationMiddleware,
+            basicAuthMiddleware,
             blogValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
@@ -103,7 +102,7 @@ export default class BlogRouter {
         })
 
         this.router.delete('/:id', 
-            authorizationMiddleware,
+            basicAuthMiddleware,
             async (req:Request,res:Response) => {
             if(await this.blogs.delete(req.params.id))
                 res.send(204)

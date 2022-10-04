@@ -1,8 +1,7 @@
 import { Router, Request, Response } from 'express'
 import UserQueryRepository from '../../data/repositories/userQueryRepository'
 import UserService from '../../logic/userService'
-import { authenticationMiddleware } from '../middlewares/authenticationMiddleware'
-import { authorizationMiddleware } from '../middlewares/authorizationMiddleware'
+import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authenticationMiddleware'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
 import GetUsersQueryParams from '../models/getUsersQueryParams'
 import { userValidation } from '../validation/bodyValidators'
@@ -35,10 +34,11 @@ export default class UserRouter {
         })
 
         this.router.post('/', 
-            authorizationMiddleware,
+            basicAuthMiddleware,
             userValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
+            
             const created = await this.users.create({
                 login: req.body.login,
                 email: req.body.email,
@@ -53,7 +53,7 @@ export default class UserRouter {
         })
 
         this.router.delete('/:id',
-            authorizationMiddleware,
+            basicAuthMiddleware,
         async (req:Request, res:Response) => {
             const deleted = await this.users.delete(req.params.id)
             if(deleted) {

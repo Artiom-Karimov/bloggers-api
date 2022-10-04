@@ -1,19 +1,39 @@
 import { Request, Response, NextFunction } from "express";
 import UserService from "../../logic/userService";
+import * as config from '../../config/config'
 
+const basicValue = 'Basic ' + Buffer.from(`${config.userName}:${config.password}`,'utf-8').toString('base64')
 const users = new UserService()
 
-export const authenticationMiddleware = async (req:Request,res:Response,next:NextFunction) => {
-    try {
-        const token = req.cookies.token
-        const authorizedId = await users.getIdFromToken(token)
-        if(!authorizedId) {
-            res.send(401)
-            return
-        }
-        next()
-    } catch {
+
+export const basicAuthMiddleware = async (req:Request,res:Response,next:NextFunction) => {
+    if(!req.headers.authorization) {
         res.send(401)
+        return
     }
-    
+    if(req.headers.authorization === basicValue) {
+        next()
+        return      
+    }
+    res.send(401)
+}
+
+export const bearerAuthMiddleware = async (req:Request,res:Response,next:NextFunction) => {
+    if(!req.headers.authorization) {
+        res.send(401)
+        return
+    }
+    const authHeader = req.headers.authorization.split(' ')
+
+    if(authHeader[0] === 'Bearer') { 
+        try {
+            const authorizedId = await users.getIdFromToken(authHeader[1])
+            if(authorizedId) {
+                req.headers.userId = authorizedId
+                next()
+                return
+            }  
+        } catch {}
+    }
+    res.send(401)
 }
