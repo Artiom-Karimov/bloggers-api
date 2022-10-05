@@ -8,6 +8,7 @@ import BlogRouter from './routers/blogRouter'
 import PostRouter from './routers/postRouter'
 import UserRouter from './routers/userRouter'
 import AuthRouter from './routers/authRouter'
+import CommentRouter from './routers/commentRouter'
 
 export default class BloggersApp {
     public readonly port: number
@@ -25,6 +26,7 @@ export default class BloggersApp {
         app.use('/posts', new PostRouter().router)
         app.use('/users', new UserRouter().router)
         app.use('/auth', new AuthRouter().router)
+        app.use('/comments', new CommentRouter().router)
 
         app.get('/', (req: Request, res: Response) => {
             res.sendStatus(404)
