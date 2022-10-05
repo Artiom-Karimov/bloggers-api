@@ -8,7 +8,7 @@ import GetBlogsQueryParams from '../models/getBlogsQueryParams'
 import GetPostsQueryParams from '../models/getPostsQueryParams'
 import PostService from '../../logic/postService'
 import { PostInputModel } from '../../logic/models/postModel'
-import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authenticationMiddleware'
+import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authMiddleware'
 
 export default class BlogRouter {
     public readonly router: Router

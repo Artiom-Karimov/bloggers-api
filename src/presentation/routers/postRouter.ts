@@ -9,7 +9,7 @@ import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logic/blogService';
 import GetPostsQueryParams from '../models/getPostsQueryParams';
 import QueryRepository from '../../data/repositories/queryRepository';
-import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authenticationMiddleware'
+import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authMiddleware'
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])

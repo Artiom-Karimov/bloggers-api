@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import UserQueryRepository from '../../data/repositories/userQueryRepository'
 import UserService from '../../logic/userService'
-import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authenticationMiddleware'
+import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authMiddleware'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
 import GetUsersQueryParams from '../models/getUsersQueryParams'
 import { userValidation } from '../validation/bodyValidators'
