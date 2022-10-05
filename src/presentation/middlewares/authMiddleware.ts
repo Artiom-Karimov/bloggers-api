@@ -30,6 +30,7 @@ export const bearerAuthMiddleware = async (req:Request,res:Response,next:NextFun
             const authorizedId = await users.getIdFromToken(authHeader[1])
             if(authorizedId) {
                 req.headers.userId = authorizedId
+                req.headers.userLogin = await users.getLoginById(authorizedId)
                 next()
                 return
             }  

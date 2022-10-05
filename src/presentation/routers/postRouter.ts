@@ -4,12 +4,16 @@ import { body, CustomValidator } from "express-validator";
 import * as config from '../../config/config'
 import PostService from '../../logic/postService'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
-import { postValidation } from '../validation/bodyValidators'
+import { commentValidation, postValidation } from '../validation/bodyValidators'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logic/blogService';
 import GetPostsQueryParams from '../models/getPostsQueryParams';
 import QueryRepository from '../../data/repositories/queryRepository';
 import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authMiddleware'
+import GetCommentsQueryParams from '../models/getCommentsQueryParams';
+import CommentQueryRepository from '../../data/repositories/commentQueryRepository';
+import CommentService from '../../logic/commentService';
+import { CommentCreateModel } from '../../logic/models/commentModel';
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
@@ -19,13 +23,18 @@ export default class PostRouter {
     private readonly posts: PostService
     private readonly blogs: BlogService
     private readonly queryRepo: QueryRepository
+    private readonly comments: CommentService
+    private readonly commentQueryRepo: CommentQueryRepository
 
     constructor() {
         this.posts = new PostService()
         this.blogs = new BlogService()
+        this.comments = new CommentService()
         this.queryRepo = new QueryRepository()
+        this.commentQueryRepo = new CommentQueryRepository()
         this.router = Router()
         this.setRoutes()
+        this.setCommentRoutes()
     }
 
     private setRoutes() {
@@ -99,6 +108,51 @@ export default class PostRouter {
         async (req:Request,res:Response) => {
             const deleted = await this.posts.delete(req.params.id)
             res.send(deleted? 204 : 404)
+        })
+    }
+
+    private setCommentRoutes() {
+        this.router.get('/:postId/comments',
+        async (req:Request,res:Response) => {
+            const query = new GetCommentsQueryParams(req.query,req.params.postId)
+            const post = await this.posts.get(query.postId)
+            if(!post) {
+                res.send(404)
+                return
+            }
+            const page = await this.commentQueryRepo.get(
+                query.postId, query.pageNumber, query.pageSize, query.sortBy, query.sortDirection
+            )
+            res.status(200).send(page)
+        })
+
+        this.router.post('/:postId/comments', 
+        bearerAuthMiddleware,
+        commentValidation,
+        validationMiddleware,
+        async (req:Request,res:Response) => {
+            const post = await this.posts.get(req.params.postId)
+            if(!post) {
+                res.send(404)
+                return
+            }
+
+            const data:CommentCreateModel = {
+                postId: post.id,
+                userId: req.headers.userId as string,
+                userLogin: req.headers.userLogin as string,
+                content: req.body.content
+            }
+
+            const created = await this.comments.create(data)
+            if(created) {
+                const retrieved = await this.commentQueryRepo.getById(created)
+                if(retrieved) {
+                    res.status(201).send(retrieved)
+                    return
+                }
+                res.send(500)
+            }
         })
     }
 

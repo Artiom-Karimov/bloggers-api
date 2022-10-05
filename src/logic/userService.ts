@@ -42,6 +42,10 @@ export default class UserService {
             return undefined
         }
     }
+    public async getLoginById(id:string): Promise<string|undefined> {
+        const user = await this.get(id)
+        return user? user.login : undefined
+    }
     public async delete(id:string): Promise<boolean> {
         return this.repo.delete(id)
     }

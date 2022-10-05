@@ -11,6 +11,7 @@ const contentErrorMessage = 'content should be a string of 1-1000 chars'
 const loginErrorMessage = 'login should be a valid string of 3-10 chars'
 const passwordErrorMessage = 'password should be a valid string of 6-20 chars'
 const emailErrorMessage = 'email should be valid'
+const commentErrorMessage = 'content should be 20-300 chars long'
 
 const stringValidation = (param:string, minLength:number, maxLength:number, message:string) => {
     return body(param).isString().withMessage(message)
@@ -35,3 +36,4 @@ export const blogValidation = [ nameValidation, ...youtubeUrlValidation ]
 export const postValidation = [ titleValidation, shortDescriptionValidation, contentValidation]
 export const userValidation = [ loginValidation, passwordValidation, emailValidation ]
 export const authValidation = [ loginValidation, passwordValidation ]
+export const commentValidation = stringValidation('content', 20, 300, commentErrorMessage)
