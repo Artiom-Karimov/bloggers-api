@@ -5,6 +5,7 @@ import { Collection, FindCursor } from "mongodb";
 import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
 import MongoPostModel from "../models/mongoModels/mongoPostModel";
 import PostPageViewModel from "../models/pageViewModels/postPageViewModel";
+import { calculateSkip } from "./utils/skipCalculator";
 
 export default class QueryRepository {
     private readonly db:BloggersMongoDb
@@ -82,12 +83,12 @@ export default class QueryRepository {
         return count[0].total
     }
     private async loadPageBlogs(page:BlogPageViewModel,cursor:FindCursor<MongoBlogModel>): Promise<BlogPageViewModel> {
-        const skip = this.calculateSkip(page.pageSize, page.page)
+        const skip = calculateSkip(page.pageSize, page.page)
         const result = await cursor.skip(skip).limit(page.pageSize).toArray()
         return page.add(...result)
     }
     private async loadPagePosts(page:PostPageViewModel,cursor:FindCursor<MongoPostModel>): Promise<PostPageViewModel> {
-        const skip = this.calculateSkip(page.pageSize, page.page)
+        const skip = calculateSkip(page.pageSize, page.page)
         const result = await cursor.skip(skip).limit(page.pageSize).toArray()
         return page.add(...result)
     }
@@ -100,8 +101,5 @@ export default class QueryRepository {
         const order = sortDirection === 'asc' ? 1 : -1
         const filter = blogId? {blogId:blogId} : {}
         return this.posts.find(filter, {collation: {locale:'en_US',numericOrdering:false}}).sort(sortBy, order)
-    }
-    private calculateSkip(pageSize:number,page:number): number {
-        return (page - 1) * pageSize
     }
 }

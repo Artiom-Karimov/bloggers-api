@@ -1,5 +1,6 @@
 import { MongoClient, Db, Collection } from "mongodb"
 import MongoBlogModel from "./models/mongoModels/mongoBlogModel"
+import MongoCommentModel from "./models/mongoModels/mongoCommentModel"
 import MongoPostModel from "./models/mongoModels/mongoPostModel"
 import MongoUserModel from "./models/mongoModels/mongoUserModel"
 
@@ -7,6 +8,7 @@ export default class BloggersMongoDb {
     public readonly blogCollection: Collection<MongoBlogModel>
     public readonly postCollection: Collection<MongoPostModel>
     public readonly userCollection: Collection<MongoUserModel>
+    public readonly commentCollection: Collection<MongoCommentModel>
 
     private readonly mongoUri: string
     private readonly client: MongoClient
@@ -19,6 +21,7 @@ export default class BloggersMongoDb {
         this.blogCollection = this.db.collection<MongoBlogModel>('blogs')
         this.postCollection = this.db.collection<MongoPostModel>('posts')
         this.userCollection = this.db.collection<MongoUserModel>('users')
+        this.commentCollection = this.db.collection<MongoCommentModel>('comments')
     }
     public async connect() {
         try {
@@ -39,5 +42,6 @@ export default class BloggersMongoDb {
         await this.blogCollection.deleteMany({})
         await this.postCollection.deleteMany({})
         await this.userCollection.deleteMany({})
+        await this.commentCollection.deleteMany({})
     } 
 }

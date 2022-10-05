@@ -1,4 +1,5 @@
 import CommentModel from "../../../logic/models/commentModel"
+import CommentViewModel from "../viewModels/commentViewModel"
 
 export default class MongoCommentModel {
     public _id: string
@@ -16,4 +17,26 @@ export default class MongoCommentModel {
         this.content = model.content
         this.createdAt = model.createdAt
     }
+    public static getBusinessModel(mongoModel:MongoCommentModel): CommentModel {
+        return new CommentModel(
+            mongoModel._id,
+            {
+                postId: mongoModel.postId,
+                userId: mongoModel.userId,
+                userLogin: mongoModel.userLogin,
+                content: mongoModel.content        
+            },
+            mongoModel.createdAt
+        )
+    }
+    public static getViewModel(mongoModel:MongoCommentModel): CommentViewModel {
+        return new CommentViewModel(
+            mongoModel._id,
+            mongoModel.content,
+            mongoModel.userId,
+            mongoModel.userLogin,
+            mongoModel.createdAt
+        )
+    }
+
 }

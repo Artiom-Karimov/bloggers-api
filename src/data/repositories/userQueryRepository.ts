@@ -1,9 +1,10 @@
-import { Collection, FindCursor } from "mongodb";
+import { Collection, Filter, FindCursor } from "mongodb";
 import * as config from '../../config/config'
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoModels/mongoUserModel";
 import UserPageViewModel from "../models/pageViewModels/userPageViewModel";
 import UserViewModel from "../models/viewModels/userViewModel";
+import { calculateSkip } from "./utils/skipCalculator";
 
 export default class UserQueryRepository {
     private readonly db:BloggersMongoDb
@@ -33,7 +34,7 @@ export default class UserQueryRepository {
     }
     private getFilter(
         searchLoginTerm:string|null,
-        searchEmailTerm:string|null): any {
+        searchEmailTerm:string|null): Filter<MongoUserModel> {
         if(searchLoginTerm && searchEmailTerm) {
             const login = this.getSingleFilter('login', searchLoginTerm)
             const email = this.getSingleFilter('email', searchEmailTerm)
@@ -47,7 +48,7 @@ export default class UserQueryRepository {
         }
         return {}
     }
-    private getSingleFilter(param:string,value:string) {
+    private getSingleFilter(param:string,value:string): Filter<MongoUserModel> {
         const result: any  = {}
         result[param] = RegExp(value, 'i')
         return result
@@ -56,22 +57,13 @@ export default class UserQueryRepository {
         const order = sortDirection === 'asc' ? 1 : -1
         return this.users.find(filter).sort(sortBy,order)
     }
-    private async getTotalCount(filter:any): Promise<number> {
-        const count = await this.users.aggregate([
-            { $match: filter },
-            { $count: 'total' }
-        ]).toArray()
-        if(!count || count.length === 0 || !count[0])
-            return 0
-        return count[0].total
+    private async getTotalCount(filter:Filter<MongoUserModel>): Promise<number> {
+        return await this.users.countDocuments(filter)
     }
     private async loadPageUsers(page:UserPageViewModel,cursor:FindCursor<MongoUserModel>)
     : Promise<UserPageViewModel> {
-        const skip = this.calculateSkip(page.pageSize, page.page)
+        const skip = calculateSkip(page.pageSize, page.page)
         const result = await cursor.skip(skip).limit(page.pageSize).toArray()
         return page.add(...result)
-    }
-    private calculateSkip(pageSize:number,page:number): number {
-        return (page - 1) * pageSize
     }
 }
