@@ -58,7 +58,7 @@ describe('authRouter tests', () => {
                 password:password
             })
         const token = result.body.accessToken
-        const infoResult = await await request(TestApp.server)
+        const infoResult = await request(TestApp.server)
             .get(`${base}/me`).set({authorization:`Bearer ${token}`})
 
         expect(infoResult.statusCode).toBe(200)
