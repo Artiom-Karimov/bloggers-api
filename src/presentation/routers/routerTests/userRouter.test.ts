@@ -1,28 +1,21 @@
 import request from 'supertest'
-import UserPageViewModel from '../../data/models/pageViewModels/userPageViewModel'
-import { UserInputModel } from '../../logic/models/userModel'
-import TestApp from '../testAppSetup'
+import UserPageViewModel from '../../../data/models/pageViewModels/userPageViewModel'
+import { UserInputModel } from '../../../logic/models/userModel'
+import TestApp from '../../testAppSetup'
+import * as helpers from './routerTestHelpers'
 
 const base = '/users'
 
-let sampleUserInputs: Array<UserInputModel>
 
 const fillSampleData = () => {
-    sampleUserInputs = []
+    helpers.clearUserSamples()
     for(let i=0;i<20;i++) {
-        sampleUserInputs.push({
+        helpers.sampleUserInputs.push({
             login: `youser ${i+1}`,
             email: `youser${i+1}@poopmail.com`,
             password: `password${i+1}`
         })
     }
-}
-const createSampleUsers = async (): Promise<any[]> => {
-    const promises = sampleUserInputs.map((u) => {
-        return request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(u)
-    })
-    const responses = await Promise.all(promises)
-    return responses.map(r => r.body)
 }
 
 describe('userRouter tests', () => {
@@ -43,7 +36,7 @@ describe('userRouter tests', () => {
     })
 
     it('put should return users', async () => {
-        const responses = await createSampleUsers()
+        const responses = await helpers.createUserSamples()
         responses.forEach((r) => {
             expect(r.id).not.toBeFalsy()
             expect(r.login).not.toBeFalsy()
@@ -54,13 +47,13 @@ describe('userRouter tests', () => {
 
     it('get should return userList', async () => {
         const response = await request(TestApp.server)
-            .get(`${base}?pageSize=${sampleUserInputs.length}`)
+            .get(`${base}?pageSize=${helpers.sampleUserInputs.length}`)
         const data = response.body as UserPageViewModel
 
-        expect(data.totalCount).toBe(sampleUserInputs.length)
-        expect(data.pageSize).toBe(sampleUserInputs.length)
+        expect(data.totalCount).toBe(helpers.sampleUserInputs.length)
+        expect(data.pageSize).toBe(helpers.sampleUserInputs.length)
         data.items.forEach((u) => {
-            const match = sampleUserInputs.some((input) => {
+            const match = helpers.sampleUserInputs.some((input) => {
                 return input.login === u.login &&
                         input.email === u.email
             })

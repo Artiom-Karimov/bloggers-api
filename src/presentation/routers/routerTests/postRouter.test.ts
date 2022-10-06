@@ -1,19 +1,15 @@
 import request from 'supertest'
-import PostPageViewModel from '../../data/models/pageViewModels/postPageViewModel'
-import { BlogInputModel } from '../../logic/models/blogModel'
-import PostModel, { PostInputModel } from '../../logic/models/postModel'
-import { UserInputModel } from '../../logic/models/userModel'
-import TestApp from '../testAppSetup'
+import PostPageViewModel from '../../../data/models/pageViewModels/postPageViewModel'
+import PostModel, { PostInputModel } from '../../../logic/models/postModel'
+import TestApp from '../../testAppSetup'
+import * as helpers from './routerTestHelpers'
 
 const base = '/posts'
 
-let samplePostInputs: Array<PostInputModel>
-const sampleBlogInput = { name: 'hell-o', youtubeUrl: 'https://go.home' }
-
 const fillSamples = (blogId:string) => {
-    samplePostInputs = []
+    helpers.clearPostSamples()
     for(let i = 1; i < 21; i++) {
-        samplePostInputs.push({
+        helpers.samplePostInputs.push({
             title:`post ${i}`, 
             shortDescription:`ddddescription ${i}`, 
             content:'c-c-c-c-c-c-content!', 
@@ -22,31 +18,7 @@ const fillSamples = (blogId:string) => {
         })
     }
 }
-const createPosts = async () => {
-    const responses = samplePostInputs.map((data) => {
-        return request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(data)
-    })
-    await Promise.all(responses)
-}
-const injectBlog = async (model: BlogInputModel): Promise<string> => {
-    const created = await request(TestApp.server).post('/blogs').auth(TestApp.userName, TestApp.password).send(model)
-    return created.body.id
-}
-const injectUser = async (model: UserInputModel): Promise<string> => {
-    const created = await request(TestApp.server).post('/users').auth(TestApp.userName, TestApp.password).send(model)
-    return created.body.id
-}
-const createUserToken = async (login:string,password:string): Promise<string> => {
-    const userModel: UserInputModel = {
-        login: login,
-        email: 'postmama@moo.on',
-        password: password
-    }
-    const id = await injectUser(userModel)
-    const authorized = await request(TestApp.server).post('/auth/login')
-        .send({ login:login, password:password })
-    return authorized.body.accessToken
-}
+
 const expectEqual = (a: PostModel, b: PostInputModel) => {
     expect(a.title).toBe(b.title)
     expect(a.shortDescription).toBe(b.shortDescription)
@@ -57,7 +29,7 @@ const prepare = async () => {
     await TestApp.start()
     await request(TestApp.server)
         .delete('/testing/all-data')
-    const blog = await injectBlog(sampleBlogInput)       
+    const blog = await helpers.createBlog({name: 'nononon', youtubeUrl: 'https://sptth.aa'})       
     fillSamples(blog)
 }
 const end = async () => {
@@ -83,13 +55,13 @@ describe('postsRouter crud tests', () => {
 
     // Post
     it('post without auth should fail', async () => {
-        const response = await request(TestApp.server).post(base).send(samplePostInputs[1])
+        const response = await request(TestApp.server).post(base).send(helpers.samplePostInputs[1])
         expect(response.statusCode).toBe(401)
     })
     it('post/put/delete with wrong credentials should fail', async () => {
         const responses = [
-            request(TestApp.server).post(base).auth('hello','world').send(samplePostInputs[1]),
-            request(TestApp.server).put(`${base}/1`).auth('hello','world').send(samplePostInputs[1]),
+            request(TestApp.server).post(base).auth('hello','world').send(helpers.samplePostInputs[1]),
+            request(TestApp.server).put(`${base}/1`).auth('hello','world').send(helpers.samplePostInputs[1]),
             request(TestApp.server).delete(`${base}/1`).auth('hello','world')
         ]
         const received = await Promise.all(responses)
@@ -112,11 +84,11 @@ describe('postsRouter crud tests', () => {
 
     // Post, GetAll
     it('post should create valid models', async () => {
-        await createPosts()
+        await helpers.createPostSamples()
         const response = await request(TestApp.server).get(base)
         const body = response.body as PostPageViewModel
         expect(body).not.toBeUndefined()
-        expect(body.totalCount).toBe(samplePostInputs.length)
+        expect(body.totalCount).toBe(helpers.samplePostInputs.length)
 
         const allHaveIds = body.items.every((post) => {
             return typeof post.id === 'string' && post.id.length > 0
@@ -124,7 +96,7 @@ describe('postsRouter crud tests', () => {
         expect(allHaveIds).toBe(true)
 
         body.items.forEach((data) => {
-            const post = samplePostInputs.find((p) => 
+            const post = helpers.samplePostInputs.find((p) => 
                 p.title === data.title && 
                 p.content === data.content && 
                 p.shortDescription === data.shortDescription &&
@@ -135,7 +107,7 @@ describe('postsRouter crud tests', () => {
 
     // Post, get by id
     it('post should return actual id, then get by id should return model', async () => {
-        const sample = samplePostInputs[0]
+        const sample = helpers.samplePostInputs[0]
         const created = await request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(sample)
         expect(created.statusCode).toBe(201)
         const id = created.body.id
@@ -147,11 +119,11 @@ describe('postsRouter crud tests', () => {
 
     // Post, put, get by id
     it('put should replace existing entity', async () => {
-        const sample = samplePostInputs[2]
+        const sample = helpers.samplePostInputs[2]
         const created = await request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(sample)
         const id = created.body.id
 
-        const updateSample = samplePostInputs[3]
+        const updateSample = helpers.samplePostInputs[3]
         const updated = await request(TestApp.server).put(`${base}/${id}`).auth(TestApp.userName, TestApp.password).send(updateSample)
         expect(updated.statusCode).toBe(204)
 
@@ -162,7 +134,7 @@ describe('postsRouter crud tests', () => {
 
     // Post, delete, get by id
     it('delete should delete existing entity', async () => {
-        const sample = samplePostInputs[2]
+        const sample = helpers.samplePostInputs[2]
         const created = await request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(sample)
         const id = created.body.id
 
@@ -181,7 +153,7 @@ describe('postsRouter crud tests', () => {
 describe('postRouter comment tests', () => {
     beforeAll(async () => {
         await prepare()
-        await createPosts()
+        await helpers.createPostSamples()
     })
 
     it('get should return 404', async () => {
@@ -206,7 +178,7 @@ describe('postRouter comment tests', () => {
     })
 
     it('actual user should be able to post', async () => {
-        const token = await createUserToken('postMama','postPapa')
+        const token = await helpers.createUserToken('postMama','postPapa')
         
         const posts = await request(TestApp.server).get(base)
         const post = posts.body.items[3]

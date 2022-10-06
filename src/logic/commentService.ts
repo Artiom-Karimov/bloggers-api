@@ -20,4 +20,10 @@ export default class CommentService {
         )
         return (await this.repo.create(newComment))?.id
     }
+    public async update(id:string,content:string): Promise<boolean> {
+        return this.repo.update(id,content)
+    }
+    public async delete(id:string): Promise<boolean> {
+        return this.repo.delete(id)
+    }
 }

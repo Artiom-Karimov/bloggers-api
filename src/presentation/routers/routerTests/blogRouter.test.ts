@@ -1,28 +1,23 @@
 import request from 'supertest'
-import BlogPageViewModel from '../../data/models/pageViewModels/blogPageViewModel'
-import BlogViewModel from '../../data/models/viewModels/blogViewModel'
-import PostPageViewModel from '../../data/models/pageViewModels/postPageViewModel'
-import PostViewModel from '../../data/models/viewModels/postViewModel'
-import BlogModel, { BlogInputModel } from '../../logic/models/blogModel'
-import { PostInputModel } from '../../logic/models/postModel'
-import TestApp from '../testAppSetup'
+import BlogPageViewModel from '../../../data/models/pageViewModels/blogPageViewModel'
+import BlogViewModel from '../../../data/models/viewModels/blogViewModel'
+import PostPageViewModel from '../../../data/models/pageViewModels/postPageViewModel'
+import TestApp from '../../testAppSetup'
+import * as helpers from './routerTestHelpers'
 
 const base = '/blogs'
 
-let sampleBlogInputs: Array<BlogInputModel>
-let samplePostInputs: Array<PostInputModel>
-
 const fillSampleData = () => {
-    sampleBlogInputs = []
+    helpers.clearBlogSamples()
     for(let i = 0; i < 32; i++) {
-        sampleBlogInputs.push({
+        helpers.sampleBlogInputs.push({
             name: `blog ${i + 1}`,
             youtubeUrl: `https://youtu.be/blog${i + 1}`
         })
     }
-    samplePostInputs = []
+    helpers.clearPostSamples()
     for(let i = 0; i < 27; i++) {
-        samplePostInputs.push({
+        helpers.samplePostInputs.push({
             title: `post ${i+1}`,
             shortDescription: `This is a sample post #${i+1} from tests.`,
             content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ',
@@ -30,20 +25,6 @@ const fillSampleData = () => {
             blogName: ''
         })
     }
-}
-const sendBlogSamples = async () => {
-    const blogs = sampleBlogInputs.map((data) => {
-        return request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(data)
-    })
-    await Promise.all(blogs)
-}
-const sendPostSamples = async (blogId:string, blogName: string) => {
-    const posts = samplePostInputs.map((data) => {
-        data.blogId = blogId
-        data.blogName = blogName
-        return request(TestApp.server).post(`${base}/${blogId}/posts`).auth(TestApp.userName, TestApp.password).send(data)
-    })
-    await Promise.all(posts)
 }
 
 describe('blogsRouter crud tests', () => {
@@ -65,13 +46,13 @@ describe('blogsRouter crud tests', () => {
 
     // Post
     it('post without auth should fail', async () => {
-        const response = await request(TestApp.server).post(base).send(sampleBlogInputs[1])
+        const response = await request(TestApp.server).post(base).send(helpers.sampleBlogInputs[1])
         expect(response.statusCode).toBe(401)
     })
     it('post/put/delete with wrong credentials should fail', async () => {
         const responses = [
-            request(TestApp.server).post(base).auth('hello','world').send(sampleBlogInputs[1]),
-            request(TestApp.server).put(`${base}/1`).auth('hello','world').send(sampleBlogInputs[1]),
+            request(TestApp.server).post(base).auth('hello','world').send(helpers.sampleBlogInputs[1]),
+            request(TestApp.server).put(`${base}/1`).auth('hello','world').send(helpers.sampleBlogInputs[1]),
             request(TestApp.server).delete(`${base}/1`).auth('hello','world')
         ]
         const received = await Promise.all(responses)
@@ -82,11 +63,11 @@ describe('blogsRouter crud tests', () => {
 
     // Post, GetAll
     it('post should create valid models', async () => {
-        await sendBlogSamples()
+        await helpers.createBlogSamples()
         const response = await request(TestApp.server).get(base)
         const body = response.body as BlogPageViewModel
         expect(body).not.toBeUndefined()
-        expect(body.totalCount).toBe(sampleBlogInputs.length)
+        expect(body.totalCount).toBe(helpers.sampleBlogInputs.length)
         expect(body.pagesCount).toBe(4)
 
         const allHaveIds = body.items.every((blog) => {
@@ -95,7 +76,7 @@ describe('blogsRouter crud tests', () => {
         expect(allHaveIds).toBe(true)
 
         body.items.forEach((data) => {
-            const blog = sampleBlogInputs.find((b) => b.name === data.name && b.youtubeUrl === data.youtubeUrl)
+            const blog = helpers.sampleBlogInputs.find((b) => b.name === data.name && b.youtubeUrl === data.youtubeUrl)
             expect(blog).not.toBeUndefined()
         })
     })
@@ -106,14 +87,14 @@ describe('blogsRouter crud tests', () => {
         const blog1: BlogViewModel = blogs[0]
         const blog2: BlogViewModel = blogs[1]
 
-        await sendPostSamples(blog1.id,blog1.name)
-        await sendPostSamples(blog2.id,blog2.name)
+        await helpers.createPostSamplesByBlog(blog1.id,blog1.name)
+        await helpers.createPostSamplesByBlog(blog2.id,blog2.name)
 
         const blog1Posts = (await request(TestApp.server).get(`${base}/${blog1.id}/posts`)).body as PostPageViewModel
         const blog2Posts = (await request(TestApp.server).get(`${base}/${blog2.id}/posts`)).body as PostPageViewModel
 
-        expect(blog1Posts.totalCount).toBe(samplePostInputs.length)
-        expect(blog2Posts.totalCount).toBe(samplePostInputs.length)
+        expect(blog1Posts.totalCount).toBe(helpers.samplePostInputs.length)
+        expect(blog2Posts.totalCount).toBe(helpers.samplePostInputs.length)
 
         blog2Posts.items.forEach((p) => {
             expect(p.blogId).toBe(blog2.id)
@@ -123,7 +104,7 @@ describe('blogsRouter crud tests', () => {
 
     // Post, get by id
     it('post should return actual id, then get by id should return model', async () => {
-        const sample = sampleBlogInputs[0]
+        const sample = helpers.sampleBlogInputs[0]
         const created = await request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(sample)
         expect(created.statusCode).toBe(201)
         const id = created.body.id
@@ -136,11 +117,11 @@ describe('blogsRouter crud tests', () => {
 
     // Post, put, get by id
     it('put should replace existing entity', async () => {
-        const sample = sampleBlogInputs[2]
+        const sample = helpers.sampleBlogInputs[2]
         const created = await request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(sample)
         const id = created.body.id
 
-        const updateSample = sampleBlogInputs[3]
+        const updateSample = helpers.sampleBlogInputs[3]
         const updated = await request(TestApp.server).put(`${base}/${id}`).auth(TestApp.userName, TestApp.password).send(updateSample)
         expect(updated.statusCode).toBe(204)
 
@@ -152,7 +133,7 @@ describe('blogsRouter crud tests', () => {
 
     // Post, delete, get by id
     it('delete should delete existing entity', async () => {
-        const sample = sampleBlogInputs[2]
+        const sample = helpers.sampleBlogInputs[2]
         const created = await request(TestApp.server).post(base).auth(TestApp.userName, TestApp.password).send(sample)
         const id = created.body.id
 

@@ -1,20 +1,8 @@
 import request from 'supertest'
-import { UserInputModel } from '../../logic/models/userModel'
-import TestApp from '../testAppSetup'
+import TestApp from '../../testAppSetup'
+import * as helpers from './routerTestHelpers'
 
 const base = '/auth'
-
-
-const createUser = async (login:string,password:string): Promise<string> => {
-    const userInput: UserInputModel = {
-        login:login,
-        email:'whatever@mail.com',
-        password:password
-    } 
-    const created = await request(TestApp.server)
-        .post('/users').auth(TestApp.userName, TestApp.password).send(userInput)
-    return created.body.id
-}
 
 describe('authRouter tests', () => {
     beforeAll(async () => {
@@ -26,7 +14,7 @@ describe('authRouter tests', () => {
     it('wrong credentials should receive 401', async () => {
         const login = 'vasya'
         const password = 'rightPass'
-        const user = await createUser(login,password)
+        const user = await helpers.createUser(login,password)
         const result = await request(TestApp.server)
             .post(`${base}/login`).send({
                 login:login,
@@ -38,7 +26,7 @@ describe('authRouter tests', () => {
     it('right credentials should receive token', async () => {
         const login = 'lena'
         const password = 'somePass'
-        const user = await createUser(login,password)
+        const user = await helpers.createUser(login,password)
         const result = await request(TestApp.server)
             .post(`${base}/login`).send({
                 login:login,
@@ -51,7 +39,7 @@ describe('authRouter tests', () => {
     it('authorized user should receive himself', async () => {
         const login = 'petya'
         const password = 'daPassword'
-        const user = await createUser(login,password)
+        const user = await helpers.createUser(login,password)
         const result = await request(TestApp.server)
             .post(`${base}/login`).send({
                 login:login,
