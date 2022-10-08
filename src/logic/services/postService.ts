@@ -1,7 +1,7 @@
-import PostRepository from "../data/repositories/postRepository";
-import PostModel, { PostInputModel } from "./models/postModel";
-import DateGenerator from "./utils/dateGenerator";
-import {generateId} from "./utils/idGenerator";
+import PostRepository from "../../data/repositories/postRepository";
+import PostModel, { PostInputModel } from "../models/postModel";
+import DateGenerator from "../utils/dateGenerator";
+import {generateId} from "../utils/idGenerator";
 
 export default class PostService {
     private readonly repo: PostRepository

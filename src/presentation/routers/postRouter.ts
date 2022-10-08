@@ -1,18 +1,17 @@
 import { Router, Request, Response } from 'express'
 import { body, CustomValidator } from "express-validator";
 
-import * as config from '../../config/config'
-import PostService from '../../logic/postService'
+import PostService from '../../logic/services/postService'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
 import { commentValidation, postValidation } from '../validation/bodyValidators'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
-import BlogService from '../../logic/blogService';
+import BlogService from '../../logic/services/blogService';
 import GetPostsQueryParams from '../models/getPostsQueryParams';
 import QueryRepository from '../../data/repositories/queryRepository';
 import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authMiddleware'
 import GetCommentsQueryParams from '../models/getCommentsQueryParams';
 import CommentQueryRepository from '../../data/repositories/commentQueryRepository';
-import CommentService from '../../logic/commentService';
+import CommentService from '../../logic/services/commentService';
 import { CommentCreateModel } from '../../logic/models/commentModel';
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'

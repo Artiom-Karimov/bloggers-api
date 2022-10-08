@@ -3,28 +3,41 @@ export type UserInputModel = {
     email: string,
     password: string
 }
+export type AccountData = {
+    login:string,
+    email:string,
+    passwordHash:string,
+    salt:string,
+    createdAt:string
+}
+export type EmailConfirmation = {
+    confirmed:boolean,
+    code:string,
+    codeExpiration:number
+}
 
 export default class UserModel {
     public id: string
-    public login: string
-    public email: string
-    public createdAt: string
-    public passwordHash: string
-    public salt: string
+    public accountData: AccountData
+    public emailConfirmation: EmailConfirmation 
 
     constructor(
         id: string,
-        login: string,
-        email: string,
-        createdAt: string,
-        passwordHash: string,
-        salt: string
+        accountData: AccountData,
+        emailConfirmation: EmailConfirmation
     ) {
         this.id = id
-        this.login = login
-        this.email = email
-        this.createdAt = createdAt
-        this.passwordHash = passwordHash
-        this.salt = salt
+        this.accountData = {
+            login:accountData.login,
+            email:accountData.email,
+            passwordHash:accountData.passwordHash,
+            salt:accountData.salt,
+            createdAt:accountData.createdAt
+        }
+        this.emailConfirmation = {
+            confirmed:emailConfirmation.confirmed,
+            code:emailConfirmation.code,
+            codeExpiration:emailConfirmation.codeExpiration
+        }
     }
 }

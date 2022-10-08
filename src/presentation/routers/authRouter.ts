@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import UserService from "../../logic/userService";
+import UserService from "../../logic/services/userService";
 import UserQueryRepository from '../../data/repositories/userQueryRepository'
 import { bearerAuthMiddleware } from "../middlewares/authMiddleware";
 

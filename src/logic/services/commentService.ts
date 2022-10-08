@@ -1,7 +1,7 @@
-import CommentRepository from "../data/repositories/commentRepository";
-import CommentModel, { CommentCreateModel } from "./models/commentModel";
-import DateGenerator from "./utils/dateGenerator";
-import { generateId } from "./utils/idGenerator";
+import CommentRepository from "../../data/repositories/commentRepository";
+import CommentModel, { CommentCreateModel } from "../models/commentModel";
+import DateGenerator from "../utils/dateGenerator";
+import { generateId } from "../utils/idGenerator";
 
 export default class CommentService {
     private readonly repo: CommentRepository

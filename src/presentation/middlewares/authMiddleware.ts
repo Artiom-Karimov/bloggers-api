@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import UserService from "../../logic/userService";
+import UserService from "../../logic/services/userService";
 import * as config from '../../config/config'
 
 const basicValue = 'Basic ' + Buffer.from(`${config.userName}:${config.password}`,'utf-8').toString('base64')

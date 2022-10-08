@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express"
 import CommentQueryRepository from "../../data/repositories/commentQueryRepository"
-import CommentService from "../../logic/commentService"
+import CommentService from "../../logic/services/commentService"
 import { bearerAuthMiddleware } from "../middlewares/authMiddleware"
 import { validationMiddleware } from "../middlewares/validationMiddleware"
 import { commentValidation } from "../validation/bodyValidators"

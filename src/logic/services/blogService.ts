@@ -1,7 +1,7 @@
-import BlogModel, { BlogInputModel } from "./models/blogModel";
-import BlogRepository from "../data/repositories/blogRepository";
-import { generateId } from "./utils/idGenerator";
-import DateGenerator from "./utils/dateGenerator";
+import BlogModel, { BlogInputModel } from "../models/blogModel";
+import BlogRepository from "../../data/repositories/blogRepository";
+import { generateId } from "../utils/idGenerator";
+import DateGenerator from "../utils/dateGenerator";
 
 export default class BlogService {
     private readonly repo: BlogRepository

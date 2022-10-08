@@ -1,6 +1,6 @@
 import { Collection } from "mongodb";
 import * as config from '../../config/config'
-import UserModel, { UserInputModel } from "../../logic/models/userModel";
+import UserModel, { EmailConfirmation, UserInputModel } from "../../logic/models/userModel";
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoModels/mongoUserModel";
 
@@ -22,7 +22,18 @@ export default class UserRepository {
     }
     public async getByLogin(login:string): Promise<UserModel|undefined> {
         try {
-            const user = await this.users.findOne({login:login})
+            const user = await this.users.findOne({'accountData.login':login})
+            if(user) {
+                return MongoUserModel.getBusinessModel(user)
+            }
+            return undefined
+        } catch {
+            return undefined
+        }
+    }
+    public async getByEmail(email:string): Promise<UserModel|undefined> {
+        try {
+            const user = await this.users.findOne({'accountData.email':email})
             if(user) {
                 return MongoUserModel.getBusinessModel(user)
             }
@@ -41,17 +52,6 @@ export default class UserRepository {
             return undefined
         }
     }
-    public async update(id:string,data:UserInputModel): Promise<boolean> {
-        try {
-            const result = await this.users.updateOne(
-                {_id:id},
-                {$set : {...data}}
-            )
-            return result.matchedCount === 1
-        } catch {
-            return false
-        }
-    }
     public async delete(id:string): Promise<boolean> {
         try {
             const result = await this.users.deleteOne({_id:id})
@@ -59,5 +59,11 @@ export default class UserRepository {
         } catch {
             return false
         }
+    }
+    public async updateEmailConfirmation(id:string,data:EmailConfirmation): Promise<boolean> {
+        const result = await this.users.updateOne(
+            { _id: id },
+            { $set: { emailConfirmation : data } })
+        return result.modifiedCount === 1
     }
 }
