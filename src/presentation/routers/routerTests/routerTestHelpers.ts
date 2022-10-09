@@ -70,18 +70,18 @@ export const createPost = async (data: PostInputModel): Promise<string> => {
     const created = await request(TestApp.server).post('/posts').auth(TestApp.userName, TestApp.password).send(data)
     return created.body.id
 }
-export const createUser = async (login:string,password:string): Promise<string> => {
+export const createUser = async (login:string,email:string,password:string): Promise<string> => {
     const userInput: UserInputModel = {
         login:login,
-        email:'whatever@mail.com',
+        email:email,
         password:password
     } 
     const created = await request(TestApp.server)
         .post('/users').auth(TestApp.userName, TestApp.password).send(userInput)
     return created.body.id
 }
-export const createUserToken = async (login:string,password:string): Promise<string> => {    
-    const id = await createUser(login,password)
+export const createUserToken = async (login:string,email:string,password:string): Promise<string> => {    
+    const id = await createUser(login,email,password)
     const authorized = await request(TestApp.server).post('/auth/login')
         .send({ login:login, password:password })
     return authorized.body.accessToken

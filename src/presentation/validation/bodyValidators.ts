@@ -12,6 +12,7 @@ const loginErrorMessage = 'login should be a valid string of 3-10 chars'
 const passwordErrorMessage = 'password should be a valid string of 6-20 chars'
 const emailErrorMessage = 'email should be valid'
 const commentErrorMessage = 'content should be 20-300 chars long'
+const confirmCodeErrorMessage = 'you shuld provide valid confirmation code'
 
 const stringValidation = (param:string, minLength:number, maxLength:number, message:string) => {
     return body(param).isString().withMessage(message)
@@ -31,6 +32,7 @@ const contentValidation = stringValidation('content', 1, 1000, contentErrorMessa
 const loginValidation = stringValidation('login', 3, 10, loginErrorMessage)
 const passwordValidation = stringValidation('password', 6, 20, passwordErrorMessage)
 export const emailValidation = body('email').matches(emailRegex).withMessage(emailErrorMessage) 
+export const confirmCodeValidation = stringValidation('code',5,100,confirmCodeErrorMessage)
 
 export const blogValidation = [ nameValidation, ...youtubeUrlValidation ]
 export const postValidation = [ titleValidation, shortDescriptionValidation, contentValidation]

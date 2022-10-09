@@ -23,10 +23,7 @@ export default class UserRepository {
     public async getByLogin(login:string): Promise<UserModel|undefined> {
         try {
             const user = await this.users.findOne({'accountData.login':login})
-            if(user) {
-                return MongoUserModel.getBusinessModel(user)
-            }
-            return undefined
+            return user? MongoUserModel.getBusinessModel(user) : undefined
         } catch {
             return undefined
         }
@@ -34,10 +31,15 @@ export default class UserRepository {
     public async getByEmail(email:string): Promise<UserModel|undefined> {
         try {
             const user = await this.users.findOne({'accountData.email':email})
-            if(user) {
-                return MongoUserModel.getBusinessModel(user)
-            }
+            return user? MongoUserModel.getBusinessModel(user) : undefined
+        } catch {
             return undefined
+        }
+    }
+    public async getByConfirmationCode(code:string): Promise<UserModel|undefined> {
+        try {
+            const user = await this.users.findOne({'emailConfirmation.code':code})
+            return user? MongoUserModel.getBusinessModel(user) : undefined
         } catch {
             return undefined
         }
@@ -46,8 +48,7 @@ export default class UserRepository {
         try {
             const model = new MongoUserModel(user)
             const created = await this.users.insertOne(model)
-            if(created.acknowledged) return user.id
-            return undefined
+            return created.acknowledged ? user.id : undefined
         } catch {
             return undefined
         }

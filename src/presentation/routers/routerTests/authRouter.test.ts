@@ -15,8 +15,9 @@ describe('authRouter tests', () => {
 
     it('wrong credentials should receive 401', async () => {
         const login = 'vasya'
+        const email = 'boo@oob.bo'
         const password = 'rightPass'
-        const user = await helpers.createUser(login,password)
+        const user = await helpers.createUser(login,email,password)
         const result = await request(TestApp.server)
             .post(`${base}/login`).send({
                 login:login,
@@ -27,8 +28,10 @@ describe('authRouter tests', () => {
 
     it('right credentials should receive token', async () => {
         const login = 'lena'
+        const email = 'ema@mail.em'
         const password = 'somePass'
-        const user = await helpers.createUser(login,password)
+        const user = await helpers.createUser(login,email,password)
+        expect(user).toBeTruthy()
         const result = await request(TestApp.server)
             .post(`${base}/login`).send({
                 login:login,
@@ -40,8 +43,9 @@ describe('authRouter tests', () => {
 
     it('authorized user should receive himself', async () => {
         const login = 'petya'
+        const email = 'pe@ty.ea'
         const password = 'daPassword'
-        const user = await helpers.createUser(login,password)
+        const user = await helpers.createUser(login,email,password)
         const result = await request(TestApp.server)
             .post(`${base}/login`).send({
                 login:login,
@@ -92,6 +96,35 @@ describe('authRouter tests', () => {
         expect(result.statusCode).toBe(200)
         expect(result.body.accessToken).toBeTruthy()
     })
+
+    // Another registration
+    const nextUserData: UserInputModel = {
+        login: 'doodkin',
+        password: 'lamePass',
+        email: 'poke@example.com'
+    }
+    it('confirm should return 204', async () => {      
+        const result = await request(TestApp.server).post(`${base}/registration`).send(nextUserData)
+        expect(result.statusCode).toBe(204)
+
+        const userModel = await new UserService().getByLogin(nextUserData.login)
+        expect(userModel).toBeTruthy()
+
+        const confirmed = await request(TestApp.server)
+            .post(`${base}/registration-confirmation`).send({code:userModel!.emailConfirmation.code})
+        expect(confirmed.statusCode).toBe(204)
+    })
+
+    it('right credentials should receive token', async () => {        
+        const result = await request(TestApp.server)
+            .post(`${base}/login`).send({
+                login:nextUserData.login,
+                password:nextUserData.password
+            })
+        expect(result.statusCode).toBe(200)
+        expect(result.body.accessToken).toBeTruthy()
+    })
+
 
     afterAll(async () => {
         await TestApp.stop()

@@ -21,7 +21,13 @@ export default class UserService {
     public async getByLogin(login:string): Promise<UserModel|undefined> {
         return this.repo.getByLogin(login)
     }
+    public async getByEmail(email:string): Promise<UserModel|undefined> {
+        return this.repo.getByEmail(email)
+    }
     public async create(data:UserInputModel): Promise<string|undefined> {
+        if(await this.loginExists(data.login) || await this.emailExists(data.email))
+            return undefined
+
         const newUser = await UserFactory.create(data)
         const createdId = await this.repo.create(newUser)
         if(!createdId) return undefined
@@ -34,6 +40,9 @@ export default class UserService {
         return emailSent ? createdId : undefined
     }
     public async createConfirmed(data:UserInputModel): Promise<string|undefined> {
+        if(await this.loginExists(data.login) || await this.emailExists(data.email))
+            return undefined
+
         const newUser = await UserFactory.createConfirmed(data)
         return this.repo.create(newUser)
     }
@@ -61,6 +70,13 @@ export default class UserService {
 
         return this.repo.updateEmailConfirmation(user.id, EmailConfirmationFactory.getConfirmed())
     }
+    public async confirmRegitrationByCodeOnly(code:string): Promise<boolean> {
+        const user = await this.repo.getByConfirmationCode(code)
+        if(!user) return false
+        if(user.emailConfirmation.codeExpiration < new Date().getDate()) return false
+
+        return this.repo.updateEmailConfirmation(user.id, EmailConfirmationFactory.getConfirmed())
+    }
     public async authenticate(login: string, password: string): Promise<string|undefined> {
         const user = await this.repo.getByLogin(login)
         if(!user) return undefined
@@ -83,5 +99,13 @@ export default class UserService {
     }
     public async delete(id:string): Promise<boolean> {
         return this.repo.delete(id)
+    }
+    public async loginExists(login:string): Promise<boolean> {
+        const user = await this.getByLogin(login)
+        return user !== undefined
+    }
+    public async emailExists(email:string): Promise<boolean> {
+        const user = await this.getByEmail(email)
+        return user !== undefined
     }
 }

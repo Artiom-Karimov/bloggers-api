@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import UserService from "../../logic/services/userService";
 import UserQueryRepository from '../../data/repositories/userQueryRepository'
 import { bearerAuthMiddleware } from "../middlewares/authMiddleware";
-import { emailValidation, userValidation } from "../validation/bodyValidators";
+import { confirmCodeValidation, emailValidation, userValidation } from "../validation/bodyValidators";
 import { validationMiddleware } from "../middlewares/validationMiddleware";
 import { confirmQueryValidation } from "../validation/queryValidators";
 
@@ -35,7 +35,7 @@ export default class AuthRouter {
         validationMiddleware,
         async (req:Request,res:Response) => {
             const success = await this.repo.resendConfirmationEmail(req.body.email)
-            res.send(success ? 204 : 500)
+            res.send(success ? 204 : 400)
         })
 
         this.router.get('/confirm-email',
@@ -45,6 +45,14 @@ export default class AuthRouter {
             const user = req.query.user as string
             const code = req.query.code as string
             const confirmed = await this.repo.confirmRegistration(user,code)
+            res.send(confirmed ? 204 : 400)
+        })
+
+        this.router.post('/registration-confirmation',
+        confirmCodeValidation,
+        validationMiddleware,
+        async (req:Request,res:Response) => {
+            const confirmed = await this.repo.confirmRegitrationByCodeOnly(req.body.code)
             res.send(confirmed ? 204 : 400)
         })
 
