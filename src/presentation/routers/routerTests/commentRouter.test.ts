@@ -33,7 +33,7 @@ const prepare = async () => {
         blogName: 'whatever' 
     }
     postId = await helpers.createPost(postData)
-    userToken = await helpers.createUserToken('ignat','firstAnimalName')
+    userToken = await helpers.createUserToken('ignat','poop@po.op','firstAnimalName')
     fillSamples()
 }
 

@@ -178,7 +178,7 @@ describe('postRouter comment tests', () => {
     })
 
     it('actual user should be able to post', async () => {
-        const token = await helpers.createUserToken('postMama','postPapa')
+        const token = await helpers.createUserToken('postMama','post@po.st','postPapa')
         
         const posts = await request(TestApp.server).get(base)
         const post = posts.body.items[3]
