@@ -13,6 +13,14 @@ export default class UserFactory {
             EmailConfirmationFactory.getNew()
         )
     }
+    public static async createConfirmed(data:UserInputModel): Promise<UserModel> {
+        const accountData = await UserFactory.getAccountData(data)
+        return new UserModel(
+            generateId(), 
+            accountData,
+            EmailConfirmationFactory.getConfirmed()
+        )
+    }
 
     private static async getAccountData(data:UserInputModel): Promise<AccountData> {
         const [passwordHash, salt] = await Hasher.hash(data.password)

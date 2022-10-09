@@ -1,6 +1,8 @@
 import request from 'supertest'
+import { UserInputModel } from '../../../logic/models/userModel'
 import TestApp from '../../testAppSetup'
 import * as helpers from './routerTestHelpers'
+import UserService from '../../../logic/services/userService'
 
 const base = '/auth'
 
@@ -53,6 +55,42 @@ describe('authRouter tests', () => {
         expect(infoResult.body.email).toBeTruthy()
         expect(infoResult.body.login).toBe(login)
         expect(infoResult.body.userId).toBeTruthy()
+    })
+
+    // Registration procedure
+    const userData: UserInputModel = {
+        login: 'poopkin',
+        password: 'dateOfBirth',
+        email: 'none@example.com'
+    }
+    it('register should return 204', async () => {      
+        const result = await request(TestApp.server).post(`${base}/registration`).send(userData)
+        expect(result.statusCode).toBe(204)
+    })
+    it('unconfirmed user should not login', async () => {
+        const result = await request(TestApp.server)
+            .post(`${base}/login`).send({
+                login:userData.login,
+                password:userData.password
+            })
+        expect(result.statusCode).toBe(401)
+    })
+    it('confirm should return 204', async () => {
+        const userModel = await new UserService().getByLogin(userData.login)
+        expect(userModel).toBeTruthy()
+
+        const confirmed = await request(TestApp.server)
+            .get(`${base}/confirm-email?user=${userData.login}&code=${userModel!.emailConfirmation.code}`)
+        expect(confirmed.statusCode).toBe(204)
+    })
+    it('right credentials should receive token', async () => {        
+        const result = await request(TestApp.server)
+            .post(`${base}/login`).send({
+                login:userData.login,
+                password:userData.password
+            })
+        expect(result.statusCode).toBe(200)
+        expect(result.body.accessToken).toBeTruthy()
     })
 
     afterAll(async () => {

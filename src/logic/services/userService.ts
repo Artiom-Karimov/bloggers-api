@@ -18,6 +18,9 @@ export default class UserService {
     public async get(id:string): Promise<UserModel|undefined> {
         return this.repo.get(id)
     }
+    public async getByLogin(login:string): Promise<UserModel|undefined> {
+        return this.repo.getByLogin(login)
+    }
     public async create(data:UserInputModel): Promise<string|undefined> {
         const newUser = await UserFactory.create(data)
         const createdId = await this.repo.create(newUser)
@@ -29,6 +32,10 @@ export default class UserService {
             newUser.emailConfirmation.code)
 
         return emailSent ? createdId : undefined
+    }
+    public async createConfirmed(data:UserInputModel): Promise<string|undefined> {
+        const newUser = await UserFactory.createConfirmed(data)
+        return this.repo.create(newUser)
     }
     public async resendConfirmationEmail(email:string): Promise<boolean> {
         const user = await this.repo.getByEmail(email)

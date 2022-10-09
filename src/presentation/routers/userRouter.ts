@@ -39,7 +39,7 @@ export default class UserRouter {
             validationMiddleware,
         async (req:Request, res:Response) => {
             
-            const created = await this.users.create({
+            const created = await this.users.createConfirmed({
                 login: req.body.login,
                 email: req.body.email,
                 password: req.body.password

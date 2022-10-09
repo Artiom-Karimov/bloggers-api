@@ -30,7 +30,7 @@ const contentValidation = stringValidation('content', 1, 1000, contentErrorMessa
 
 const loginValidation = stringValidation('login', 3, 10, loginErrorMessage)
 const passwordValidation = stringValidation('password', 6, 20, passwordErrorMessage)
-const emailValidation = body('email').matches(emailRegex).withMessage(emailErrorMessage) 
+export const emailValidation = body('email').matches(emailRegex).withMessage(emailErrorMessage) 
 
 export const blogValidation = [ nameValidation, ...youtubeUrlValidation ]
 export const postValidation = [ titleValidation, shortDescriptionValidation, contentValidation]
