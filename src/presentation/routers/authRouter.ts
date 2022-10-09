@@ -5,6 +5,7 @@ import { bearerAuthMiddleware } from "../middlewares/authMiddleware";
 import { confirmCodeValidation, emailValidation, userValidation } from "../validation/bodyValidators";
 import { validationMiddleware } from "../middlewares/validationMiddleware";
 import { confirmQueryValidation } from "../validation/queryValidators";
+import { APIErrorResult } from "../validation/apiErrorResultFormatter";
 
 export default class AuthRouter {
     public readonly router: Router
@@ -27,7 +28,7 @@ export default class AuthRouter {
                 email: req.body.email,
                 password: req.body.password
             })
-            res.send(created? 204 : 500)
+            res.send(created? 204 : 400)
         })
 
         this.router.post('/registration-email-resending',
@@ -35,7 +36,12 @@ export default class AuthRouter {
         validationMiddleware,
         async (req:Request,res:Response) => {
             const success = await this.repo.resendConfirmationEmail(req.body.email)
-            res.send(success ? 204 : 400)
+            if(success) {
+                res.send(204)
+            }
+            res.status(400).send(new APIErrorResult([ 
+                { field: 'email', message: 'wrong or already confirmed email' } 
+            ]))
         })
 
         this.router.get('/confirm-email',
@@ -53,7 +59,14 @@ export default class AuthRouter {
         validationMiddleware,
         async (req:Request,res:Response) => {
             const confirmed = await this.repo.confirmRegitrationByCodeOnly(req.body.code)
-            res.send(confirmed ? 204 : 400)
+            if(confirmed) {
+                res.send(204)
+                return
+            }
+
+            res.status(400).send(new APIErrorResult([ 
+                { field: 'code', message: 'wrong or already confirmed code' } 
+            ]))
         })
 
         this.router.post('/login',
