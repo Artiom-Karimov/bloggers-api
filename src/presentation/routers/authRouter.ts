@@ -33,6 +33,7 @@ export default class AuthRouter {
                 res.status(400).send(new APIErrorResult([ 
                     { field: 'email', message: 'email already exists' } 
                 ]))
+                return
             }
             const created = await this.repo.create({
                 login: req.body.login,
