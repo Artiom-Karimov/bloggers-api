@@ -50,6 +50,7 @@ export default class AuthRouter {
             const success = await this.repo.resendConfirmationEmail(req.body.email)
             if(success) {
                 res.send(204)
+                return
             }
             res.status(400).send(new APIErrorResult([ 
                 { field: 'email', message: 'wrong or already confirmed email' } 
