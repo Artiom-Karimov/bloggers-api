@@ -25,9 +25,6 @@ export default class UserService {
         return this.repo.getByEmail(email)
     }
     public async create(data:UserInputModel): Promise<string|undefined> {
-        if(await this.loginExists(data.login) || await this.emailExists(data.email))
-            return undefined
-
         const newUser = await UserFactory.create(data)
         const createdId = await this.repo.create(newUser)
         if(!createdId) return undefined

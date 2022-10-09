@@ -23,6 +23,17 @@ export default class AuthRouter {
         userValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
+            if(await this.repo.loginExists(req.body.login)) {
+                res.status(400).send(new APIErrorResult([ 
+                    { field: 'login', message: 'login already exists' } 
+                ]))
+                return
+            }
+            if(await this.repo.emailExists(req.body.email)) {
+                res.status(400).send(new APIErrorResult([ 
+                    { field: 'email', message: 'email already exists' } 
+                ]))
+            }
             const created = await this.repo.create({
                 login: req.body.login,
                 email: req.body.email,
