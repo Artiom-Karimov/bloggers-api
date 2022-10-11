@@ -6,14 +6,18 @@ import UserService from '../../../logic/services/userService'
 
 const base = '/auth'
 
+
+
 describe('authRouter tests', () => {
     beforeAll(async () => {
         await TestApp.start()
         await request(TestApp.server)
             .delete('/testing/all-data')
+         //jest.useFakeTimers()      
     })
 
     it('wrong credentials should receive 401', async () => {
+        jest.setTimeout(10000)
         const login = 'vasya'
         const email = 'boo@oob.bo'
         const password = 'rightPass'
@@ -27,6 +31,7 @@ describe('authRouter tests', () => {
     })
 
     it('right credentials should receive token', async () => {
+        jest.setTimeout(10000)
         const login = 'lena'
         const email = 'ema@mail.em'
         const password = 'somePass'
@@ -42,6 +47,7 @@ describe('authRouter tests', () => {
     })
 
     it('authorized user should receive himself', async () => {
+        jest.setTimeout(10000)
         const login = 'petya'
         const email = 'pe@ty.ea'
         const password = 'daPassword'
@@ -67,7 +73,8 @@ describe('authRouter tests', () => {
         password: 'dateOfBirth',
         email: 'none@example.com'
     }
-    it('register should return 204', async () => {      
+    it('register should return 204', async () => {   
+        jest.setTimeout(10000)   
         const result = await request(TestApp.server).post(`${base}/registration`).send(userData)
         expect(result.statusCode).toBe(204)
     })

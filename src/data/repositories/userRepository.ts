@@ -62,9 +62,33 @@ export default class UserRepository {
         }
     }
     public async updateEmailConfirmation(id:string,data:EmailConfirmation): Promise<boolean> {
-        const result = await this.users.updateOne(
-            { _id: id },
-            { $set: { emailConfirmation : data } })
-        return result.modifiedCount === 1
+        try {
+            const result = await this.users.updateOne(
+                { _id: id },
+                { $set: { emailConfirmation : data } })
+            return result.modifiedCount === 1
+        } catch {
+            return false
+        }
+    }
+    public async appendRefreshToken(id:string,token:string): Promise<boolean> {
+        try {
+            const result = await this.users.updateOne(
+                {_id:id},
+                { $push: { refreshTokens: token } })
+            return result.modifiedCount === 1
+        } catch {
+            return false
+        }
+    }
+    public async removeRefreshToken(id:string,token:string): Promise<boolean> {
+        try {
+            const result = await this.users.updateOne(
+                {_id:id},
+                { $pull: { refreshTokens: token } })
+            return result.modifiedCount === 1
+        } catch {
+            return false
+        }
     }
 }

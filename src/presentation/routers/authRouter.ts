@@ -6,6 +6,8 @@ import { confirmCodeValidation, emailValidation, userValidation } from "../valid
 import { validationMiddleware } from "../middlewares/validationMiddleware";
 import { confirmQueryValidation } from "../validation/queryValidators";
 import { APIErrorResult } from "../validation/apiErrorResultFormatter";
+import { refreshTokenCheckMiddleware } from "../middlewares/refreshTokenCheckMiddleware";
+import { loginCheckMiddleware } from "../middlewares/loginCheckMiddleware";
 
 export default class AuthRouter {
     public readonly router: Router
@@ -83,17 +85,50 @@ export default class AuthRouter {
         })
 
         this.router.post('/login',
-        async (req:Request,res:Response) => {
-            if(!req.body.login || !req.body.password) {
+        loginCheckMiddleware,
+        async (req:Request,res:Response) => {          
+            const tokenPair = await this.repo.login(req.body.login,req.body.password)
+            if(!tokenPair) {
                 res.send(401)
                 return
             }
-            const token = await this.repo.authenticate(req.body.login,req.body.password)
-            if(token) {                
-                res.status(200).send({ accessToken: token })
+            res.cookie(
+                'refreshToken', 
+                tokenPair[1], 
+                { 
+                    secure: process.env.NODE_ENV !== "development",
+                    httpOnly: true
+                })            
+            res.status(200).send({ accessToken: tokenPair[0] })
+            return
+        })
+
+        this.router.post('/refresh-token',
+        refreshTokenCheckMiddleware,
+        async (req:Request,res:Response) => {
+            const refreshToken = req.cookies.refreshToken
+            const newPair = await this.repo.renewTokenPair(refreshToken)
+            if(!newPair) {
+                res.send(401)
                 return
             }
-            res.send(401)
+            res.cookie(
+                'refreshToken', 
+                newPair[1], 
+                { 
+                    secure: process.env.NODE_ENV !== "development",
+                    httpOnly: true
+                })            
+            res.status(200).send({ accessToken: newPair[0] })
+            return
+        })
+
+        this.router.post('/logout',
+        refreshTokenCheckMiddleware,
+        async (req:Request,res:Response) => {
+            const refreshToken = req.cookies.refreshToken
+            const success = await this.repo.logout(refreshToken)
+            res.send(success? 204 : 401)
         })
         
         this.router.get('/me', 

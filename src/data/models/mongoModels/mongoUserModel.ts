@@ -6,6 +6,7 @@ export default class MongoUserModel {
     public _id: string
     public accountData: AccountData
     public emailConfirmation: EmailConfirmation 
+    public refreshTokens: string[]
 
     constructor(user:UserModel) {
         this._id = user.id
@@ -21,6 +22,7 @@ export default class MongoUserModel {
             code:user.emailConfirmation.code,
             codeExpiration:user.emailConfirmation.codeExpiration
         }
+        this.refreshTokens = [...user.refreshTokens ]
     }
     public static getBusinessModel(mongoModel:MongoUserModel): UserModel {
         return new UserModel(

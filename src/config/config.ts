@@ -6,7 +6,8 @@ const userName:string = process.env.USER_NAME!
 const password:string = process.env.PASSWORD!
 const jwt = {
     jwtSecret:process.env.jwtSecret!,
-    jwtExpire:process.env.jwtExpire || '1h'
+    jwtExpire:process.env.jwtExpire || '10s',
+    jwtRefreshExpire:process.env.jwtRefreshExpire || '20s'
 }
 const email = {
     user:process.env.mailUser!,

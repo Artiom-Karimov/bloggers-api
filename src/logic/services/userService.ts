@@ -6,6 +6,7 @@ import { jwt as config } from '../../config/config'
 import UserFactory from "../utils/userFactory"
 import ConfirmationEmailSender from "../../email/confirmationEmailSender"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
+import TokenCreator from "../utils/tokenCreator"
 
 export default class UserService {
     private readonly repo: UserRepository
@@ -74,21 +75,36 @@ export default class UserService {
 
         return this.repo.updateEmailConfirmation(user.id, EmailConfirmationFactory.getConfirmed())
     }
-    public async authenticate(login: string, password: string): Promise<string|undefined> {
-        const user = await this.repo.getByLogin(login)
+    public async login(login: string, password: string)
+    : Promise<[token:string,refreshToken:string]|undefined> {
+        const user = await this.getByLogin(login)
         if(!user) return undefined
-        if(!user.emailConfirmation.confirmed) return undefined
-        if(!await Hasher.check(password,user.accountData.passwordHash,user.accountData.salt))
-            return undefined
-        return jwt.sign({userId:user.id},config.jwtSecret,{expiresIn:config.jwtExpire})
+        if(!await this.allowUserLogin(user,login,password))
+            return undefined 
+
+        const pair = TokenCreator.createTokenPair(user)
+        const saved = await this.repo.appendRefreshToken(user.id,pair[1])
+
+        return saved ? pair : undefined
     }
-    public async getIdFromToken(token:string): Promise<string|undefined> {
-        try {
-            const result: any = jwt.verify(token,config.jwtSecret)
-            return result.userId
-        } catch {
-            return undefined
-        }
+    public async renewTokenPair(refreshToken:string)
+    : Promise<[token:string,refreshToken:string]|undefined> {
+        const user = await this.getByRefreshToken(refreshToken)
+        if(!user) return undefined
+
+        const removed = await this.repo.removeRefreshToken(user.id,refreshToken)
+        if(!removed) return undefined
+
+        const pair = TokenCreator.createTokenPair(user)
+        const saved = await this.repo.appendRefreshToken(user.id,pair[1])
+
+        return saved ? pair : undefined
+    }
+    public async logout(refreshToken:string): Promise<boolean> {
+        const user = await this.getByRefreshToken(refreshToken)
+        if(!user) return false
+
+        return this.repo.removeRefreshToken(user.id,refreshToken)
     }
     public async getLoginById(id:string): Promise<string|undefined> {
         const user = await this.get(id)
@@ -104,5 +120,27 @@ export default class UserService {
     public async emailExists(email:string): Promise<boolean> {
         const user = await this.getByEmail(email)
         return user !== undefined
+    }
+    public async verifyTokenGetId(token:string): Promise<string|undefined> {
+        try {
+            const result: any = jwt.verify(token,config.jwtSecret)
+            return result.userId
+        } catch {
+            return undefined
+        }
+    }
+    private async allowUserLogin(user:UserModel,login:string,password:string): Promise<boolean> {
+        if(!user.emailConfirmation.confirmed) return false
+        return Hasher.check(password,user.accountData.passwordHash,user.accountData.salt)
+    }
+    private async getByRefreshToken(refreshToken:string): Promise<UserModel|undefined> {
+        const id = await this.verifyTokenGetId(refreshToken)
+        if(!id) return undefined
+
+        const user = await this.get(id)
+        if(!user) return undefined
+        if(!user.refreshTokens.includes(refreshToken)) return undefined
+
+        return user
     }
 }

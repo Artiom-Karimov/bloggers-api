@@ -27,7 +27,7 @@ export const bearerAuthMiddleware = async (req:Request,res:Response,next:NextFun
 
     if(authHeader[0] === 'Bearer') { 
         try {
-            const authorizedId = await users.getIdFromToken(authHeader[1])
+            const authorizedId = await users.verifyTokenGetId(authHeader[1])
             if(authorizedId) {
                 req.headers.userId = authorizedId
                 req.headers.userLogin = await users.getLoginById(authorizedId)
