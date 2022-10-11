@@ -122,6 +122,7 @@ describe('authRouter tests', () => {
         expect(confirmed.statusCode).toBe(204)
     })
 
+    let refreshCookie:string
     it('right credentials should receive token', async () => {        
         const result = await request(TestApp.server)
             .post(`${base}/login`).send({
@@ -130,6 +131,12 @@ describe('authRouter tests', () => {
             })
         expect(result.statusCode).toBe(200)
         expect(result.body.accessToken).toBeTruthy()
+        refreshCookie = helpers.parseRefreshCookie(result.get("Set-Cookie"))
+    })
+
+    it('refresh should return refresh token', async () => {
+        const result = await request(TestApp.server).post(`${base}/refresh-token`).send({}).set('Cookie', [ refreshCookie ])
+        expect(result.statusCode).toBe(200)
     })
 
 

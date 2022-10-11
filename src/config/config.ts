@@ -4,6 +4,7 @@ const port:number = Number(process.env.PORT!)
 const baseUrl:string = process.env.baseUrl || `http://localhost:${port}`
 const userName:string = process.env.USER_NAME!
 const password:string = process.env.PASSWORD!
+const cookieMaxAge:number = Number(process.env.cookieMaxAge) || 24 * 3600
 const jwt = {
     jwtSecret:process.env.jwtSecret!,
     jwtExpire:process.env.jwtExpire || '10s',
@@ -25,5 +26,6 @@ export {
     password,
     jwt,
     email,
+    cookieMaxAge,
     db 
 }

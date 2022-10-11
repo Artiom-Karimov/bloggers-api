@@ -28,7 +28,8 @@ export default class MongoUserModel {
         return new UserModel(
             mongoModel._id,
             mongoModel.accountData,
-            mongoModel.emailConfirmation
+            mongoModel.emailConfirmation,
+            mongoModel.refreshTokens
         )
     }
     public static getViewModel(mongoModel:MongoUserModel): UserViewModel {

@@ -86,3 +86,10 @@ export const createUserToken = async (login:string,email:string,password:string)
         .send({ login:login, password:password })
     return authorized.body.accessToken
 }
+
+export const parseRefreshCookie = (cookies:string[]):string => {
+    const cookie = cookies.find((q) => q.includes('refreshToken'))
+    return cookie ? cookie : ''
+}
+
+//"refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxNjY1NDkzNzkyODI4OTc1IiwiaWF0IjoxNjY1NDkzNzk0LCJleHAiOjE2NjU0OTM4MTR9.Vz1JsmEQE3KadbR-0pz4qM5btaAXra_JEY2Ktb-NPTg; Max-Age=86; Path=/; Expires=Tue, 11 Oct 2022 13:11:21 GMT; HttpOnly; Secure"

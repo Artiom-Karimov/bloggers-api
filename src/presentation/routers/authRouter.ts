@@ -8,6 +8,7 @@ import { confirmQueryValidation } from "../validation/queryValidators";
 import { APIErrorResult } from "../validation/apiErrorResultFormatter";
 import { refreshTokenCheckMiddleware } from "../middlewares/refreshTokenCheckMiddleware";
 import { loginCheckMiddleware } from "../middlewares/loginCheckMiddleware";
+import * as config from '../../config/config'
 
 export default class AuthRouter {
     public readonly router: Router
@@ -95,10 +96,7 @@ export default class AuthRouter {
             res.cookie(
                 'refreshToken', 
                 tokenPair[1], 
-                { 
-                    secure: process.env.NODE_ENV !== "development",
-                    httpOnly: true
-                })            
+                this.getCookieSettings())            
             res.status(200).send({ accessToken: tokenPair[0] })
             return
         })
@@ -112,15 +110,12 @@ export default class AuthRouter {
                 res.send(401)
                 return
             }
+            res.clearCookie('refreshToken')
             res.cookie(
                 'refreshToken', 
                 newPair[1], 
-                { 
-                    secure: process.env.NODE_ENV !== "development",
-                    httpOnly: true
-                })            
+                this.getCookieSettings())            
             res.status(200).send({ accessToken: newPair[0] })
-            return
         })
 
         this.router.post('/logout',
@@ -146,5 +141,12 @@ export default class AuthRouter {
             }
             res.send(401)
         })
+    }
+    private getCookieSettings(): any {
+        return {
+            maxAge: config.cookieMaxAge,
+            secure: process.env.NODE_ENV !== "development",
+            httpOnly: true
+        }
     }
 }
