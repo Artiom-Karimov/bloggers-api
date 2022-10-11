@@ -110,10 +110,9 @@ export default class AuthRouter {
                 res.send(401)
                 return
             }
-            res.clearCookie('refreshToken')
             res.cookie(
                 'refreshToken', 
-                newPair[1], 
+                newPair[1],
                 this.getCookieSettings())            
             res.status(200).send({ accessToken: newPair[0] })
         })

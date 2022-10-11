@@ -137,6 +137,9 @@ describe('authRouter tests', () => {
     it('refresh should return refresh token', async () => {
         const result = await request(TestApp.server).post(`${base}/refresh-token`).send({}).set('Cookie', [ refreshCookie ])
         expect(result.statusCode).toBe(200)
+        const newCookie = helpers.parseRefreshCookie(result.get("Set-Cookie"))
+        expect(newCookie).toBeTruthy()
+        expect(newCookie.includes('.')).toBe(true)
     })
 
 
