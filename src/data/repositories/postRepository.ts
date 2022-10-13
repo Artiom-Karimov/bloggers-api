@@ -3,15 +3,15 @@ import PostModel, { PostInputModel } from "../../logic/models/postModel";
 import { Collection } from "mongodb";
 import BlogModel from "../../logic/models/blogModel";
 import MongoPostModel from "../models/mongoModels/mongoPostModel";
-import * as config from '../../config/config'
 import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
+import BloggersMongoDb from "../bloggersMongoDb";
 
 export default class PostRepository {
     private readonly db:BloggersMongDb
     private readonly posts: Collection<MongoPostModel>
 
-    constructor() {
-        this.db = config.db
+    constructor(db: BloggersMongoDb) {
+        this.db = db
         this.posts = this.db.postCollection
     }
     public async get(id: string): Promise<PostModel|undefined> {

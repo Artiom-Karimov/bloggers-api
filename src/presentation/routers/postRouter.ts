@@ -8,7 +8,7 @@ import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logic/services/blogService';
 import GetPostsQueryParams from '../models/getPostsQueryParams';
 import QueryRepository from '../../data/repositories/queryRepository';
-import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authMiddleware'
+import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import GetCommentsQueryParams from '../models/getCommentsQueryParams';
 import CommentQueryRepository from '../../data/repositories/commentQueryRepository';
 import CommentService from '../../logic/services/commentService';
@@ -24,13 +24,22 @@ export default class PostRouter {
     private readonly queryRepo: QueryRepository
     private readonly comments: CommentService
     private readonly commentQueryRepo: CommentQueryRepository
+    private authProvider: AuthMiddlewareProvider
 
-    constructor() {
-        this.posts = new PostService()
-        this.blogs = new BlogService()
-        this.comments = new CommentService()
-        this.queryRepo = new QueryRepository()
-        this.commentQueryRepo = new CommentQueryRepository()
+    constructor(
+        posts:PostService,
+        blogs:BlogService,
+        comments:CommentService,
+        queryRepo:QueryRepository,
+        commentQueryRepo:CommentQueryRepository,
+        authProvider:AuthMiddlewareProvider
+        ) {
+        this.posts = posts
+        this.blogs = blogs
+        this.comments = comments
+        this.queryRepo = queryRepo
+        this.commentQueryRepo = commentQueryRepo
+        this.authProvider = authProvider
         this.router = Router()
         this.setRoutes()
         this.setCommentRoutes()
@@ -57,7 +66,7 @@ export default class PostRouter {
         })
 
         this.router.post('/',
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
             postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -78,7 +87,7 @@ export default class PostRouter {
         })
 
         this.router.put('/:id',
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
             postValidation, this.blogIdValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
@@ -103,7 +112,7 @@ export default class PostRouter {
         })
 
         this.router.delete('/:id', 
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
         async (req:Request,res:Response) => {
             const deleted = await this.posts.delete(req.params.id)
             res.send(deleted? 204 : 404)
@@ -126,7 +135,7 @@ export default class PostRouter {
         })
 
         this.router.post('/:postId/comments', 
-        bearerAuthMiddleware,
+            this.authProvider.bearerAuthMiddleware,
         commentValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {

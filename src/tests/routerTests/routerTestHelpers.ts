@@ -1,10 +1,10 @@
 import request from 'supertest'
 
-import { BlogInputModel } from "../../../logic/models/blogModel"
-import { CommentInputModel } from '../../../logic/models/commentModel'
-import { PostInputModel } from "../../../logic/models/postModel"
-import { UserInputModel } from '../../../logic/models/userModel'
-import TestApp from '../../testAppSetup'
+import { BlogInputModel } from "../../logic/models/blogModel"
+import { CommentInputModel } from '../../logic/models/commentModel'
+import { PostInputModel } from "../../logic/models/postModel"
+import { UserInputModel } from '../../logic/models/userModel'
+import * as root from '../testCompositionRoot'
 
 export let sampleBlogInputs: Array<BlogInputModel> = []
 export let samplePostInputs: Array<PostInputModel> = []
@@ -26,7 +26,7 @@ export const clearCommentSamples = () => {
 
 export const createBlogSamples = async () => {
     const blogs = sampleBlogInputs.map((data) => {
-        return request(TestApp.server).post('/blogs').auth(TestApp.userName, TestApp.password).send(data)
+        return request(root.app.server).post('/blogs').auth(root.login, root.password).send(data)
     })
     await Promise.all(blogs)
 }
@@ -34,26 +34,26 @@ export const createPostSamplesByBlog = async (blogId:string, blogName: string) =
     const posts = samplePostInputs.map((data) => {
         data.blogId = blogId
         data.blogName = blogName
-        return request(TestApp.server).post(`/blogs/${blogId}/posts`).auth(TestApp.userName, TestApp.password).send(data)
+        return request(root.app.server).post(`/blogs/${blogId}/posts`).auth(root.login, root.password).send(data)
     })
     await Promise.all(posts)
 }
 export const createPostSamples = async () => {
     const responses = samplePostInputs.map((data) => {
-        return request(TestApp.server).post('/posts').auth(TestApp.userName, TestApp.password).send(data)
+        return request(root.app.server).post('/posts').auth(root.login, root.password).send(data)
     })
     await Promise.all(responses)
 }
 export const createUserSamples = async (): Promise<any[]> => {
     const promises = sampleUserInputs.map((u) => {
-        return request(TestApp.server).post('/users').auth(TestApp.userName, TestApp.password).send(u)
+        return request(root.app.server).post('/users').auth(root.login, root.password).send(u)
     })
     const responses = await Promise.all(promises)
     return responses.map(r => r.body)
 }
 export const createCommentSamples = async (userToken:string): Promise<string[]> => {
     const promises = sampleCommentInputs.map(c => {
-        return request(TestApp.server).post(`/posts/${c.postId}/comments`)
+        return request(root.app.server).post(`/posts/${c.postId}/comments`)
             .auth(userToken, {type: "bearer"}).send({ content: c.content })
     })
     const responses = await Promise.all(promises)
@@ -63,11 +63,11 @@ export const createCommentSamples = async (userToken:string): Promise<string[]> 
 
 
 export const createBlog = async (data: BlogInputModel): Promise<string> => {
-    const created = await request(TestApp.server).post('/blogs').auth(TestApp.userName, TestApp.password).send(data)
+    const created = await request(root.app.server).post('/blogs').auth(root.login, root.password).send(data)
     return created.body.id
 }
 export const createPost = async (data: PostInputModel): Promise<string> => {
-    const created = await request(TestApp.server).post('/posts').auth(TestApp.userName, TestApp.password).send(data)
+    const created = await request(root.app.server).post('/posts').auth(root.login, root.password).send(data)
     return created.body.id
 }
 export const createUser = async (login:string,email:string,password:string): Promise<string> => {
@@ -76,13 +76,13 @@ export const createUser = async (login:string,email:string,password:string): Pro
         email:email,
         password:password
     } 
-    const created = await request(TestApp.server)
-        .post('/users').auth(TestApp.userName, TestApp.password).send(userInput)
+    const created = await request(root.app.server)
+        .post('/users').auth(root.login, root.password).send(userInput)
     return created.body.id
 }
 export const createUserToken = async (login:string,email:string,password:string): Promise<string> => {    
     const id = await createUser(login,email,password)
-    const authorized = await request(TestApp.server).post('/auth/login')
+    const authorized = await request(root.app.server).post('/auth/login')
         .send({ login:login, password:password })
     return authorized.body.accessToken
 }

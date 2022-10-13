@@ -1,5 +1,5 @@
-import BloggersApp from "./presentation/bloggersApp"
+import * as root from './compositionRoot'
 
-const app = new BloggersApp()
+const app = root.app
 
 app.start()

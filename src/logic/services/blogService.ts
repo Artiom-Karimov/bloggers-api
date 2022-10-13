@@ -6,8 +6,8 @@ import DateGenerator from "../utils/dateGenerator";
 export default class BlogService {
     private readonly repo: BlogRepository
 
-    constructor() {
-        this.repo = new BlogRepository()
+    constructor(repo:BlogRepository) {
+        this.repo = repo
     }
     public async get(id:string): Promise<BlogModel|undefined> {
         return this.repo.get(id)

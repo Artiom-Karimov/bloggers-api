@@ -9,45 +9,54 @@ import PostRouter from './routers/postRouter'
 import UserRouter from './routers/userRouter'
 import AuthRouter from './routers/authRouter'
 import CommentRouter from './routers/commentRouter'
+import BloggersMongoDb from '../data/bloggersMongoDb'
+
+export type ConstructorParams = {
+    db:BloggersMongoDb,
+    blogRouter?:BlogRouter,
+    postRouter?:PostRouter,
+    userRouter?:UserRouter,
+    authRouter?:AuthRouter,
+    commentRouter?:CommentRouter
+}
 
 export default class BloggersApp {
     public readonly port: number
     public readonly server: http.Server
+    private readonly db: BloggersMongoDb
 
-    constructor() {
+    constructor(params:ConstructorParams) {
         this.port = config.port
+        this.db = params.db
 
         const app = express()
         this.server = http.createServer(app)
 
         app.use(bodyParser.json())
         app.use(cookieParser())
-        app.use('/blogs', new BlogRouter().router)
-        app.use('/posts', new PostRouter().router)
-        app.use('/users', new UserRouter().router)
-        app.use('/auth', new AuthRouter().router)
-        app.use('/comments', new CommentRouter().router)
+        if(params.blogRouter) app.use('/blogs', params.blogRouter.router)
+        if(params.postRouter) app.use('/posts', params.postRouter.router)
+        if(params.userRouter) app.use('/users', params.userRouter.router)
+        if(params.authRouter) app.use('/auth', params.authRouter.router)
+        if(params.commentRouter) app.use('/comments', params.commentRouter.router)
 
         app.get('/', (req: Request, res: Response) => {
             res.sendStatus(404)
         })
         
         app.delete('/testing/all-data', async (req: Request, res: Response) => {
-            await config.db.clearAll()
+            await this.db.clearAll()
             res.sendStatus(204)
         })
     }
     public async start() {
-        await config.db.connect()
+        await this.db.connect()
         this.server.listen(this.port, () => {
             console.log(`Listenning on port ${this.port}`)
         })
     }
-    public async startDbOnly() {
-        await config.db.connect()
-    }
     public async stop() {
-        await config.db.close()
+        await this.db.close()
         this.server.close()
     }
 }

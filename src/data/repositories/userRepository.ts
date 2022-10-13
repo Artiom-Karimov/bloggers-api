@@ -1,5 +1,4 @@
 import { Collection } from "mongodb";
-import * as config from '../../config/config'
 import UserModel, { EmailConfirmation, UserInputModel } from "../../logic/models/userModel";
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoModels/mongoUserModel";
@@ -8,8 +7,8 @@ export default class UserRepository {
     private readonly db: BloggersMongoDb
     private readonly users: Collection<MongoUserModel>
 
-    constructor() {
-        this.db = config.db
+    constructor(db: BloggersMongoDb) {
+        this.db = db
         this.users = this.db.userCollection
     }
     public async get(id:string): Promise<UserModel|undefined> {

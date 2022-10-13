@@ -1,7 +1,6 @@
 import request from 'supertest'
-import UserPageViewModel from '../../../data/models/pageViewModels/userPageViewModel'
-import { UserInputModel } from '../../../logic/models/userModel'
-import TestApp from '../../testAppSetup'
+import UserPageViewModel from '../../data/models/pageViewModels/userPageViewModel'
+import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 
 const base = '/users'
@@ -21,14 +20,14 @@ const fillSampleData = () => {
 describe('userRouter tests', () => {
 
     beforeAll(async () => {
-        await TestApp.start()
-        await request(TestApp.server)
+        await root.initApp()
+        await request(root.app.server)
             .delete('/testing/all-data')
         fillSampleData()
     })
 
     it('should return empty user list', async () => {
-        const response = await request(TestApp.server).get(base)
+        const response = await request(root.app.server).get(base)
         expect(response.statusCode).toEqual(200)
         const model = response.body as UserPageViewModel
         expect(model.totalCount).toBe(0)
@@ -46,7 +45,7 @@ describe('userRouter tests', () => {
     })
 
     it('get should return userList', async () => {
-        const response = await request(TestApp.server)
+        const response = await request(root.app.server)
             .get(`${base}?pageSize=${helpers.sampleUserInputs.length}`)
         const data = response.body as UserPageViewModel
 
@@ -62,6 +61,6 @@ describe('userRouter tests', () => {
     })
 
     afterAll(() => {
-        TestApp.stop()
+        root.stopApp()
     })
 })

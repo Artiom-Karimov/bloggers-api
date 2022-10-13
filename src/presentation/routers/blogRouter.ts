@@ -7,19 +7,21 @@ import QueryRepository from '../../data/repositories/queryRepository'
 import GetBlogsQueryParams from '../models/getBlogsQueryParams'
 import GetPostsQueryParams from '../models/getPostsQueryParams'
 import PostService from '../../logic/services/postService'
-import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authMiddleware'
+import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 
 export default class BlogRouter {
     public readonly router: Router
     private readonly blogs: BlogService
     private readonly posts: PostService
     private readonly queryRepo: QueryRepository
+    private authProvider: AuthMiddlewareProvider
 
-    constructor() {
+    constructor(blogService:BlogService,postService:PostService,queryRepo:QueryRepository,authProvider:AuthMiddlewareProvider) {
         this.router = Router()
-        this.blogs = new BlogService()
-        this.posts = new PostService()
-        this.queryRepo = new QueryRepository()
+        this.blogs = blogService
+        this.posts = postService
+        this.queryRepo = queryRepo
+        this.authProvider = authProvider
         this.setRoutes()
     }
 
@@ -53,7 +55,7 @@ export default class BlogRouter {
         })
 
         this.router.post('/',
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
             blogValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -63,7 +65,7 @@ export default class BlogRouter {
         })
 
         this.router.post('/:blogId/posts', 
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
             postValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
@@ -87,7 +89,7 @@ export default class BlogRouter {
         })
 
         this.router.put('/:id',
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
             blogValidation,
             validationMiddleware,
         async (req:Request,res:Response) => {
@@ -101,7 +103,7 @@ export default class BlogRouter {
         })
 
         this.router.delete('/:id', 
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
             async (req:Request,res:Response) => {
             if(await this.blogs.delete(req.params.id))
                 res.send(204)

@@ -1,20 +1,22 @@
 import { Router, Request, Response } from 'express'
 import UserQueryRepository from '../../data/repositories/userQueryRepository'
 import UserService from '../../logic/services/userService'
-import { basicAuthMiddleware, bearerAuthMiddleware } from '../middlewares/authMiddleware'
+import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { validationMiddleware } from '../middlewares/validationMiddleware'
 import GetUsersQueryParams from '../models/getUsersQueryParams'
 import { userValidation } from '../validation/bodyValidators'
 
 export default class UserRouter {
     public readonly router: Router
-    private users: UserService
+    private service: UserService
     private queryRepo: UserQueryRepository
+    private authProvider: AuthMiddlewareProvider
 
-    constructor() {
+    constructor(service:UserService,queryRepo:UserQueryRepository,authProvider:AuthMiddlewareProvider) {
         this.router = Router()
-        this.users = new UserService()
-        this.queryRepo = new UserQueryRepository()
+        this.service = service
+        this.queryRepo = queryRepo
+        this.authProvider = authProvider
         this.setRoutes()
     }
 
@@ -34,12 +36,12 @@ export default class UserRouter {
         })
 
         this.router.post('/', 
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
             userValidation,
             validationMiddleware,
         async (req:Request, res:Response) => {
             
-            const created = await this.users.createConfirmed({
+            const created = await this.service.createConfirmed({
                 login: req.body.login,
                 email: req.body.email,
                 password: req.body.password
@@ -53,9 +55,9 @@ export default class UserRouter {
         })
 
         this.router.delete('/:id',
-            basicAuthMiddleware,
+            this.authProvider.basicAuthMiddleware,
         async (req:Request, res:Response) => {
-            const deleted = await this.users.delete(req.params.id)
+            const deleted = await this.service.delete(req.params.id)
             if(deleted) {
                 res.send(204)
                 return

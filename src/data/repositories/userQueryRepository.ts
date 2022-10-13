@@ -1,5 +1,4 @@
 import { Collection, Filter, FindCursor } from "mongodb";
-import * as config from '../../config/config'
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoModels/mongoUserModel";
 import UserPageViewModel from "../models/pageViewModels/userPageViewModel";
@@ -10,8 +9,8 @@ export default class UserQueryRepository {
     private readonly db:BloggersMongoDb
     private readonly users:Collection<MongoUserModel>
 
-    constructor() {
-        this.db = config.db
+    constructor(db: BloggersMongoDb) {
+        this.db = db
         this.users = this.db.userCollection
     }
     public async get(

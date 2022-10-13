@@ -1,19 +1,16 @@
 import request from 'supertest'
-import { UserInputModel } from '../../../logic/models/userModel'
-import TestApp from '../../testAppSetup'
+import { UserInputModel } from '../../logic/models/userModel'
+import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
-import UserService from '../../../logic/services/userService'
 
 const base = '/auth'
 
-
-
 describe('authRouter tests', () => {
+
     beforeAll(async () => {
-        await TestApp.start()
-        await request(TestApp.server)
-            .delete('/testing/all-data')
-         //jest.useFakeTimers()      
+        await root.initApp()
+        await request(root.app.server)
+            .delete('/testing/all-data')    
     })
 
     it('wrong credentials should receive 401', async () => {
@@ -22,7 +19,7 @@ describe('authRouter tests', () => {
         const email = 'boo@oob.bo'
         const password = 'rightPass'
         const user = await helpers.createUser(login,email,password)
-        const result = await request(TestApp.server)
+        const result = await request(root.app.server)
             .post(`${base}/login`).send({
                 login:login,
                 password:'wrongPass'
@@ -37,7 +34,7 @@ describe('authRouter tests', () => {
         const password = 'somePass'
         const user = await helpers.createUser(login,email,password)
         expect(user).toBeTruthy()
-        const result = await request(TestApp.server)
+        const result = await request(root.app.server)
             .post(`${base}/login`).send({
                 login:login,
                 password:password
@@ -52,13 +49,13 @@ describe('authRouter tests', () => {
         const email = 'pe@ty.ea'
         const password = 'daPassword'
         const user = await helpers.createUser(login,email,password)
-        const result = await request(TestApp.server)
+        const result = await request(root.app.server)
             .post(`${base}/login`).send({
                 login:login,
                 password:password
             })
         const token = result.body.accessToken
-        const infoResult = await request(TestApp.server)
+        const infoResult = await request(root.app.server)
             .get(`${base}/me`).set({authorization:`Bearer ${token}`})
 
         expect(infoResult.statusCode).toBe(200)
@@ -75,11 +72,11 @@ describe('authRouter tests', () => {
     }
     it('register should return 204', async () => {   
         jest.setTimeout(10000)   
-        const result = await request(TestApp.server).post(`${base}/registration`).send(userData)
+        const result = await request(root.app.server).post(`${base}/registration`).send(userData)
         expect(result.statusCode).toBe(204)
     })
     it('unconfirmed user should not login', async () => {
-        const result = await request(TestApp.server)
+        const result = await request(root.app.server)
             .post(`${base}/login`).send({
                 login:userData.login,
                 password:userData.password
@@ -87,15 +84,15 @@ describe('authRouter tests', () => {
         expect(result.statusCode).toBe(401)
     })
     it('confirm should return 204', async () => {
-        const userModel = await new UserService().getByLogin(userData.login)
+        const userModel = await root.userService.getByLogin(userData.login)
         expect(userModel).toBeTruthy()
 
-        const confirmed = await request(TestApp.server)
+        const confirmed = await request(root.app.server)
             .get(`${base}/confirm-email?user=${userData.login}&code=${userModel!.emailConfirmation.code}`)
         expect(confirmed.statusCode).toBe(204)
     })
     it('right credentials should receive token', async () => {        
-        const result = await request(TestApp.server)
+        const result = await request(root.app.server)
             .post(`${base}/login`).send({
                 login:userData.login,
                 password:userData.password
@@ -111,20 +108,20 @@ describe('authRouter tests', () => {
         email: 'poke@example.com'
     }
     it('confirm should return 204', async () => {      
-        const result = await request(TestApp.server).post(`${base}/registration`).send(nextUserData)
+        const result = await request(root.app.server).post(`${base}/registration`).send(nextUserData)
         expect(result.statusCode).toBe(204)
 
-        const userModel = await new UserService().getByLogin(nextUserData.login)
+        const userModel = await root.userService.getByLogin(nextUserData.login)
         expect(userModel).toBeTruthy()
 
-        const confirmed = await request(TestApp.server)
+        const confirmed = await request(root.app.server)
             .post(`${base}/registration-confirmation`).send({code:userModel!.emailConfirmation.code})
         expect(confirmed.statusCode).toBe(204)
     })
 
     let refreshCookie:string
     it('right credentials should receive token', async () => {        
-        const result = await request(TestApp.server)
+        const result = await request(root.app.server)
             .post(`${base}/login`).send({
                 login:nextUserData.login,
                 password:nextUserData.password
@@ -135,7 +132,7 @@ describe('authRouter tests', () => {
     })
 
     it('refresh should return refresh token', async () => {
-        const result = await request(TestApp.server).post(`${base}/refresh-token`).send({}).set('Cookie', [ refreshCookie ])
+        const result = await request(root.app.server).post(`${base}/refresh-token`).send({}).set('Cookie', [ refreshCookie ])
         expect(result.statusCode).toBe(200)
         const newCookie = helpers.parseRefreshCookie(result.get("Set-Cookie"))
         expect(newCookie).toBeTruthy()
@@ -144,6 +141,6 @@ describe('authRouter tests', () => {
 
 
     afterAll(async () => {
-        await TestApp.stop()
+        await root.stopApp()
     })
 })

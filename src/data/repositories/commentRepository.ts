@@ -1,15 +1,14 @@
 import BloggersMongoDb from "../bloggersMongoDb";
 import CommentModel, { CommentInputModel } from "../../logic/models/commentModel";
 import { Collection } from "mongodb";
-import * as config from '../../config/config'
 import MongoCommentModel from "../models/mongoModels/mongoCommentModel";
 
 export default class CommentRepository {
     private readonly db: BloggersMongoDb
     private readonly comments: Collection<MongoCommentModel>
 
-    constructor() {
-        this.db = config.db
+    constructor(db: BloggersMongoDb) {
+        this.db = db
         this.comments = this.db.commentCollection
     }
     public async get(id:string): Promise<CommentModel|undefined> {

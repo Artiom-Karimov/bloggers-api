@@ -4,17 +4,17 @@ import Hasher from "../utils/hasher"
 import jwt from 'jsonwebtoken'
 import { jwt as config } from '../../config/config'
 import UserFactory from "../utils/userFactory"
-import ConfirmationEmailSender from "../../email/confirmationEmailSender"
+import { ConfirmEmailSender } from "../../email/confirmationEmailSender"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
 import TokenCreator from "../utils/tokenCreator"
 
 export default class UserService {
     private readonly repo: UserRepository
-    private readonly confirmSender: ConfirmationEmailSender
+    private readonly confirmSender: ConfirmEmailSender
 
-    constructor() {
-        this.repo = new UserRepository()
-        this.confirmSender = new ConfirmationEmailSender()
+    constructor(repo: UserRepository, emailSender: ConfirmEmailSender) {
+        this.repo = repo
+        this.confirmSender = emailSender
     }
     public async get(id:string): Promise<UserModel|undefined> {
         return this.repo.get(id)

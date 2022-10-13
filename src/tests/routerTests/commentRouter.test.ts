@@ -1,8 +1,7 @@
-import { createDecipheriv } from 'crypto'
 import request from 'supertest'
-import CommentViewModel from '../../../data/models/viewModels/commentViewModel'
-import { PostInputModel } from '../../../logic/models/postModel'
-import TestApp from '../../testAppSetup'
+import CommentViewModel from '../../data/models/viewModels/commentViewModel'
+import { PostInputModel } from '../../logic/models/postModel'
+import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 
 const base = '/comments'
@@ -21,8 +20,8 @@ const fillSamples = () => {
 }
 
 const prepare = async () => {
-    await TestApp.start()
-    await request(TestApp.server)
+    await root.initApp()
+    await request(root.app.server)
         .delete('/testing/all-data')
     const blog = await helpers.createBlog({name: 'just kidding', youtubeUrl: 'https://plpl.pl/pl'})
     const postData: PostInputModel = {
@@ -38,8 +37,8 @@ const prepare = async () => {
 }
 
 const end = async () => {
-    await request(TestApp.server).delete('/testing/all-data')
-    await TestApp.stop()
+    await request(root.app.server).delete('/testing/all-data')
+    await root.stopApp()
 }
 
 describe('commentRouter tests', () => {
@@ -48,7 +47,7 @@ describe('commentRouter tests', () => {
     })
 
     it('should get 404', async () => {
-        const response = await request(TestApp.server).get(`${base}/12345`)
+        const response = await request(root.app.server).get(`${base}/12345`)
         expect(response.statusCode).toBe(404)
     })
 
@@ -58,7 +57,7 @@ describe('commentRouter tests', () => {
             expect(id).toBeTruthy()
         })
         const promises = created.map(id => {
-            return request(TestApp.server).get(`${base}/${id}`)
+            return request(root.app.server).get(`${base}/${id}`)
         })
         const responses = await Promise.all(promises)
         const comments = responses.map(r => r.body as CommentViewModel)
@@ -71,29 +70,29 @@ describe('commentRouter tests', () => {
     })
 
     it('should change existing comment', async () => {
-        const comments = await request(TestApp.server).get(`/posts/${postId}/comments`)
+        const comments = await request(root.app.server).get(`/posts/${postId}/comments`)
         expect(comments.statusCode).toBe(200)
         expect(comments.body.totalCount).toBeGreaterThan(0)
         const initComment = comments.body.items[0] as CommentViewModel
 
         const newContent = 'ah jeez, i forgot to tell something'
-        const changed = await request(TestApp.server).put(`${base}/${initComment.id}`)
+        const changed = await request(root.app.server).put(`${base}/${initComment.id}`)
             .auth(userToken, {type: 'bearer'}).send({content:newContent})
         expect(changed.statusCode).toBe(204)
 
-        const newComment = await request(TestApp.server).get(`${base}/${initComment.id}`)
+        const newComment = await request(root.app.server).get(`${base}/${initComment.id}`)
         expect(newComment.body.content).toBe(newContent)
     })
 
     it('should delete existing comment', async () => {
-        const comments = await request(TestApp.server).get(`/posts/${postId}/comments`)
+        const comments = await request(root.app.server).get(`/posts/${postId}/comments`)
         const initComment = comments.body.items[1] as CommentViewModel
 
-        const deleted = await request(TestApp.server).delete(`${base}/${initComment.id}`)
+        const deleted = await request(root.app.server).delete(`${base}/${initComment.id}`)
             .auth(userToken, {type: 'bearer'})
         expect(deleted.statusCode).toBe(204)
 
-        const noComment = await request(TestApp.server).get(`${base}/${initComment.id}`)
+        const noComment = await request(root.app.server).get(`${base}/${initComment.id}`)
         expect(noComment.statusCode).toBe(404)
     })
 

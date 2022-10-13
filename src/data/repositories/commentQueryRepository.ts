@@ -1,4 +1,3 @@
-import * as config from '../../config/config'
 import { Collection, FindCursor } from "mongodb"
 import BloggersMongoDb from "../bloggersMongoDb"
 import MongoCommentModel from "../models/mongoModels/mongoCommentModel"
@@ -10,8 +9,8 @@ export default class CommentQueryRepository {
     private readonly db:BloggersMongoDb
     private readonly comments:Collection<MongoCommentModel>
 
-    constructor() {
-        this.db = config.db
+    constructor(db: BloggersMongoDb) {
+        this.db = db
         this.comments = this.db.commentCollection
     }
     public async get(

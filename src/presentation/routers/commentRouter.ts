@@ -1,19 +1,21 @@
 import { Router, Request, Response } from "express"
 import CommentQueryRepository from "../../data/repositories/commentQueryRepository"
 import CommentService from "../../logic/services/commentService"
-import { bearerAuthMiddleware } from "../middlewares/authMiddleware"
+import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider"
 import { validationMiddleware } from "../middlewares/validationMiddleware"
 import { commentValidation } from "../validation/bodyValidators"
 
 export default class CommentRouter {
     public readonly router: Router
-    private readonly repo: CommentService
+    private readonly service: CommentService
     private readonly queryRepo: CommentQueryRepository
+    private authProvider: AuthMiddlewareProvider
 
-    constructor() {
+    constructor(service:CommentService,queryRepo:CommentQueryRepository,authProvider:AuthMiddlewareProvider) {
         this.router = Router()
-        this.repo = new CommentService()
-        this.queryRepo = new CommentQueryRepository()
+        this.service = service
+        this.queryRepo = queryRepo
+        this.authProvider = authProvider
         this.setRoutes()
     }
     private setRoutes() {
@@ -28,7 +30,7 @@ export default class CommentRouter {
         })
 
         this.router.put('/:id',
-        bearerAuthMiddleware,
+        this.authProvider.bearerAuthMiddleware,
         commentValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
@@ -41,12 +43,12 @@ export default class CommentRouter {
                 res.send(403)
                 return
             }
-            const updated = await this.repo.update(req.params.id, req.body.content)
+            const updated = await this.service.update(req.params.id, req.body.content)
             res.send(updated? 204 : 500)
         })
 
         this.router.delete('/:id',
-        bearerAuthMiddleware,
+        this.authProvider.bearerAuthMiddleware,
         async (req:Request,res:Response) => {
             const comment = await this.queryRepo.getById(req.params.id)
             if(!comment) {
@@ -57,7 +59,7 @@ export default class CommentRouter {
                 res.send(403)
                 return
             }
-            const deleted = await this.repo.delete(req.params.id)
+            const deleted = await this.service.delete(req.params.id)
             res.send(deleted? 204 : 500)
         })
     }

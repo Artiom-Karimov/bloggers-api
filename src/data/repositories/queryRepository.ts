@@ -1,5 +1,4 @@
 import BloggersMongoDb from "../bloggersMongoDb";
-import * as config from '../../config/config'
 import BlogPageViewModel from "../models/pageViewModels/blogPageViewModel";
 import { Collection, FindCursor } from "mongodb";
 import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
@@ -12,8 +11,8 @@ export default class QueryRepository {
     private readonly blogs:Collection<MongoBlogModel>
     private readonly posts:Collection<MongoPostModel>
 
-    constructor() {
-        this.db = config.db
+    constructor(db: BloggersMongoDb) {
+        this.db = db
         this.blogs = this.db.blogCollection
         this.posts = this.db.postCollection
     }

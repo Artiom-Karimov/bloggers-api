@@ -6,8 +6,8 @@ import {generateId} from "../utils/idGenerator";
 export default class PostService {
     private readonly repo: PostRepository
 
-    constructor() {
-        this.repo = new PostRepository()
+    constructor(repo: PostRepository) {
+        this.repo = repo
     }
     public async get(id:string): Promise<PostModel|undefined> {
         return this.repo.get(id)

@@ -6,8 +6,8 @@ import { generateId } from "../utils/idGenerator";
 export default class CommentService {
     private readonly repo: CommentRepository
 
-    constructor() {
-        this.repo = new CommentRepository()
+    constructor(repo: CommentRepository) {
+        this.repo = repo
     }
     public async get(id:string): Promise<CommentModel|undefined> {
         return this.repo.get(id)
