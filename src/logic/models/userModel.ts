@@ -20,13 +20,11 @@ export default class UserModel {
     public id: string
     public accountData: AccountData
     public emailConfirmation: EmailConfirmation 
-    public refreshTokens: string[]
 
     constructor(
         id: string,
         accountData: AccountData,
-        emailConfirmation: EmailConfirmation,
-        refreshTokens: string[] = []
+        emailConfirmation: EmailConfirmation
     ) {
         this.id = id
         this.accountData = {
@@ -41,6 +39,5 @@ export default class UserModel {
             code:emailConfirmation.code,
             codeExpiration:emailConfirmation.codeExpiration
         }
-        this.refreshTokens = [ ...refreshTokens ]
     }
 }

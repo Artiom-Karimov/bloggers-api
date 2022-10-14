@@ -8,14 +8,12 @@ import { ConfirmEmailSender } from "../../email/confirmationEmailSender"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
 import TokenCreator from "../utils/tokenCreator"
 
-export default class UserService {
-    private readonly repo: UserRepository
-    private readonly confirmSender: ConfirmEmailSender
+export default class UserService {    
 
-    constructor(repo: UserRepository, emailSender: ConfirmEmailSender) {
-        this.repo = repo
-        this.confirmSender = emailSender
-    }
+    constructor(
+        private readonly repo: UserRepository, 
+        private readonly confirmSender: ConfirmEmailSender) {}
+        
     public async get(id:string): Promise<UserModel|undefined> {
         return this.repo.get(id)
     }
@@ -83,28 +81,23 @@ export default class UserService {
             return undefined 
 
         const pair = TokenCreator.createTokenPair(user)
-        const saved = await this.repo.appendRefreshToken(user.id,pair[1])
 
-        return saved ? pair : undefined
+        return pair
     }
     public async renewTokenPair(refreshToken:string)
     : Promise<[token:string,refreshToken:string]|undefined> {
         const user = await this.getByRefreshToken(refreshToken)
         if(!user) return undefined
 
-        const removed = await this.repo.removeRefreshToken(user.id,refreshToken)
-        if(!removed) return undefined
-
         const pair = TokenCreator.createTokenPair(user)
-        const saved = await this.repo.appendRefreshToken(user.id,pair[1])
 
-        return saved ? pair : undefined
+        return pair
     }
     public async logout(refreshToken:string): Promise<boolean> {
         const user = await this.getByRefreshToken(refreshToken)
         if(!user) return false
 
-        return this.repo.removeRefreshToken(user.id,refreshToken)
+        return true
     }
     public async getLoginById(id:string): Promise<string|undefined> {
         const user = await this.get(id)
@@ -138,8 +131,6 @@ export default class UserService {
         if(!id) return undefined
 
         const user = await this.get(id)
-        if(!user) return undefined
-        if(!user.refreshTokens.includes(refreshToken)) return undefined
 
         return user
     }

@@ -4,12 +4,10 @@ import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoModels/mongoUserModel";
 
 export default class UserRepository {
-    private readonly db: BloggersMongoDb
     private readonly users: Collection<MongoUserModel>
 
     constructor(db: BloggersMongoDb) {
-        this.db = db
-        this.users = this.db.userCollection
+        this.users = db.userCollection
     }
     public async get(id:string): Promise<UserModel|undefined> {
         try {
@@ -65,26 +63,6 @@ export default class UserRepository {
             const result = await this.users.updateOne(
                 { _id: id },
                 { $set: { emailConfirmation : data } })
-            return result.modifiedCount === 1
-        } catch {
-            return false
-        }
-    }
-    public async appendRefreshToken(id:string,token:string): Promise<boolean> {
-        try {
-            const result = await this.users.updateOne(
-                {_id:id},
-                { $push: { refreshTokens: token } })
-            return result.modifiedCount === 1
-        } catch {
-            return false
-        }
-    }
-    public async removeRefreshToken(id:string,token:string): Promise<boolean> {
-        try {
-            const result = await this.users.updateOne(
-                {_id:id},
-                { $pull: { refreshTokens: token } })
             return result.modifiedCount === 1
         } catch {
             return false
