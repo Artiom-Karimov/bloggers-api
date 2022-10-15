@@ -41,7 +41,7 @@ export default class SecurityRouter {
             res.sendStatus(deleted? 204 : 401)
         })
 
-        this.router.delete('devices/:deviceId',
+        this.router.delete('/devices/:deviceId',
         refreshTokenCheckMiddleware,
         async (req:Request,res:Response) => {
             const refreshToken = req.cookies.refreshToken
