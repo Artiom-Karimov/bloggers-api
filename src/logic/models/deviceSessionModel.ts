@@ -10,6 +10,7 @@ export default class DeviceSessionModel {
         public ip:string,
         public deviceName:string,
         public issuedAt:number,
+        public expiresAt:number,
         public userId:string
     ) {}
 }

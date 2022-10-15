@@ -7,6 +7,7 @@ export default class MongoDeviceSessionModel {
     public ip: string
     public deviceName: string
     public issuedAt: number
+    public expiresAt: number
 
     constructor(model:DeviceSessionModel) {
         this._id = model.deviceId
@@ -14,6 +15,7 @@ export default class MongoDeviceSessionModel {
         this.ip = model.ip
         this.deviceName = model.deviceName
         this.issuedAt = model.issuedAt
+        this.expiresAt = model.expiresAt
     }
 
     public static getBusinessModel(mongoModel:MongoDeviceSessionModel)
@@ -23,7 +25,8 @@ export default class MongoDeviceSessionModel {
             mongoModel.ip,
             mongoModel.deviceName,
             mongoModel.issuedAt,
-            mongoModel.userId,            
+            mongoModel.expiresAt,
+            mongoModel.userId           
         )
     }
     public static getViewModel(mongoModel:MongoDeviceSessionModel)

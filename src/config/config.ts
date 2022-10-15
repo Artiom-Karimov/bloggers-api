@@ -5,9 +5,10 @@ const password:string = process.env.PASSWORD!
 const cookieMaxAge:number = Number(process.env.cookieMaxAge) || 24 * 3600
 const mongoUri:string = process.env.mongoUri || 'mongodb://0.0.0.0:27017'
 const jwt = {
-    jwtSecret:process.env.jwtSecret!,
-    jwtExpire:process.env.jwtExpire || '10s',
-    jwtRefreshExpire:process.env.jwtRefreshExpire || '20s'
+    secret:process.env.jwtSecret!,
+    expire:process.env.jwtExpire || '10s',
+    refreshExpire:process.env.jwtRefreshExpire || '20s',
+    refreshExpireMillis:process.env.jwtRefreshExpireMillis? Number(process.env.jwtRefreshExpireMillis) : 20_000
 }
 const email = {
     user:process.env.mailUser!,
