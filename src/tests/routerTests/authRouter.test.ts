@@ -12,6 +12,9 @@ describe('authRouter tests', () => {
         await request(root.app.server)
             .delete('/testing/all-data')    
     })
+    afterAll(async () => {
+        await root.stopApp()
+    })
 
     it('wrong credentials should receive 401', async () => {
         jest.setTimeout(10000)
@@ -38,7 +41,7 @@ describe('authRouter tests', () => {
             .post(`${base}/login`).send({
                 login:login,
                 password:password
-            })
+            }).set({ 'user-agent': 'poopzilla' })
         expect(result.statusCode).toBe(200)
         expect(result.body.accessToken).toBeTruthy()
     })
@@ -137,10 +140,5 @@ describe('authRouter tests', () => {
         const newCookie = helpers.parseRefreshCookie(result.get("Set-Cookie"))
         expect(newCookie).toBeTruthy()
         expect(newCookie.includes('.')).toBe(true)
-    })
-
-
-    afterAll(async () => {
-        await root.stopApp()
     })
 })

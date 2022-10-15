@@ -5,7 +5,7 @@ import UserFactory from "../utils/userFactory"
 import { ConfirmEmailSender } from "../../email/confirmationEmailSender"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
 import { LoginModelType } from "../models/loginModel"
-import DeviceSessionService from "./deviceSessionService"
+import DeviceSessionService, { DeviceSessionError } from "./deviceSessionService"
 import JwtTokenOperator from "../utils/jwtTokenOperator"
 import { RenewTokenModelType } from "../models/renewTokenModel"
 
@@ -102,7 +102,8 @@ export default class UserService {
         const user = await this.get(tokenData.userId)
         if(!user) return false
       
-        return this.deviceService.deleteDevice(tokenData)
+        const deleted = await this.deviceService.deleteDevice(refreshToken, user.id)
+        return deleted === DeviceSessionError.NoError
     }
     public async getLoginById(id:string): Promise<string|undefined> {
         const user = await this.get(id)

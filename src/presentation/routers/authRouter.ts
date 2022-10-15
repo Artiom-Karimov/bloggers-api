@@ -12,9 +12,9 @@ import * as config from '../../config/config'
 
 export default class AuthRouter {
     public readonly router: Router
-    private service: UserService
-    private queryRepo: UserQueryRepository
-    private authProvider: AuthMiddlewareProvider
+    private readonly service: UserService
+    private readonly queryRepo: UserQueryRepository
+    private readonly authProvider: AuthMiddlewareProvider
 
     constructor(service:UserService,queryRepo:UserQueryRepository,authProvider:AuthMiddlewareProvider) {
         this.router = Router()

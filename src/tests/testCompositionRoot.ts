@@ -65,6 +65,10 @@ const initDb = async () => {
     db = new BloggersMongoDb(mongoServ.getUri())
     await db.connect()
 }
+// const initDb = async () => {
+//     db = new BloggersMongoDb('mongodb://0.0.0.0:27017')
+//     await db.connect()
+// }
 const initRepos = async () => {
     if(!db) await initDb()
     blogRepository = new BlogRepository(db)

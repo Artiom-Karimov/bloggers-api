@@ -46,5 +46,6 @@ export default class BloggersMongoDb {
         await this.postCollection.deleteMany({})
         await this.userCollection.deleteMany({})
         await this.commentCollection.deleteMany({})
+        await this.deviceSessionCollection.deleteMany({})
     } 
 }
