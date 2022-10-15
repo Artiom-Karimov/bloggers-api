@@ -45,7 +45,7 @@ export default class AuthRouter {
                 email: req.body.email,
                 password: req.body.password
             })
-            res.send(created? 204 : 400)
+            res.sendStatus(created? 204 : 400)
         })
 
         this.router.post('/registration-email-resending',
@@ -54,7 +54,7 @@ export default class AuthRouter {
         async (req:Request,res:Response) => {
             const success = await this.service.resendConfirmationEmail(req.body.email)
             if(success) {
-                res.send(204)
+                res.sendStatus(204)
                 return
             }
             res.status(400).send(new APIErrorResult([ 
@@ -69,7 +69,7 @@ export default class AuthRouter {
             const user = req.query.user as string
             const code = req.query.code as string
             const confirmed = await this.service.confirmRegistration(user,code)
-            res.send(confirmed ? 204 : 400)
+            res.sendStatus(confirmed ? 204 : 400)
         })
 
         this.router.post('/registration-confirmation',
@@ -78,7 +78,7 @@ export default class AuthRouter {
         async (req:Request,res:Response) => {
             const confirmed = await this.service.confirmRegitrationByCodeOnly(req.body.code)
             if(confirmed) {
-                res.send(204)
+                res.sendStatus(204)
                 return
             }
 
@@ -90,9 +90,14 @@ export default class AuthRouter {
         this.router.post('/login',
         loginCheckMiddleware,
         async (req:Request,res:Response) => {          
-            const tokenPair = await this.service.login(req.body.login,req.body.password)
+            const tokenPair = await this.service.login({
+                login: req.body.login,
+                password: req.body.password,
+                ip: req.ip,
+                deviceName: req.headers["user-agent"] || ''
+            })
             if(!tokenPair) {
-                res.send(401)
+                res.sendStatus(401)
                 return
             }
             res.cookie(
@@ -107,9 +112,13 @@ export default class AuthRouter {
         refreshTokenCheckMiddleware,
         async (req:Request,res:Response) => {
             const refreshToken = req.cookies.refreshToken
-            const newPair = await this.service.renewTokenPair(refreshToken)
+            const newPair = await this.service.renewTokenPair({
+                refreshToken:refreshToken,
+                ip: req.ip,
+                deviceName: req.headers["user-agent"] || ''
+            })
             if(!newPair) {
-                res.send(401)
+                res.sendStatus(401)
                 return
             }
             res.cookie(
@@ -124,7 +133,7 @@ export default class AuthRouter {
         async (req:Request,res:Response) => {
             const refreshToken = req.cookies.refreshToken
             const success = await this.service.logout(refreshToken)
-            res.send(success? 204 : 401)
+            res.sendStatus(success? 204 : 401)
         })
         
         this.router.get('/me', 

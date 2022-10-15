@@ -6,15 +6,13 @@ export default class MongoDeviceSessionModel {
     public userId: string
     public ip: string
     public deviceName: string
-    public deviceId: string
     public issuedAt: number
 
     constructor(model:DeviceSessionModel) {
-        this._id = model.id
+        this._id = model.deviceId
         this.userId = model.userId
         this.ip = model.ip
         this.deviceName = model.deviceName
-        this.deviceId = model.deviceId
         this.issuedAt = model.issuedAt
     }
 
@@ -25,8 +23,7 @@ export default class MongoDeviceSessionModel {
             mongoModel.ip,
             mongoModel.deviceName,
             mongoModel.issuedAt,
-            mongoModel.userId,
-            mongoModel.deviceId
+            mongoModel.userId,            
         )
     }
     public static getViewModel(mongoModel:MongoDeviceSessionModel)
@@ -35,7 +32,7 @@ export default class MongoDeviceSessionModel {
             mongoModel.ip,
             mongoModel.deviceName,
             new Date(mongoModel.issuedAt).toISOString(),
-            mongoModel.deviceId
+            mongoModel._id
         )
     }
 }

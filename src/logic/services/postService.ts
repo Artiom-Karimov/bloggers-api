@@ -1,7 +1,7 @@
 import PostRepository from "../../data/repositories/postRepository";
 import PostModel, { PostInputModel } from "../models/postModel";
 import DateGenerator from "../utils/dateGenerator";
-import {generateId} from "../utils/idGenerator";
+import IdGenerator from "../utils/idGenerator";
 
 export default class PostService {
     private readonly repo: PostRepository
@@ -14,7 +14,7 @@ export default class PostService {
     }
     public async create(data:PostInputModel): Promise<PostModel|undefined> {
         const newBlog = new PostModel(
-            generateId(), 
+            IdGenerator.generate(), 
             data, 
             DateGenerator.generate())
         return this.repo.create(newBlog)

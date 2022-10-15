@@ -3,6 +3,7 @@ import BloggersMongoDb from "./data/bloggersMongoDb"
 import BlogRepository from './data/repositories/blogRepository'
 import CommentQueryRepository from './data/repositories/commentQueryRepository'
 import CommentRepository from './data/repositories/commentRepository'
+import DeviceSessionRepository from './data/repositories/deviceSessionRepository'
 import PostRepository from './data/repositories/postRepository'
 import QueryRepository from './data/repositories/queryRepository'
 import UserQueryRepository from './data/repositories/userQueryRepository'
@@ -10,6 +11,7 @@ import UserRepository from './data/repositories/userRepository'
 import ConfirmationEmailSender from './email/confirmationEmailSender'
 import BlogService from './logic/services/blogService'
 import CommentService from './logic/services/commentService'
+import DeviceSessionService from './logic/services/deviceSessionService'
 import PostService from './logic/services/postService'
 import UserService from './logic/services/userService'
 import BloggersApp from './presentation/bloggersApp'
@@ -29,12 +31,14 @@ const commentRepository = new CommentRepository(db)
 const queryRepository = new QueryRepository(db)
 const userQueryRepository = new UserQueryRepository(db)
 const commentQueryRepository = new CommentQueryRepository(db)
+const deviceSessionRepository = new DeviceSessionRepository(db)
 
 const confirmationEmailSender = new ConfirmationEmailSender()
 
 const blogService = new BlogService(blogRepository)
 const postService = new PostService(postRepository)
-const userService = new UserService(userRepository, confirmationEmailSender)
+const deviceService = new DeviceSessionService(deviceSessionRepository)
+const userService = new UserService(userRepository, confirmationEmailSender, deviceService)
 const commentService = new CommentService(commentRepository)
 
 const authProvider = new AuthMiddlewareProvider(userService)

@@ -1,6 +1,6 @@
 import BlogModel, { BlogInputModel } from "../models/blogModel";
 import BlogRepository from "../../data/repositories/blogRepository";
-import { generateId } from "../utils/idGenerator";
+import IdGenerator from "../utils/idGenerator";
 import DateGenerator from "../utils/dateGenerator";
 
 export default class BlogService {
@@ -14,7 +14,7 @@ export default class BlogService {
     }
     public async create(data:BlogInputModel): Promise<BlogModel|undefined> {
         const newBlog = new BlogModel(
-            generateId(), 
+            IdGenerator.generate(), 
             data, 
             DateGenerator.generate())
         return this.repo.create(newBlog)

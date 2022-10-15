@@ -34,6 +34,8 @@ export default class BloggersApp {
 
         app.use(bodyParser.json())
         app.use(cookieParser())
+        app.set('trust proxy', true)
+        
         if(params.blogRouter) app.use('/blogs', params.blogRouter.router)
         if(params.postRouter) app.use('/posts', params.postRouter.router)
         if(params.userRouter) app.use('/users', params.userRouter.router)

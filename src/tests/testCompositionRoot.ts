@@ -20,6 +20,8 @@ import PostRouter from '../presentation/routers/postRouter'
 import UserRouter from '../presentation/routers/userRouter'
 import BloggersApp from '../presentation/bloggersApp'
 import AuthMiddlewareProvider from '../presentation/middlewares/authMiddlewareProvider'
+import DeviceSessionRepository from '../data/repositories/deviceSessionRepository'
+import DeviceSessionService from '../logic/services/deviceSessionService'
 
 const login = config.userName
 const password = config.password
@@ -34,6 +36,7 @@ let commentRepository: CommentRepository
 let queryRepository: QueryRepository
 let userQueryRepository: UserQueryRepository
 let commentQueryRepository: CommentQueryRepository
+let deviceSessionRepository: DeviceSessionRepository
 
 const fakeConfirmEmailSender: ConfirmEmailSender = {
     send(login:string,email:string,code:string): Promise<boolean> {
@@ -43,6 +46,7 @@ const fakeConfirmEmailSender: ConfirmEmailSender = {
 
 let blogService: BlogService
 let postService: PostService
+let deviceService: DeviceSessionService
 let userService: UserService
 let commentService: CommentService
 
@@ -70,12 +74,14 @@ const initRepos = async () => {
     queryRepository = new QueryRepository(db)
     userQueryRepository = new UserQueryRepository(db)
     commentQueryRepository = new CommentQueryRepository(db)
+    deviceSessionRepository = new DeviceSessionRepository(db)
 }
 const initServices = async () => {
     if(!blogRepository) await initRepos()
     blogService = new BlogService(blogRepository)
     postService = new PostService(postRepository)
-    userService = new UserService(userRepository,fakeConfirmEmailSender)
+    deviceService = new DeviceSessionService(deviceSessionRepository)
+    userService = new UserService(userRepository,fakeConfirmEmailSender,deviceService)
     commentService = new CommentService(commentRepository)
 }
 const initRouters = async () => {

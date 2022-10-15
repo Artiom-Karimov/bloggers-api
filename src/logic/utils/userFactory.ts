@@ -2,13 +2,13 @@ import UserModel, { AccountData, UserInputModel } from "../models/userModel";
 import DateGenerator from "./dateGenerator";
 import EmailConfirmationFactory from "./emailConfirmationFactory";
 import Hasher from "./hasher";
-import { generateId } from "./idGenerator";
+import IdGenerator from "./idGenerator";
 
 export default class UserFactory {
     public static async create(data:UserInputModel): Promise<UserModel> {
         const accountData = await UserFactory.getAccountData(data)
         return new UserModel(
-            generateId(), 
+            IdGenerator.generate(), 
             accountData,
             EmailConfirmationFactory.getNew()
         )
@@ -16,7 +16,7 @@ export default class UserFactory {
     public static async createConfirmed(data:UserInputModel): Promise<UserModel> {
         const accountData = await UserFactory.getAccountData(data)
         return new UserModel(
-            generateId(), 
+            IdGenerator.generate(), 
             accountData,
             EmailConfirmationFactory.getConfirmed()
         )

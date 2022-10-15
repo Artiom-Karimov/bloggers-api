@@ -1,7 +1,7 @@
 import CommentRepository from "../../data/repositories/commentRepository";
 import CommentModel, { CommentCreateModel } from "../models/commentModel";
 import DateGenerator from "../utils/dateGenerator";
-import { generateId } from "../utils/idGenerator";
+import IdGenerator from "../utils/idGenerator";
 
 export default class CommentService {
     private readonly repo: CommentRepository
@@ -14,7 +14,7 @@ export default class CommentService {
     }
     public async create(data:CommentCreateModel):Promise<string|undefined> {
         const newComment = new CommentModel(
-            generateId(),
+            IdGenerator.generate(),
             data,
             DateGenerator.generate()
         )

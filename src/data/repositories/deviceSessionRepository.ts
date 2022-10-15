@@ -9,6 +9,14 @@ export default class DeviceSessionRepository {
     constructor(db:BloggersMongoDb) {
         this.sessions = db.deviceSessionCollection
     }
+    public async get(id:string): Promise<DeviceSessionModel|undefined> {
+        try {
+            const result = await this.sessions.findOne({_id:id})
+            return result ? MongoDeviceSessionModel.getBusinessModel(result) : undefined
+        } catch {
+            return undefined
+        }
+    }
     public async getByUser(id:string): Promise<Array<DeviceSessionModel>> {
         const result = await this.sessions.find({userId:id}).toArray()
         if(!result) return []
@@ -19,6 +27,18 @@ export default class DeviceSessionRepository {
         try {
             const result = await this.sessions.insertOne(model)
             return !!result.insertedId
+        } catch {
+            return false
+        }
+    }
+    public async update(data:DeviceSessionModel): Promise<boolean> {
+        const model = new MongoDeviceSessionModel(data)
+        try {
+            const result = await this.sessions.updateOne(
+                {_id:model._id},
+                { $set: { ip:model.ip,issuedAt:model.issuedAt,deviceName:model.deviceName } })
+
+            return result.modifiedCount === 1
         } catch {
             return false
         }

@@ -1,18 +1,20 @@
 import UserRepository from "../../data/repositories/userRepository"
 import UserModel, { UserInputModel } from "../models/userModel"
 import Hasher from "../utils/hasher"
-import jwt from 'jsonwebtoken'
-import { jwt as config } from '../../config/config'
 import UserFactory from "../utils/userFactory"
 import { ConfirmEmailSender } from "../../email/confirmationEmailSender"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
-import TokenCreator from "../utils/tokenCreator"
+import { LoginModelType } from "../models/loginModel"
+import DeviceSessionService from "./deviceSessionService"
+import JwtTokenOperator from "../utils/jwtTokenOperator"
+import { RenewTokenModelType } from "../models/renewTokenModel"
 
 export default class UserService {    
 
     constructor(
         private readonly repo: UserRepository, 
-        private readonly confirmSender: ConfirmEmailSender) {}
+        private readonly confirmSender: ConfirmEmailSender,
+        private readonly deviceService: DeviceSessionService) {}
         
     public async get(id:string): Promise<UserModel|undefined> {
         return this.repo.get(id)
@@ -73,31 +75,34 @@ export default class UserService {
 
         return this.repo.updateEmailConfirmation(user.id, EmailConfirmationFactory.getConfirmed())
     }
-    public async login(login: string, password: string)
+    public async login(data:LoginModelType)
     : Promise<[token:string,refreshToken:string]|undefined> {
-        const user = await this.getByLogin(login)
+        const user = await this.getByLogin(data.login)
         if(!user) return undefined
-        if(!await this.allowUserLogin(user,login,password))
+        if(!await this.checkPassword(user,data.password))
             return undefined 
-
-        const pair = TokenCreator.createTokenPair(user)
-
-        return pair
+        
+        return this.deviceService.createDevice({
+            ip:data.ip, deviceName:data.deviceName, userId:user.id})
     }
-    public async renewTokenPair(refreshToken:string)
+    public async renewTokenPair(data:RenewTokenModelType)
     : Promise<[token:string,refreshToken:string]|undefined> {
-        const user = await this.getByRefreshToken(refreshToken)
+        const tokenData = JwtTokenOperator.unpackRefreshToken(data.refreshToken)
+        if(!tokenData) return undefined
+        const user = await this.get(tokenData.userId)
         if(!user) return undefined
 
-        const pair = TokenCreator.createTokenPair(user)
-
-        return pair
+        return this.deviceService.updateDevice(
+            tokenData, 
+            { ip:data.ip, deviceName:data.deviceName, userId:user.id })
     }
     public async logout(refreshToken:string): Promise<boolean> {
-        const user = await this.getByRefreshToken(refreshToken)
+        const tokenData = JwtTokenOperator.unpackRefreshToken(refreshToken)
+        if(!tokenData) return false
+        const user = await this.get(tokenData.userId)
         if(!user) return false
-
-        return true
+      
+        return this.deviceService.deleteDevice(tokenData)
     }
     public async getLoginById(id:string): Promise<string|undefined> {
         const user = await this.get(id)
@@ -114,24 +119,8 @@ export default class UserService {
         const user = await this.getByEmail(email)
         return user !== undefined
     }
-    public async verifyTokenGetId(token:string): Promise<string|undefined> {
-        try {
-            const result: any = jwt.verify(token,config.jwtSecret)
-            return result.userId
-        } catch {
-            return undefined
-        }
-    }
-    private async allowUserLogin(user:UserModel,login:string,password:string): Promise<boolean> {
+    private async checkPassword(user:UserModel,password:string): Promise<boolean> {
         if(!user.emailConfirmation.confirmed) return false
         return Hasher.check(password,user.accountData.passwordHash,user.accountData.salt)
-    }
-    private async getByRefreshToken(refreshToken:string): Promise<UserModel|undefined> {
-        const id = await this.verifyTokenGetId(refreshToken)
-        if(!id) return undefined
-
-        const user = await this.get(id)
-
-        return user
     }
 }

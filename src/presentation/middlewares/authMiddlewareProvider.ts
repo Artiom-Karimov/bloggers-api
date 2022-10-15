@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as config from '../../config/config'
 import UserService from "../../logic/services/userService";
+import JwtTokenOperator from "../../logic/utils/jwtTokenOperator";
 
 export default class AuthMiddlewareProvider {
     private readonly basicValue: string
@@ -29,7 +30,7 @@ export default class AuthMiddlewareProvider {
     
         if(authHeader[0] === 'Bearer') { 
             try {
-                const authorizedId = await this.userService.verifyTokenGetId(authHeader[1])
+                const authorizedId = JwtTokenOperator.unpackToken(authHeader[1])
                 if(authorizedId) {
                     req.headers.userId = authorizedId
                     req.headers.userLogin = await this.userService.getLoginById(authorizedId)
