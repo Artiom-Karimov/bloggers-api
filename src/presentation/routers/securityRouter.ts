@@ -5,7 +5,7 @@ import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { refreshTokenCheckMiddleware } from "../middlewares/refreshTokenCheckMiddleware";
 
 export default class SecurityRouter {
-    private readonly router: Router
+    public readonly router: Router
     private readonly service: DeviceSessionService 
     private readonly queryRepo: DeviceSessionQueryRepository
     private readonly authProvider: AuthMiddlewareProvider

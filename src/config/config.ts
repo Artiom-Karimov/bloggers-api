@@ -17,6 +17,10 @@ const email = {
     confirmExpirationMinutes: Number(process.env.mailExpireMinutes!),
     linkBase:baseUrl
 }
+const userAuth = {
+    loginAttempts:process.env.userLoginAttempts ? Number(process.env.userLoginAttempts ) : 5,
+    loginAttemptsTime:process.env.userLoginTime ? Number(process.env.userLoginTime) : 10_000
+}
 
 export {
     port,
@@ -25,6 +29,7 @@ export {
     password,
     mongoUri,
     jwt,
+    userAuth,
     email,
     cookieMaxAge
 }

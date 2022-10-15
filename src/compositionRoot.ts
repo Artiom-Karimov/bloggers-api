@@ -3,12 +3,15 @@ import BloggersMongoDb from "./data/bloggersMongoDb"
 import BlogRepository from './data/repositories/blogRepository'
 import CommentQueryRepository from './data/repositories/commentQueryRepository'
 import CommentRepository from './data/repositories/commentRepository'
+import DeviceSessionQueryRepository from './data/repositories/deviceSessionQueryRepository'
 import DeviceSessionRepository from './data/repositories/deviceSessionRepository'
+import LoginAttemptRepository from './data/repositories/loginAttemptRepository'
 import PostRepository from './data/repositories/postRepository'
 import QueryRepository from './data/repositories/queryRepository'
 import UserQueryRepository from './data/repositories/userQueryRepository'
 import UserRepository from './data/repositories/userRepository'
 import ConfirmationEmailSender from './email/confirmationEmailSender'
+import AuthService from './logic/services/authService'
 import BlogService from './logic/services/blogService'
 import CommentService from './logic/services/commentService'
 import DeviceSessionService from './logic/services/deviceSessionService'
@@ -20,6 +23,7 @@ import AuthRouter from './presentation/routers/authRouter'
 import BlogRouter from './presentation/routers/blogRouter'
 import CommentRouter from './presentation/routers/commentRouter'
 import PostRouter from './presentation/routers/postRouter'
+import SecurityRouter from './presentation/routers/securityRouter'
 import UserRouter from './presentation/routers/userRouter'
 
 const db = new BloggersMongoDb(config.mongoUri)
@@ -32,22 +36,26 @@ const queryRepository = new QueryRepository(db)
 const userQueryRepository = new UserQueryRepository(db)
 const commentQueryRepository = new CommentQueryRepository(db)
 const deviceSessionRepository = new DeviceSessionRepository(db)
+const deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)
+const loginAttemptRepository = new LoginAttemptRepository(db)
 
 const confirmationEmailSender = new ConfirmationEmailSender()
 
 const blogService = new BlogService(blogRepository)
 const postService = new PostService(postRepository)
 const deviceService = new DeviceSessionService(deviceSessionRepository)
-const userService = new UserService(userRepository, confirmationEmailSender, deviceService)
+const userService = new UserService(userRepository, confirmationEmailSender)
+const authService = new AuthService(userService,deviceService,loginAttemptRepository)
 const commentService = new CommentService(commentRepository)
 
 const authProvider = new AuthMiddlewareProvider(userService)
 
-const authRouter = new AuthRouter(userService,userQueryRepository,authProvider)
+const authRouter = new AuthRouter(authService,userService,userQueryRepository,authProvider)
 const blogRouter = new BlogRouter(blogService,postService,queryRepository,authProvider)
 const commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
 const postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)
 const userRouter = new UserRouter(userService,userQueryRepository,authProvider)
+const securityRouter = new SecurityRouter(deviceService,deviceSessionQueryRepository,authProvider)
 
 const app = new BloggersApp({
     db:db,
@@ -55,7 +63,8 @@ const app = new BloggersApp({
     blogRouter:blogRouter,
     commentRouter:commentRouter,
     postRouter:postRouter,
-    userRouter:userRouter
+    userRouter:userRouter,
+    securityRouter:securityRouter
 })
 
 export {

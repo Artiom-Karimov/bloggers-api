@@ -22,6 +22,8 @@ import BloggersApp from '../presentation/bloggersApp'
 import AuthMiddlewareProvider from '../presentation/middlewares/authMiddlewareProvider'
 import DeviceSessionRepository from '../data/repositories/deviceSessionRepository'
 import DeviceSessionService from '../logic/services/deviceSessionService'
+import AuthService from '../logic/services/authService'
+import LoginAttemptRepository from '../data/repositories/loginAttemptRepository'
 
 const login = config.userName
 const password = config.password
@@ -37,6 +39,7 @@ let queryRepository: QueryRepository
 let userQueryRepository: UserQueryRepository
 let commentQueryRepository: CommentQueryRepository
 let deviceSessionRepository: DeviceSessionRepository
+let loginAttemptRepository: LoginAttemptRepository
 
 const fakeConfirmEmailSender: ConfirmEmailSender = {
     send(login:string,email:string,code:string): Promise<boolean> {
@@ -49,6 +52,7 @@ let postService: PostService
 let deviceService: DeviceSessionService
 let userService: UserService
 let commentService: CommentService
+let authService: AuthService
 
 let authProvider: AuthMiddlewareProvider
 
@@ -79,19 +83,21 @@ const initRepos = async () => {
     userQueryRepository = new UserQueryRepository(db)
     commentQueryRepository = new CommentQueryRepository(db)
     deviceSessionRepository = new DeviceSessionRepository(db)
+    loginAttemptRepository = new LoginAttemptRepository(db)
 }
 const initServices = async () => {
     if(!blogRepository) await initRepos()
     blogService = new BlogService(blogRepository)
     postService = new PostService(postRepository)
     deviceService = new DeviceSessionService(deviceSessionRepository)
-    userService = new UserService(userRepository,fakeConfirmEmailSender,deviceService)
+    userService = new UserService(userRepository,fakeConfirmEmailSender)
     commentService = new CommentService(commentRepository)
+    authService = new AuthService(userService,deviceService,loginAttemptRepository)
 }
 const initRouters = async () => {
     if(!blogService) await initServices()
     authProvider = new AuthMiddlewareProvider(userService)
-    authRouter = new AuthRouter(userService,userQueryRepository,authProvider)
+    authRouter = new AuthRouter(authService,userService,userQueryRepository,authProvider)
     blogRouter = new BlogRouter(blogService,postService,queryRepository,authProvider)
     commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
     postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)

@@ -9,38 +9,37 @@ import { APIErrorResult } from "../validation/apiErrorResultFormatter";
 import { refreshTokenCheckMiddleware } from "../middlewares/refreshTokenCheckMiddleware";
 import { loginCheckMiddleware } from "../middlewares/loginCheckMiddleware";
 import * as config from '../../config/config'
+import AuthService from "../../logic/services/authService";
 
 export default class AuthRouter {
     public readonly router: Router
-    private readonly service: UserService
-    private readonly queryRepo: UserQueryRepository
-    private readonly authProvider: AuthMiddlewareProvider
 
-    constructor(service:UserService,queryRepo:UserQueryRepository,authProvider:AuthMiddlewareProvider) {
-        this.router = Router()
-        this.service = service
-        this.queryRepo = queryRepo
-        this.authProvider = authProvider
-        this.setRoutes()
+    constructor(
+        private readonly authService:AuthService,
+        private readonly userService:UserService,
+        private readonly queryRepo:UserQueryRepository,
+        private readonly authProvider:AuthMiddlewareProvider) {
+            this.router = Router()
+            this.setRoutes()
     }
     private setRoutes() {
         this.router.post('/registration',
         userValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-            if(await this.service.loginExists(req.body.login)) {
+            if(await this.userService.loginExists(req.body.login)) {
                 res.status(400).send(new APIErrorResult([ 
                     { field: 'login', message: 'login already exists' } 
                 ]))
                 return
             }
-            if(await this.service.emailExists(req.body.email)) {
+            if(await this.userService.emailExists(req.body.email)) {
                 res.status(400).send(new APIErrorResult([ 
                     { field: 'email', message: 'email already exists' } 
                 ]))
                 return
             }
-            const created = await this.service.create({
+            const created = await this.userService.create({
                 login: req.body.login,
                 email: req.body.email,
                 password: req.body.password
@@ -52,7 +51,7 @@ export default class AuthRouter {
         emailValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-            const success = await this.service.resendConfirmationEmail(req.body.email)
+            const success = await this.userService.resendConfirmationEmail(req.body.email)
             if(success) {
                 res.sendStatus(204)
                 return
@@ -68,7 +67,7 @@ export default class AuthRouter {
         async (req:Request,res:Response) => {
             const user = req.query.user as string
             const code = req.query.code as string
-            const confirmed = await this.service.confirmRegistration(user,code)
+            const confirmed = await this.userService.confirmRegistration(user,code)
             res.sendStatus(confirmed ? 204 : 400)
         })
 
@@ -76,7 +75,7 @@ export default class AuthRouter {
         confirmCodeValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-            const confirmed = await this.service.confirmRegitrationByCodeOnly(req.body.code)
+            const confirmed = await this.userService.confirmRegitrationByCodeOnly(req.body.code)
             if(confirmed) {
                 res.sendStatus(204)
                 return
@@ -89,22 +88,26 @@ export default class AuthRouter {
 
         this.router.post('/login',
         loginCheckMiddleware,
-        async (req:Request,res:Response) => {          
-            const tokenPair = await this.service.login({
+        async (req:Request,res:Response) => {     
+            if(await this.authService.loginAttemptsLimit(req.ip)) {
+                res.sendStatus(429)
+                return
+            }     
+            const result = await this.authService.login({
                 login: req.body.login,
                 password: req.body.password,
                 ip: req.ip,
                 deviceName: req.headers["user-agent"] || ''
             })
-            if(!tokenPair) {
+            if(!result) {
                 res.sendStatus(401)
                 return
             }
             res.cookie(
                 'refreshToken', 
-                tokenPair[1], 
+                result[1], 
                 this.getCookieSettings())            
-            res.status(200).send({ accessToken: tokenPair[0] })
+            res.status(200).send({ accessToken: result[0] })
             return
         })
 
@@ -112,7 +115,7 @@ export default class AuthRouter {
         refreshTokenCheckMiddleware,
         async (req:Request,res:Response) => {
             const refreshToken = req.cookies.refreshToken
-            const newPair = await this.service.renewTokenPair({
+            const newPair = await this.authService.renewTokenPair({
                 refreshToken:refreshToken,
                 ip: req.ip,
                 deviceName: req.headers["user-agent"] || ''
@@ -132,7 +135,7 @@ export default class AuthRouter {
         refreshTokenCheckMiddleware,
         async (req:Request,res:Response) => {
             const refreshToken = req.cookies.refreshToken
-            const success = await this.service.logout(refreshToken)
+            const success = await this.authService.logout(refreshToken)
             res.sendStatus(success? 204 : 401)
         })
         

@@ -1,20 +1,14 @@
 import UserRepository from "../../data/repositories/userRepository"
 import UserModel, { UserInputModel } from "../models/userModel"
-import Hasher from "../utils/hasher"
 import UserFactory from "../utils/userFactory"
 import { ConfirmEmailSender } from "../../email/confirmationEmailSender"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
-import { LoginModelType } from "../models/loginModel"
-import DeviceSessionService, { DeviceSessionError } from "./deviceSessionService"
-import JwtTokenOperator from "../utils/jwtTokenOperator"
-import { RenewTokenModelType } from "../models/renewTokenModel"
 
 export default class UserService {    
 
     constructor(
         private readonly repo: UserRepository, 
-        private readonly confirmSender: ConfirmEmailSender,
-        private readonly deviceService: DeviceSessionService) {}
+        private readonly confirmSender: ConfirmEmailSender) {}
         
     public async get(id:string): Promise<UserModel|undefined> {
         return this.repo.get(id)
@@ -75,36 +69,6 @@ export default class UserService {
 
         return this.repo.updateEmailConfirmation(user.id, EmailConfirmationFactory.getConfirmed())
     }
-    public async login(data:LoginModelType)
-    : Promise<[token:string,refreshToken:string]|undefined> {
-        const user = await this.getByLogin(data.login)
-        if(!user) return undefined
-        if(!await this.checkPassword(user,data.password))
-            return undefined 
-        
-        return this.deviceService.createDevice({
-            ip:data.ip, deviceName:data.deviceName, userId:user.id})
-    }
-    public async renewTokenPair(data:RenewTokenModelType)
-    : Promise<[token:string,refreshToken:string]|undefined> {
-        const tokenData = JwtTokenOperator.unpackRefreshToken(data.refreshToken)
-        if(!tokenData) return undefined
-        const user = await this.get(tokenData.userId)
-        if(!user) return undefined
-
-        return this.deviceService.updateDevice(
-            tokenData, 
-            { ip:data.ip, deviceName:data.deviceName, userId:user.id })
-    }
-    public async logout(refreshToken:string): Promise<boolean> {
-        const tokenData = JwtTokenOperator.unpackRefreshToken(refreshToken)
-        if(!tokenData) return false
-        const user = await this.get(tokenData.userId)
-        if(!user) return false
-      
-        const deleted = await this.deviceService.deleteDevice(refreshToken, user.id)
-        return deleted === DeviceSessionError.NoError
-    }
     public async getLoginById(id:string): Promise<string|undefined> {
         const user = await this.get(id)
         return user? user.accountData.login : undefined
@@ -119,9 +83,5 @@ export default class UserService {
     public async emailExists(email:string): Promise<boolean> {
         const user = await this.getByEmail(email)
         return user !== undefined
-    }
-    private async checkPassword(user:UserModel,password:string): Promise<boolean> {
-        if(!user.emailConfirmation.confirmed) return false
-        return Hasher.check(password,user.accountData.passwordHash,user.accountData.salt)
     }
 }
