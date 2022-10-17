@@ -24,6 +24,8 @@ import DeviceSessionRepository from '../data/repositories/deviceSessionRepositor
 import DeviceSessionService from '../logic/services/deviceSessionService'
 import AuthService from '../logic/services/authService'
 import LoginAttemptRepository from '../data/repositories/clientActionRepository'
+import SecurityRouter from '../presentation/routers/securityRouter'
+import DeviceSessionQueryRepository from '../data/repositories/deviceSessionQueryRepository'
 
 const login = config.userName
 const password = config.password
@@ -40,6 +42,7 @@ let userQueryRepository: UserQueryRepository
 let commentQueryRepository: CommentQueryRepository
 let deviceSessionRepository: DeviceSessionRepository
 let loginAttemptRepository: LoginAttemptRepository
+let deviceSessionQueryRepository: DeviceSessionQueryRepository
 
 const fakeConfirmEmailSender: ConfirmEmailSender = {
     send(login:string,email:string,code:string): Promise<boolean> {
@@ -61,6 +64,7 @@ let blogRouter: BlogRouter
 let commentRouter: CommentRouter
 let postRouter: PostRouter
 let userRouter: UserRouter
+let securityRouter: SecurityRouter
 
 let app: BloggersApp
 
@@ -84,6 +88,7 @@ const initRepos = async () => {
     commentQueryRepository = new CommentQueryRepository(db)
     deviceSessionRepository = new DeviceSessionRepository(db)
     loginAttemptRepository = new LoginAttemptRepository(db)
+    deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)
 }
 const initServices = async () => {
     if(!blogRepository) await initRepos()
@@ -102,6 +107,7 @@ const initRouters = async () => {
     commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
     postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)
     userRouter = new UserRouter(userService,userQueryRepository,authProvider)
+    securityRouter = new SecurityRouter(deviceService,deviceSessionQueryRepository,authProvider)
 }
 
 const initApp = async () => {
@@ -112,7 +118,8 @@ const initApp = async () => {
         postRouter,
         userRouter,
         authRouter,
-        commentRouter
+        commentRouter,
+        securityRouter
     })
 }
 const stopDb = async () => {

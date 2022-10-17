@@ -160,7 +160,7 @@ export default class AuthService {
         const user = await this.userService.get(tokenData.userId)
         if(!user) return false
       
-        const deleted = await this.sessionService.deleteDevice(refreshToken, user.id)
+        const deleted = await this.sessionService.deleteDevice(refreshToken,tokenData.deviceId)
         return deleted === DeviceSessionError.NoError
     }
     public async clientActionLimit(ip:string): Promise<boolean> {
