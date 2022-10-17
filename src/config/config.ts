@@ -18,8 +18,10 @@ const email = {
     linkBase:baseUrl
 }
 const userAuth = {
-    loginAttempts:process.env.userLoginAttempts ? Number(process.env.userLoginAttempts ) : 5,
-    loginAttemptsTime:process.env.userLoginTime ? Number(process.env.userLoginTime) : 10_000
+    actionLimit:
+        process.env.clientActionLimit ? Number(process.env.clientActionLimit ) : 5,
+    actionLimitTime:
+        process.env.clientActionLimitTime ? Number(process.env.clientActionLimitTime) : 10_000
 }
 
 export {

@@ -1,5 +1,4 @@
 import { Router, Request, Response } from "express";
-import UserService from "../../logic/services/userService";
 import UserQueryRepository from '../../data/repositories/userQueryRepository'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { confirmCodeValidation, emailValidation, userValidation } from "../validation/bodyValidators";
@@ -10,13 +9,14 @@ import { refreshTokenCheckMiddleware } from "../middlewares/refreshTokenCheckMid
 import { loginCheckMiddleware } from "../middlewares/loginCheckMiddleware";
 import * as config from '../../config/config'
 import AuthService from "../../logic/services/authService";
+import { AuthError } from "../../logic/models/authError";
+import TokenPair from "../../logic/models/tokenPair";
 
 export default class AuthRouter {
     public readonly router: Router
 
     constructor(
         private readonly authService:AuthService,
-        private readonly userService:UserService,
         private readonly queryRepo:UserQueryRepository,
         private readonly authProvider:AuthMiddlewareProvider) {
             this.router = Router()
@@ -27,108 +27,141 @@ export default class AuthRouter {
         userValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-            if(await this.userService.loginExists(req.body.login)) {
-                res.status(400).send(new APIErrorResult([ 
-                    { field: 'login', message: 'login already exists' } 
-                ]))
-                return
-            }
-            if(await this.userService.emailExists(req.body.email)) {
-                res.status(400).send(new APIErrorResult([ 
-                    { field: 'email', message: 'email already exists' } 
-                ]))
-                return
-            }
-            const created = await this.userService.create({
-                login: req.body.login,
-                email: req.body.email,
-                password: req.body.password
+            const result = await this.authService.register({
+                login:req.body.login,
+                email:req.body.email,
+                password:req.body.password,
+                ip:req.ip,
+                deviceName:req.headers["user-agent"] || ''
             })
-            res.sendStatus(created? 204 : 400)
+            switch(result) {
+                case AuthError.NoError : res.sendStatus(204); break;
+                case AuthError.ActionLimit : res.sendStatus(429); break;
+                case AuthError.LoginExists : {
+                    res.status(400).send(new APIErrorResult([ 
+                        { field: 'login', message: 'login already exists' }]))
+                    break;
+                }
+                case AuthError.EmailExists : {
+                    res.status(400).send(new APIErrorResult([ 
+                        { field: 'email', message: 'email already exists' }]))
+                    break;
+                }
+                default: res.sendStatus(400)
+            }
         })
 
         this.router.post('/registration-email-resending',
         emailValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-            const success = await this.userService.resendConfirmationEmail(req.body.email)
-            if(success) {
-                res.sendStatus(204)
-                return
+            const result = await this.authService.resendConfirmationEmail({
+                email:req.body.email,
+                ip:req.ip,
+                deviceName:req.headers["user-agent"] || ''
+            })
+            switch(result) {
+                case AuthError.NoError : res.sendStatus(204); break;
+                case AuthError.ActionLimit : res.sendStatus(429); break;
+                case AuthError.WrongCredentials : 
+                case AuthError.AlreadyConfirmed : { res.status(400).send(new APIErrorResult([ 
+                    { field: 'email', message: 'wrong or already confirmed email' } 
+                    ]))
+                    break; 
+                }
+                default: res.sendStatus(400)
             }
-            res.status(400).send(new APIErrorResult([ 
-                { field: 'email', message: 'wrong or already confirmed email' } 
-            ]))
         })
 
         this.router.get('/confirm-email',
         confirmQueryValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-            const user = req.query.user as string
-            const code = req.query.code as string
-            const confirmed = await this.userService.confirmRegistration(user,code)
-            res.sendStatus(confirmed ? 204 : 400)
+            const result = await this.authService.confirmRegistration({
+                login:req.query.user as string,
+                ip:req.ip,
+                deviceName:req.headers["user-agent"] || '',
+                code:req.query.code as string
+            })
+            switch(result) {
+                case AuthError.NoError : res.sendStatus(204); break;
+                case AuthError.ActionLimit : res.sendStatus(429); break;
+                case AuthError.UserNotFound : 
+                case AuthError.WrongCode : { res.status(400).send(new APIErrorResult([ 
+                    { field: 'code', message: 'invalid code or user' } 
+                    ]))
+                    break; 
+                }
+                default: res.sendStatus(400)
+            }
         })
 
         this.router.post('/registration-confirmation',
         confirmCodeValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-            const confirmed = await this.userService.confirmRegitrationByCodeOnly(req.body.code)
-            if(confirmed) {
-                res.sendStatus(204)
-                return
+            const result = await this.authService.confirmRegitrationByCodeOnly({
+                login:'',
+                ip:req.ip,
+                deviceName:req.headers["user-agent"] || '',
+                code:req.body.code
+            })
+            switch(result) {
+                case AuthError.NoError : res.sendStatus(204); break;
+                case AuthError.ActionLimit : res.sendStatus(429); break;
+                case AuthError.UserNotFound : 
+                case AuthError.WrongCode : { res.status(400).send(new APIErrorResult([ 
+                    { field: 'code', message: 'invalid code or user' } 
+                    ]))
+                    break; 
+                }
+                default: res.sendStatus(400)
             }
-
-            res.status(400).send(new APIErrorResult([ 
-                { field: 'code', message: 'wrong or already confirmed code' } 
-            ]))
         })
 
         this.router.post('/login',
         loginCheckMiddleware,
         async (req:Request,res:Response) => {     
-            if(await this.authService.loginAttemptsLimit(req.ip)) {
-                res.sendStatus(429)
-                return
-            }     
             const result = await this.authService.login({
-                login: req.body.login,
-                password: req.body.password,
-                ip: req.ip,
-                deviceName: req.headers["user-agent"] || ''
+                login:req.body.login,
+                password:req.body.password,
+                ip:req.ip,
+                deviceName:req.headers["user-agent"] || ''
             })
-            if(!result) {
-                res.sendStatus(401)
+            if(result instanceof TokenPair) {
+                res.cookie(
+                    'refreshToken', 
+                    result.refreshToken, 
+                    this.getCookieSettings()
+                )            
+                res.status(200).send({ accessToken: result.accessToken })
                 return
             }
-            res.cookie(
-                'refreshToken', 
-                result[1], 
-                this.getCookieSettings())            
-            res.status(200).send({ accessToken: result[0] })
-            return
+            switch(result) {
+                case AuthError.ActionLimit : res.sendStatus(429); break;
+                case AuthError.WrongCredentials : res.sendStatus(401); break; 
+                default: res.sendStatus(400)
+            }     
         })
 
         this.router.post('/refresh-token',
         refreshTokenCheckMiddleware,
         async (req:Request,res:Response) => {
-            const refreshToken = req.cookies.refreshToken
-            const newPair = await this.authService.renewTokenPair({
-                refreshToken:refreshToken,
-                ip: req.ip,
-                deviceName: req.headers["user-agent"] || ''
+            const result = await this.authService.renewTokenPair({
+                refreshToken:req.cookies.refreshToken,
+                ip:req.ip,
+                deviceName:req.headers["user-agent"] || ''
             })
-            if(!newPair) {
-                res.sendStatus(401)
+            if(result instanceof TokenPair) {
+                res.cookie(
+                    'refreshToken', 
+                    result.refreshToken, 
+                    this.getCookieSettings()
+                )            
+                res.status(200).send({ accessToken: result.accessToken })
                 return
             }
-            res.cookie(
-                'refreshToken', 
-                newPair[1],
-                this.getCookieSettings())            
-            res.status(200).send({ accessToken: newPair[0] })
+            res.sendStatus(401)
         })
 
         this.router.post('/logout',

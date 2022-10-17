@@ -1,5 +1,6 @@
 import DeviceSessionRepository from "../../data/repositories/deviceSessionRepository";
 import { DeviceSessionCreateType } from "../models/deviceSessionModel";
+import TokenPair from "../models/tokenPair";
 import DeviceSessionFactory from "../utils/deviceSessionFactory";
 import JwtTokenOperator, { TokenPayload } from "../utils/jwtTokenOperator";
 
@@ -15,7 +16,7 @@ export default class DeviceSessionService {
     constructor(private readonly repo:DeviceSessionRepository) {}
 
     public async createDevice(data:DeviceSessionCreateType)
-    : Promise<[token:string,refreshToken:string]|undefined> {
+    : Promise<TokenPair|undefined> {
         const device = DeviceSessionFactory.createNew(data)
 
         const added = await this.repo.create(device)
@@ -28,7 +29,7 @@ export default class DeviceSessionService {
         })
     }
     public async updateDevice(oldToken:TokenPayload,data:DeviceSessionCreateType)
-    : Promise<[token:string,refreshToken:string]|undefined> {
+    : Promise<TokenPair|undefined> {
         if(!await this.checkTokenExists(oldToken)) return undefined
 
         const device = DeviceSessionFactory.createUpdate(oldToken.deviceId,data)

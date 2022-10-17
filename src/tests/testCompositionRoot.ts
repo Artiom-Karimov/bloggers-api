@@ -23,7 +23,7 @@ import AuthMiddlewareProvider from '../presentation/middlewares/authMiddlewarePr
 import DeviceSessionRepository from '../data/repositories/deviceSessionRepository'
 import DeviceSessionService from '../logic/services/deviceSessionService'
 import AuthService from '../logic/services/authService'
-import LoginAttemptRepository from '../data/repositories/loginAttemptRepository'
+import LoginAttemptRepository from '../data/repositories/clientActionRepository'
 
 const login = config.userName
 const password = config.password
@@ -90,14 +90,14 @@ const initServices = async () => {
     blogService = new BlogService(blogRepository)
     postService = new PostService(postRepository)
     deviceService = new DeviceSessionService(deviceSessionRepository)
-    userService = new UserService(userRepository,fakeConfirmEmailSender)
+    userService = new UserService(userRepository)
     commentService = new CommentService(commentRepository)
-    authService = new AuthService(userService,deviceService,loginAttemptRepository)
+    authService = new AuthService(userService,deviceService,loginAttemptRepository,fakeConfirmEmailSender)
 }
 const initRouters = async () => {
     if(!blogService) await initServices()
     authProvider = new AuthMiddlewareProvider(userService)
-    authRouter = new AuthRouter(authService,userService,userQueryRepository,authProvider)
+    authRouter = new AuthRouter(authService,userQueryRepository,authProvider)
     blogRouter = new BlogRouter(blogService,postService,queryRepository,authProvider)
     commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
     postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)

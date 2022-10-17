@@ -5,7 +5,7 @@ import CommentQueryRepository from './data/repositories/commentQueryRepository'
 import CommentRepository from './data/repositories/commentRepository'
 import DeviceSessionQueryRepository from './data/repositories/deviceSessionQueryRepository'
 import DeviceSessionRepository from './data/repositories/deviceSessionRepository'
-import LoginAttemptRepository from './data/repositories/loginAttemptRepository'
+import LoginAttemptRepository from './data/repositories/clientActionRepository'
 import PostRepository from './data/repositories/postRepository'
 import QueryRepository from './data/repositories/queryRepository'
 import UserQueryRepository from './data/repositories/userQueryRepository'
@@ -44,13 +44,13 @@ const confirmationEmailSender = new ConfirmationEmailSender()
 const blogService = new BlogService(blogRepository)
 const postService = new PostService(postRepository)
 const deviceService = new DeviceSessionService(deviceSessionRepository)
-const userService = new UserService(userRepository, confirmationEmailSender)
-const authService = new AuthService(userService,deviceService,loginAttemptRepository)
+const userService = new UserService(userRepository)
+const authService = new AuthService(userService,deviceService,loginAttemptRepository,confirmationEmailSender)
 const commentService = new CommentService(commentRepository)
 
 const authProvider = new AuthMiddlewareProvider(userService)
 
-const authRouter = new AuthRouter(authService,userService,userQueryRepository,authProvider)
+const authRouter = new AuthRouter(authService,userQueryRepository,authProvider)
 const blogRouter = new BlogRouter(blogService,postService,queryRepository,authProvider)
 const commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
 const postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)

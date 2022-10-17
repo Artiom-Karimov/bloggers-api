@@ -2,7 +2,7 @@ import { MongoClient, Db, Collection } from "mongodb"
 import MongoBlogModel from "./models/mongoModels/mongoBlogModel"
 import MongoCommentModel from "./models/mongoModels/mongoCommentModel"
 import MongoDeviceSessionModel from "./models/mongoModels/mongoDeviceSessionModel"
-import MongoLoginAttemptModel from "./models/mongoModels/mongoLoginAttemptModel"
+import MongoLoginAttemptModel from "./models/mongoModels/MongoClientActionModel"
 import MongoPostModel from "./models/mongoModels/mongoPostModel"
 import MongoUserModel from "./models/mongoModels/mongoUserModel"
 

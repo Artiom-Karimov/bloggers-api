@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { jwt as config } from '../../config/config'
+import TokenPair from '../models/tokenPair'
 
 export type TokenPayload = {
     userId:string,
@@ -9,10 +10,10 @@ export type TokenPayload = {
 
 export default class JwtTokenOperator {
     public static createTokenPair(payload:TokenPayload)
-    : [token:string,refreshToken:string] {
+    : TokenPair {
         const token = JwtTokenOperator.createToken(payload.userId, config.expire)
         const refreshToken = JwtTokenOperator.createRefreshToken(payload, config.refreshExpire)
-        return [token,refreshToken]
+        return new TokenPair(token,refreshToken)
     }
     public static unpackToken(token:string): string|undefined {
         try {

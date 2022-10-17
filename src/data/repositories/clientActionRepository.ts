@@ -1,20 +1,20 @@
 import { Collection } from "mongodb";
-import LoginAttemptModel from "../../logic/models/loginAttemptModel";
+import ClientActionModel from "../../logic/models/clientActionModel";
 import BloggersMongoDb from "../bloggersMongoDb";
-import MongoLoginAttemptModel from "../models/mongoModels/mongoLoginAttemptModel";
+import MongoClientActionModel from "../models/mongoModels/MongoClientActionModel";
 
-export default class LoginAttemptRepository {
-    private readonly attempts: Collection<MongoLoginAttemptModel>
+export default class ClientActionRepository {
+    private readonly attempts: Collection<MongoClientActionModel>
 
     constructor(db:BloggersMongoDb) {
         this.attempts = db.loginAttemptCollection
     }
     public async getByIp(ip:string, fromTime:number)
-    : Promise<Array<LoginAttemptModel>> {
+    : Promise<Array<ClientActionModel>> {
         const filter = { ip:ip, timestamp: { $gte : fromTime } } 
         try {
             const result = await this.attempts.find(filter).toArray()
-            return result.map(a => MongoLoginAttemptModel.getBusinessModel(a))
+            return result.map(a => MongoClientActionModel.getBusinessModel(a))
         } catch {
             return []
         }
@@ -23,9 +23,9 @@ export default class LoginAttemptRepository {
         const filter = { ip:ip, timestamp: { $gte : fromTime } } 
         return this.attempts.countDocuments(filter)
     }
-    public async create(data:LoginAttemptModel): Promise<boolean> {
+    public async create(data:ClientActionModel): Promise<boolean> {
         try {
-            const result = await this.attempts.insertOne(new MongoLoginAttemptModel(data))
+            const result = await this.attempts.insertOne(new MongoClientActionModel(data))
             return !!result.insertedId
         } catch {
             return false
