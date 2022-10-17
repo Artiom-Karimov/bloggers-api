@@ -5,7 +5,7 @@ import CommentQueryRepository from './data/repositories/commentQueryRepository'
 import CommentRepository from './data/repositories/commentRepository'
 import DeviceSessionQueryRepository from './data/repositories/deviceSessionQueryRepository'
 import DeviceSessionRepository from './data/repositories/deviceSessionRepository'
-import LoginAttemptRepository from './data/repositories/clientActionRepository'
+import ClientActionRepository from './data/repositories/clientActionRepository'
 import PostRepository from './data/repositories/postRepository'
 import QueryRepository from './data/repositories/queryRepository'
 import UserQueryRepository from './data/repositories/userQueryRepository'
@@ -37,7 +37,7 @@ const userQueryRepository = new UserQueryRepository(db)
 const commentQueryRepository = new CommentQueryRepository(db)
 const deviceSessionRepository = new DeviceSessionRepository(db)
 const deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)
-const loginAttemptRepository = new LoginAttemptRepository(db)
+const clientActionRepository = new ClientActionRepository(db)
 
 const confirmationEmailSender = new ConfirmationEmailSender()
 
@@ -45,7 +45,7 @@ const blogService = new BlogService(blogRepository)
 const postService = new PostService(postRepository)
 const deviceService = new DeviceSessionService(deviceSessionRepository)
 const userService = new UserService(userRepository)
-const authService = new AuthService(userService,deviceService,loginAttemptRepository,confirmationEmailSender)
+const authService = new AuthService(userService,deviceService,clientActionRepository,confirmationEmailSender)
 const commentService = new CommentService(commentRepository)
 
 const authProvider = new AuthMiddlewareProvider(userService)

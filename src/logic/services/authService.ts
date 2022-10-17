@@ -1,4 +1,4 @@
-import LoginAttemptRepository from "../../data/repositories/clientActionRepository";
+import ClientActionRepository from "../../data/repositories/clientActionRepository";
 import DeviceSessionService, { DeviceSessionError } from "./deviceSessionService";
 import UserService from "./userService";
 import Hasher from "../utils/hasher"
@@ -16,7 +16,7 @@ export default class AuthService {
     constructor(
         private readonly userService: UserService,
         private readonly sessionService: DeviceSessionService,
-        private readonly clientActionRepo: LoginAttemptRepository,
+        private readonly clientActionRepo: ClientActionRepository,
         private readonly confirmSender: ConfirmEmailSender
     ) {}
     public async register(data:RegisterModelType): Promise<AuthError> {

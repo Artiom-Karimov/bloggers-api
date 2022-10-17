@@ -11,6 +11,10 @@ export let samplePostInputs: Array<PostInputModel> = []
 export let sampleUserInputs: Array<UserInputModel> = []
 export let sampleCommentInputs: Array<CommentInputModel> = []
 
+export const timeout = (ms:number) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export const clearBlogSamples = () => {
     sampleBlogInputs = []
 }

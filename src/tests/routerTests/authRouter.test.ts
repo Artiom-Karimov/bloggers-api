@@ -67,6 +67,16 @@ describe('authRouter tests', () => {
         expect(infoResult.body.userId).toBeTruthy()
     })
 
+    it('prevent from ip block', async () => {
+        await helpers.timeout(3333)
+    })
+    it('prevent from ip block', async () => {
+        await helpers.timeout(3333)
+    })
+    it('prevent from ip block', async () => {
+        await helpers.timeout(3333)
+    })
+
     // Registration procedure
     const userData: UserInputModel = {
         login: 'poopkin',
@@ -94,7 +104,19 @@ describe('authRouter tests', () => {
             .get(`${base}/confirm-email?user=${userData.login}&code=${userModel!.emailConfirmation.code}`)
         expect(confirmed.statusCode).toBe(204)
     })
-    it('right credentials should receive token', async () => {        
+
+    it('prevent from ip block', async () => {
+        await helpers.timeout(3333)
+    })
+    it('prevent from ip block', async () => {
+        await helpers.timeout(3333)
+    })
+    it('prevent from ip block', async () => {
+        await helpers.timeout(3333)
+    })
+    
+    it('right credentials should receive token', async () => {  
+           
         const result = await request(root.app.server)
             .post(`${base}/login`).send({
                 login:userData.login,

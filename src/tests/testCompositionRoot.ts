@@ -23,7 +23,7 @@ import AuthMiddlewareProvider from '../presentation/middlewares/authMiddlewarePr
 import DeviceSessionRepository from '../data/repositories/deviceSessionRepository'
 import DeviceSessionService from '../logic/services/deviceSessionService'
 import AuthService from '../logic/services/authService'
-import LoginAttemptRepository from '../data/repositories/clientActionRepository'
+import ClientActionRepository from '../data/repositories/clientActionRepository'
 import SecurityRouter from '../presentation/routers/securityRouter'
 import DeviceSessionQueryRepository from '../data/repositories/deviceSessionQueryRepository'
 
@@ -41,7 +41,7 @@ let queryRepository: QueryRepository
 let userQueryRepository: UserQueryRepository
 let commentQueryRepository: CommentQueryRepository
 let deviceSessionRepository: DeviceSessionRepository
-let loginAttemptRepository: LoginAttemptRepository
+let clientActionRepository: ClientActionRepository
 let deviceSessionQueryRepository: DeviceSessionQueryRepository
 
 const fakeConfirmEmailSender: ConfirmEmailSender = {
@@ -87,7 +87,7 @@ const initRepos = async () => {
     userQueryRepository = new UserQueryRepository(db)
     commentQueryRepository = new CommentQueryRepository(db)
     deviceSessionRepository = new DeviceSessionRepository(db)
-    loginAttemptRepository = new LoginAttemptRepository(db)
+    clientActionRepository = new ClientActionRepository(db)
     deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)
 }
 const initServices = async () => {
@@ -97,7 +97,7 @@ const initServices = async () => {
     deviceService = new DeviceSessionService(deviceSessionRepository)
     userService = new UserService(userRepository)
     commentService = new CommentService(commentRepository)
-    authService = new AuthService(userService,deviceService,loginAttemptRepository,fakeConfirmEmailSender)
+    authService = new AuthService(userService,deviceService,clientActionRepository,fakeConfirmEmailSender)
 }
 const initRouters = async () => {
     if(!blogService) await initServices()

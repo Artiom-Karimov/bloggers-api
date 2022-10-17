@@ -2,7 +2,7 @@ import { MongoClient, Db, Collection } from "mongodb"
 import MongoBlogModel from "./models/mongoModels/mongoBlogModel"
 import MongoCommentModel from "./models/mongoModels/mongoCommentModel"
 import MongoDeviceSessionModel from "./models/mongoModels/mongoDeviceSessionModel"
-import MongoLoginAttemptModel from "./models/mongoModels/MongoClientActionModel"
+import MongoClentActionModel from "./models/mongoModels/MongoClientActionModel"
 import MongoPostModel from "./models/mongoModels/mongoPostModel"
 import MongoUserModel from "./models/mongoModels/mongoUserModel"
 
@@ -12,7 +12,7 @@ export default class BloggersMongoDb {
     public readonly userCollection: Collection<MongoUserModel>
     public readonly commentCollection: Collection<MongoCommentModel>
     public readonly deviceSessionCollection: Collection<MongoDeviceSessionModel>
-    public readonly loginAttemptCollection: Collection<MongoLoginAttemptModel>
+    public readonly clientActionCollection: Collection<MongoClentActionModel>
 
     private readonly mongoUri: string
     private readonly client: MongoClient
@@ -27,7 +27,7 @@ export default class BloggersMongoDb {
         this.userCollection = this.db.collection<MongoUserModel>('users')
         this.commentCollection = this.db.collection<MongoCommentModel>('comments')
         this.deviceSessionCollection = this.db.collection<MongoDeviceSessionModel>('deviceSessions')
-        this.loginAttemptCollection = this.db.collection<MongoLoginAttemptModel>('loginAttempts')
+        this.clientActionCollection = this.db.collection<MongoClentActionModel>('clientActions')
     }
     public async connect() {
         try {
@@ -50,5 +50,6 @@ export default class BloggersMongoDb {
         await this.userCollection.deleteMany({})
         await this.commentCollection.deleteMany({})
         await this.deviceSessionCollection.deleteMany({})
+        await this.clientActionCollection.deleteMany({})
     } 
 }

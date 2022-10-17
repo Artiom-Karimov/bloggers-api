@@ -1,6 +1,6 @@
-import LoginAttemptModel, { ClientAction } from "../../../logic/models/clientActionModel"
+import ClentActionModel, { ClientAction } from "../../../logic/models/clientActionModel"
 
-export default class MongoLoginAttemptModel {
+export default class MongoClentActionModel {
     public _id:string
     public ip:string
     public action:string
@@ -9,18 +9,18 @@ export default class MongoLoginAttemptModel {
     public success:boolean
     public timestamp:number
 
-    constructor(model:LoginAttemptModel) {
+    constructor(model:ClentActionModel) {
         this._id = model.id
-        this.ip = model.id
+        this.ip = model.ip
         this.action = model.action
         this.login = model.login
         this.deviceName = model.deviceName
         this.success = model.success
         this.timestamp = model.timestamp
     }
-    public static getBusinessModel(mongoModel:MongoLoginAttemptModel)
-    : LoginAttemptModel {
-        return new LoginAttemptModel(
+    public static getBusinessModel(mongoModel:MongoClentActionModel)
+    : ClentActionModel {
+        return new ClentActionModel(
             mongoModel._id,
             mongoModel.ip,
             mongoModel.action as ClientAction || ClientAction.Unset,
