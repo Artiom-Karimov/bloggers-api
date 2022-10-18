@@ -25,8 +25,7 @@ import CommentRouter from './presentation/routers/commentRouter'
 import PostRouter from './presentation/routers/postRouter'
 import SecurityRouter from './presentation/routers/securityRouter'
 import UserRouter from './presentation/routers/userRouter'
-import { MongoMemoryServer } from 'mongodb-memory-server'
-import ClientActionMongoDb from './data/clientActionMongoDb'
+import ClientActionService from './logic/services/clientActionService'
 
 export default class CompositionRoot {
     private readonly db = new BloggersMongoDb(config.mongoUri)
@@ -37,6 +36,7 @@ export default class CompositionRoot {
     private readonly userRepository: UserRepository
     private readonly commentRepository: CommentRepository
     private readonly deviceSessionRepository: DeviceSessionRepository
+    private readonly clientActionRepository: ClientActionRepository
 
     private readonly queryRepository: QueryRepository
     private readonly userQueryRepository: UserQueryRepository
@@ -48,6 +48,8 @@ export default class CompositionRoot {
     private readonly deviceSessionService: DeviceSessionService
     private readonly userService: UserService
     private readonly commentService: CommentService
+    private readonly clientActionService: ClientActionService
+    private readonly authService: AuthService
 
     private readonly authProvider: AuthMiddlewareProvider
 
@@ -55,12 +57,8 @@ export default class CompositionRoot {
     private readonly postRouter: PostRouter
     private readonly commentRouter: CommentRouter
     private readonly userRouter: UserRouter
-    private readonly securityRouter: SecurityRouter
-
-    private actionDb: ClientActionMongoDb|undefined
-    private actionRepository: ClientActionRepository|undefined
-    private authService: AuthService|undefined
-    private authRouter: AuthRouter|undefined
+    private readonly securityRouter: SecurityRouter   
+    private readonly authRouter: AuthRouter
 
     private app: BloggersApp|undefined
     
@@ -70,6 +68,7 @@ export default class CompositionRoot {
         this.userRepository = new UserRepository(this.db)
         this.commentRepository = new CommentRepository(this.db)
         this.deviceSessionRepository = new DeviceSessionRepository(this.db)
+        this.clientActionRepository = new ClientActionRepository()
 
         this.queryRepository = new QueryRepository(this.db)
         this.userQueryRepository = new UserQueryRepository(this.db)
@@ -81,6 +80,8 @@ export default class CompositionRoot {
         this.deviceSessionService = new DeviceSessionService(this.deviceSessionRepository) 
         this.userService = new UserService(this.userRepository) 
         this.commentService = new CommentService(this.commentRepository)
+        this.clientActionService = new ClientActionService(this.clientActionRepository)
+        this.authService = new AuthService(this.userService,this.deviceSessionService,this.clientActionService,this.confirmationEmailSender)
         
         this.authProvider = new AuthMiddlewareProvider(this.userService)
 
@@ -89,11 +90,10 @@ export default class CompositionRoot {
         this.commentRouter = new CommentRouter(this.commentService,this.commentQueryRepository,this.authProvider)
         this.userRouter = new UserRouter(this.userService,this.userQueryRepository,this.authProvider)
         this.securityRouter = new SecurityRouter(this.deviceSessionService,this.deviceSessionQueryRepository,this.authProvider)
+        this.authRouter = new AuthRouter(this.authService,this.userQueryRepository,this.authProvider)
     }
 
     public async start() {
-        await this.initActionDb()
-        this.initAuthRouter()
         this.app = new BloggersApp({
             db:this.db,
             authRouter:this.authRouter,
@@ -104,21 +104,5 @@ export default class CompositionRoot {
             securityRouter:this.securityRouter
         })
         await this.app.start()
-    }
-
-    private async initActionDb() {
-        try {
-            const server = await MongoMemoryServer.create()
-            this.actionDb = new ClientActionMongoDb(server.getUri())
-            await this.actionDb.connect()
-        } catch (err) {
-            console.error(err)
-        }
-    }
-    private initAuthRouter() {
-        if(!this.actionDb) return
-        this.actionRepository = new ClientActionRepository(this.actionDb)
-        this.authService = new AuthService(this.userService,this.deviceSessionService,this.actionRepository,this.confirmationEmailSender)
-        this.authRouter = new AuthRouter(this.authService,this.userQueryRepository,this.authProvider)
     }
 }

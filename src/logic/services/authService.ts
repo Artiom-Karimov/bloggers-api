@@ -1,146 +1,144 @@
-import ClientActionRepository from "../../data/repositories/clientActionRepository";
 import DeviceSessionService, { DeviceSessionError } from "./deviceSessionService";
 import UserService from "./userService";
 import Hasher from "../utils/hasher"
 import { LoginModelType, RegisterModelType, ResendEmailModelType, RenewTokenModelType, ConfirmEmailModelType } from "../models/clientActionTypes"
 import JwtTokenOperator from "../utils/jwtTokenOperator"
 import UserModel from "../models/userModel";
-import { userAuth as config } from "../../config/config";
-import ClientActionFactory from "../utils/clientActionFactory";
 import { ConfirmEmailSender } from "../../email/confirmationEmailSender";
 import { AuthError } from "../models/authError";
 import TokenPair from "../models/tokenPair";
+import ClientActionService from "./clientActionService";
 
 export default class AuthService {
     
     constructor(
         private readonly userService: UserService,
         private readonly sessionService: DeviceSessionService,
-        private readonly clientActionRepo: ClientActionRepository,
+        private readonly actionService: ClientActionService,
         private readonly confirmSender: ConfirmEmailSender
     ) {}
     public async register(data:RegisterModelType): Promise<AuthError> {
-        if(await this.clientActionLimit(data.ip)) {
-            this.writeRegiterAction(data)
+        if(await this.actionService.clientActionLimit(data.ip)) {
+            this.actionService.writeRegiterAction(data)
             return AuthError.ActionLimit
         }
         const existsError = await this.loginOrEmailExists(data)
         if(existsError !== AuthError.NoError) {
-            this.writeRegiterAction(data)
+            this.actionService.writeRegiterAction(data)
             return existsError
         }
         const user = await this.createAndGetUser(data)
         if(!user) {
-            this.writeRegiterAction(data)
+            this.actionService.writeRegiterAction(data)
             return AuthError.Unknown
         }
 
         this.sendConfirmEmail(user)
-        this.writeRegiterAction(data,true)
+        this.actionService.writeRegiterAction(data,true)
 
         return AuthError.NoError
     }
     public async resendConfirmationEmail(data:ResendEmailModelType): Promise<AuthError> {
-        if(await this.clientActionLimit(data.ip)) {
-            this.writeResendAction(data)
+        if(await this.actionService.clientActionLimit(data.ip)) {
+            this.actionService.writeResendAction(data)
             return AuthError.ActionLimit
         }
         const user = await this.userService.getByEmail(data.email)
         if(!user) {
-            this.writeResendAction(data)
+            this.actionService.writeResendAction(data)
             return AuthError.WrongCredentials
         }
         if(user.emailConfirmation.confirmed) {
-            this.writeResendAction(data,false,user.accountData.login)
+            this.actionService.writeResendAction(data,false,user.accountData.login)
             return AuthError.AlreadyConfirmed
         }
         const newCode = await this.userService.renewEmailConfirmation(user.id)
         if(!newCode) {
-            this.writeResendAction(data,false,user.accountData.login)
+            this.actionService.writeResendAction(data,false,user.accountData.login)
             return AuthError.Unknown
         }
         this.sendConfirmEmail(user,newCode)
 
-        this.writeResendAction(data,true,user.accountData.login)
+        this.actionService.writeResendAction(data,true,user.accountData.login)
 
         return AuthError.NoError
     }
     public async confirmRegistration(data:ConfirmEmailModelType): Promise<AuthError> {
-        if(await this.clientActionLimit(data.ip)) {
-            this.writeConfirmAction(data)
+        if(await this.actionService.clientActionLimit(data.ip)) {
+            this.actionService.writeConfirmAction(data)
             return AuthError.ActionLimit
         }
         const user = await this.userService.getByLogin(data.login)
         if(!user) {
-            this.writeConfirmAction(data)
+            this.actionService.writeConfirmAction(data)
             return AuthError.UserNotFound
         }
         if(user.emailConfirmation.codeExpiration < new Date().getDate() || 
             data.code !== user.emailConfirmation.code) {
-                this.writeConfirmAction(data)
+                this.actionService.writeConfirmAction(data)
                 return AuthError.WrongCode
         }
         if(await this.userService.setEmailConfirmed(user.id)) {
-            this.writeConfirmAction(data,true)
+            this.actionService.writeConfirmAction(data,true)
             return AuthError.NoError
         }
-        this.writeConfirmAction(data)
+        this.actionService.writeConfirmAction(data)
         return AuthError.Unknown
     }
     public async confirmRegitrationByCodeOnly(data:ConfirmEmailModelType): Promise<AuthError> {
-        if(await this.clientActionLimit(data.ip)) {
-            this.writeConfirmAction(data)
+        if(await this.actionService.clientActionLimit(data.ip)) {
+            this.actionService.writeConfirmAction(data)
             return AuthError.ActionLimit
         }
         const user = await this.userService.getByConfirmCode(data.code)
         if(!user || 
             user.emailConfirmation.codeExpiration < new Date().getDate() || 
             data.code !== user.emailConfirmation.code) {
-                this.writeConfirmAction(data)
+                this.actionService.writeConfirmAction(data)
                 return AuthError.WrongCode
         }
         if(await this.userService.setEmailConfirmed(user.id)) {
-            this.writeConfirmAction(data,true)
+            this.actionService.writeConfirmAction(data,true)
             return AuthError.NoError
         }
-        this.writeConfirmAction(data)
+        this.actionService.writeConfirmAction(data)
         return AuthError.Unknown
     }
     public async login(data:LoginModelType)
     : Promise<TokenPair|AuthError> {
-        if(await this.clientActionLimit(data.ip)) {
-            this.writeLoginAction(data)
+        if(await this.actionService.clientActionLimit(data.ip)) {
+            this.actionService.writeLoginAction(data)
             return AuthError.ActionLimit
         }
         const user = await this.userService.getByLogin(data.login)
         if(!user || !await this.checkPassword(user,data.password)) {
-            this.writeLoginAction(data)
+            this.actionService.writeLoginAction(data)
             return AuthError.WrongCredentials
         }   
 
         const pair = await this.sessionService.createDevice({
             ip:data.ip, deviceName:data.deviceName, userId:user.id})
         if(!pair) {
-            this.writeLoginAction(data)
+            this.actionService.writeLoginAction(data)
             return AuthError.Unknown
         }
-        this.writeLoginAction(data,true)
+        this.actionService.writeLoginAction(data,true)
         return pair
     }
     public async renewTokenPair(data:RenewTokenModelType)
     : Promise<TokenPair|AuthError> {
-        if(await this.clientActionLimit(data.ip)) {
-            this.writeRenewAction(data)
+        if(await this.actionService.clientActionLimit(data.ip)) {
+            this.actionService.writeRenewAction(data)
             return AuthError.ActionLimit
         }
         const tokenData = JwtTokenOperator.unpackRefreshToken(data.refreshToken)
         if(!tokenData) {
-            this.writeRenewAction(data)
+            this.actionService.writeRenewAction(data)
             return AuthError.WrongToken
         }
         const user = await this.userService.get(tokenData.userId)
         if(!user) {
-            this.writeRenewAction(data)
+            this.actionService.writeRenewAction(data)
             return AuthError.UserNotFound
         }
 
@@ -148,10 +146,10 @@ export default class AuthService {
             tokenData, 
             { ip:data.ip, deviceName:data.deviceName, userId:user.id })
         if(!pair) {
-            this.writeRenewAction(data,false,user.accountData.login)
+            this.actionService.writeRenewAction(data,false,user.accountData.login)
             return AuthError.WrongToken
         }
-        this.writeRenewAction(data,true,user.accountData.login)
+        this.actionService.writeRenewAction(data,true,user.accountData.login)
         return pair
     }
     public async logout(refreshToken:string): Promise<boolean> {
@@ -162,30 +160,10 @@ export default class AuthService {
       
         const deleted = await this.sessionService.deleteDevice(refreshToken,tokenData.deviceId)
         return deleted === DeviceSessionError.NoError
-    }
-    public async clientActionLimit(ip:string): Promise<boolean> {
-        const fromTime = new Date().getTime() - config.actionLimitTime
-        const actions = await this.clientActionRepo.countByIp(ip,fromTime)
-        return actions > config.actionLimit
-    }
+    } 
     private async checkPassword(user:UserModel,password:string): Promise<boolean> {
         if(!user.emailConfirmation.confirmed) return false
         return Hasher.check(password,user.accountData.passwordHash,user.accountData.salt)
-    }
-    private async writeRegiterAction(data:RegisterModelType,success:boolean = false) {
-        await this.clientActionRepo.create(ClientActionFactory.createRegister(data,success))
-    }
-    private async writeResendAction(data:ResendEmailModelType,success:boolean = false,login:string = '') {
-        await this.clientActionRepo.create(ClientActionFactory.createResend(data,success,login))
-    }
-    private async writeLoginAction(data:LoginModelType,success:boolean = false) {
-        await this.clientActionRepo.create(ClientActionFactory.createLogin(data,success))
-    }
-    private async writeRenewAction(data:RenewTokenModelType,success:boolean = false,login:string = '') {
-        await this.clientActionRepo.create(ClientActionFactory.createRenew(data,success,login))
-    }
-    private async writeConfirmAction(data:ConfirmEmailModelType,success:boolean = false) {
-        await this.clientActionRepo.create(ClientActionFactory.createConfirm(data,success))
     }
     private async createAndGetUser(data:RegisterModelType): Promise<UserModel|undefined> {
         const createdId = await this.userService.createUnconfirmed({

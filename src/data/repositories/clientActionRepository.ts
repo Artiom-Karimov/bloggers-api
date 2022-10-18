@@ -1,42 +1,28 @@
-import { Collection } from "mongodb";
 import ClientActionModel from "../../logic/models/clientActionModel";
-import { ClientActionDb } from "../dbInterfaces";
-import MongoClientActionModel from "../models/mongoModels/MongoClientActionModel";
 
 export default class ClientActionRepository {
-    private readonly actions: Collection<MongoClientActionModel>
+    private readonly actions: Array<ClientActionModel> = []
 
-    constructor(db:ClientActionDb) {
-        this.actions = db.clientActionCollection
+    constructor() {}
+
+    public countByIp(ip:string, fromTime:number): number {
+        return this.actions.filter(a => a.ip === ip && a.timestamp >= fromTime).length
     }
-    public async getByIp(ip:string, fromTime:number)
-    : Promise<Array<ClientActionModel>> {
-        const filter = { ip:ip, timestamp: { $gte : fromTime } } 
-        try {
-            const result = await this.actions.find(filter).toArray()
-            return result.map(a => MongoClientActionModel.getBusinessModel(a))
-        } catch {
-            return []
+    public create(data:ClientActionModel) {
+        this.actions.push(data)
+    }
+    public deleteAllBeforeTime(time:number) {
+        const removeIndex = this.findTimeIndex(time)
+        this.actions.splice(0,removeIndex)
+    }
+    private findTimeIndex(time:number):number {
+        if(this.actions.length === 0) return 0
+        if(this.actions[0].timestamp > time) return 0
+
+        for(let i=0;i<this.actions.length;i++) {
+            if(this.actions[i].timestamp >= time)
+                return i === 0 ? 0 : i - 1
         }
-    }
-    public async countByIp(ip:string, fromTime:number): Promise<number> {
-        const filter = { ip:ip, timestamp: { $gte : fromTime } } 
-        return this.actions.countDocuments(filter)
-    }
-    public async create(data:ClientActionModel): Promise<boolean> {
-        try {
-            const result = await this.actions.insertOne(new MongoClientActionModel(data))
-            return !!result.insertedId
-        } catch {
-            return false
-        }
-    }
-    public async deleteAllBeforeTime(time:number): Promise<number> {
-        try {
-            const result = await this.actions.deleteMany({timestamp : { $lt : time }})
-            return result.deletedCount
-        } catch {
-            return 0
-        }
+        return 0
     }
 }

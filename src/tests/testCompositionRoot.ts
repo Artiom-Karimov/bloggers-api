@@ -26,6 +26,7 @@ import AuthService from '../logic/services/authService'
 import ClientActionRepository from '../data/repositories/clientActionRepository'
 import SecurityRouter from '../presentation/routers/securityRouter'
 import DeviceSessionQueryRepository from '../data/repositories/deviceSessionQueryRepository'
+import ClientActionService from '../logic/services/clientActionService'
 
 const login = config.userName
 const password = config.password
@@ -56,6 +57,7 @@ let deviceService: DeviceSessionService
 let userService: UserService
 let commentService: CommentService
 let authService: AuthService
+let actionService: ClientActionService
 
 let authProvider: AuthMiddlewareProvider
 
@@ -87,7 +89,7 @@ const initRepos = async () => {
     userQueryRepository = new UserQueryRepository(db)
     commentQueryRepository = new CommentQueryRepository(db)
     deviceSessionRepository = new DeviceSessionRepository(db)
-    clientActionRepository = new ClientActionRepository(db)
+    clientActionRepository = new ClientActionRepository()
     deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)
 }
 const initServices = async () => {
@@ -97,7 +99,8 @@ const initServices = async () => {
     deviceService = new DeviceSessionService(deviceSessionRepository)
     userService = new UserService(userRepository)
     commentService = new CommentService(commentRepository)
-    authService = new AuthService(userService,deviceService,clientActionRepository,fakeConfirmEmailSender)
+    actionService = new ClientActionService(clientActionRepository)
+    authService = new AuthService(userService,deviceService,actionService,fakeConfirmEmailSender)
 }
 const initRouters = async () => {
     if(!blogService) await initServices()
