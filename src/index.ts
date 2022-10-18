@@ -1,5 +1,5 @@
-import * as root from './compositionRoot'
+import CompositionRoot from './compositionRoot'
 
-const app = root.app
+const root = new CompositionRoot()
 
-app.start()
+root.start()

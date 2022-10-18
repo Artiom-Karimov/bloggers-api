@@ -12,18 +12,18 @@ export default class AuthMiddlewareProvider {
 
     public basicAuthMiddleware = async (req:Request,res:Response,next:NextFunction) => {
         if(!req.headers.authorization) {
-            res.send(401)
+            res.sendStatus(401)
             return
         }
         if(req.headers.authorization === this.basicValue) {
             next()
             return      
         }
-        res.send(401)
+        res.sendStatus(401)
     }
     public bearerAuthMiddleware = async (req:Request,res:Response,next:NextFunction) => {
         if(!req.headers.authorization) {
-            res.send(401)
+            res.sendStatus(401)
             return
         }
         const authHeader = req.headers.authorization.split(' ')
@@ -39,6 +39,6 @@ export default class AuthMiddlewareProvider {
                 }  
             } catch {}
         }
-        res.send(401)
+        res.sendStatus(401)
     }
 }

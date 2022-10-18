@@ -1,12 +1,12 @@
 import { Collection } from "mongodb";
 import ClientActionModel from "../../logic/models/clientActionModel";
-import BloggersMongoDb from "../bloggersMongoDb";
+import { ClientActionDb } from "../dbInterfaces";
 import MongoClientActionModel from "../models/mongoModels/MongoClientActionModel";
 
 export default class ClientActionRepository {
     private readonly actions: Collection<MongoClientActionModel>
 
-    constructor(db:BloggersMongoDb) {
+    constructor(db:ClientActionDb) {
         this.actions = db.clientActionCollection
     }
     public async getByIp(ip:string, fromTime:number)
