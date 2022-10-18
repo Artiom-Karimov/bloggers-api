@@ -67,6 +67,13 @@ describe('authRouter tests', () => {
         expect(infoResult.body.userId).toBeTruthy()
     })
 
+    it('should block if too many requests', async () => {
+        const results:any[] = []
+        for(let i=0;i<6;i++) {
+            results.push(await request(root.app.server).post(`${base}/login`).send({login:'login',password:'password'}))
+        }
+        expect(results.some(r => r.statusCode === 429)).toBe(true)
+    })
     it('prevent from ip block', async () => {
         await helpers.timeout(3333)
     })

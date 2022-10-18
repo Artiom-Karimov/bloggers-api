@@ -18,7 +18,7 @@ export default class AuthService {
         private readonly confirmSender: ConfirmEmailSender
     ) {}
     public async register(data:RegisterModelType): Promise<AuthError> {
-        if(await this.actionService.clientActionLimit(data.ip)) {
+        if(this.actionService.clientActionLimit(data.ip)) {
             this.actionService.writeRegiterAction(data)
             return AuthError.ActionLimit
         }
@@ -39,7 +39,7 @@ export default class AuthService {
         return AuthError.NoError
     }
     public async resendConfirmationEmail(data:ResendEmailModelType): Promise<AuthError> {
-        if(await this.actionService.clientActionLimit(data.ip)) {
+        if(this.actionService.clientActionLimit(data.ip)) {
             this.actionService.writeResendAction(data)
             return AuthError.ActionLimit
         }
@@ -64,7 +64,7 @@ export default class AuthService {
         return AuthError.NoError
     }
     public async confirmRegistration(data:ConfirmEmailModelType): Promise<AuthError> {
-        if(await this.actionService.clientActionLimit(data.ip)) {
+        if(this.actionService.clientActionLimit(data.ip)) {
             this.actionService.writeConfirmAction(data)
             return AuthError.ActionLimit
         }
@@ -86,7 +86,7 @@ export default class AuthService {
         return AuthError.Unknown
     }
     public async confirmRegitrationByCodeOnly(data:ConfirmEmailModelType): Promise<AuthError> {
-        if(await this.actionService.clientActionLimit(data.ip)) {
+        if(this.actionService.clientActionLimit(data.ip)) {
             this.actionService.writeConfirmAction(data)
             return AuthError.ActionLimit
         }
@@ -106,7 +106,7 @@ export default class AuthService {
     }
     public async login(data:LoginModelType)
     : Promise<TokenPair|AuthError> {
-        if(await this.actionService.clientActionLimit(data.ip)) {
+        if(this.actionService.clientActionLimit(data.ip)) {
             this.actionService.writeLoginAction(data)
             return AuthError.ActionLimit
         }
@@ -127,7 +127,7 @@ export default class AuthService {
     }
     public async renewTokenPair(data:RenewTokenModelType)
     : Promise<TokenPair|AuthError> {
-        if(await this.actionService.clientActionLimit(data.ip)) {
+        if(this.actionService.clientActionLimit(data.ip)) {
             this.actionService.writeRenewAction(data)
             return AuthError.ActionLimit
         }

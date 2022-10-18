@@ -21,7 +21,7 @@ export default class ClientActionRepository {
 
         for(let i=0;i<this.actions.length;i++) {
             if(this.actions[i].timestamp >= time)
-                return i === 0 ? 0 : i - 1
+                return i
         }
         return 0
     }
