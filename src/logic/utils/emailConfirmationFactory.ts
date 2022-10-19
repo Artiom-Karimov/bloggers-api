@@ -1,9 +1,11 @@
 import { EmailConfirmation } from "../models/userModel"
-import ConfirmCodeGenerator from "./confirmCodeGenerator"
+import { v4 as uuidv4 } from 'uuid'
+import add from 'date-fns/add'
+import { email as config } from '../../config/config'
 
 export default class EmailConfirmationFactory {
     public static getNew(): EmailConfirmation {
-        const [code,expiration] = ConfirmCodeGenerator.generate()
+        const [code,expiration] = EmailConfirmationFactory.generate()
         return {
             confirmed:false,
             code:code,
@@ -16,5 +18,10 @@ export default class EmailConfirmationFactory {
             code:'<none>',
             codeExpiration:0
         }
+    }
+    private static generate(): [code:string,expiration:number] {
+        const code = uuidv4()
+        const expiration = add(new Date(), {minutes: config.confirmExpirationMinutes}).getTime()
+        return [code,expiration]
     }
 }
