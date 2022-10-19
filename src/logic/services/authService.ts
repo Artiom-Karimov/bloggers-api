@@ -33,15 +33,15 @@ export default class AuthService {
     }
     public async resendConfirmationEmail(data:ResendEmailModelType): Promise<AuthError> {
         if(this.actionService.updateAndCheckLimit(data.ip,ClientAction.ResendEmail)) return AuthError.ActionLimit        
-            console.log(`emailConfirmation, data:${JSON.stringify(data)}`)
+            
         const user = await this.userService.getByEmail(data.email)
         if(!user) return AuthError.WrongCredentials
-            console.log(`emailConfirmation, user: ${JSON.stringify(user)}`)
+            
         if(user.emailConfirmation.confirmed) return AuthError.AlreadyConfirmed
 
         const newCode = await this.userService.renewEmailConfirmation(user.id)
         if(!newCode) return AuthError.Unknown
-            console.log(`emailConfirmation, code: ${newCode}`)
+            
         this.sendConfirmEmail(user,newCode)
 
         return AuthError.NoError

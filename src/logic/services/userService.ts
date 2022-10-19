@@ -52,7 +52,7 @@ export default class UserService {
     public async renewEmailConfirmation(id:string): Promise<string|undefined> {
         const newConfirmation = EmailConfirmationFactory.getNew()
         const updated = await this.repo.updateEmailConfirmation(id,newConfirmation)
-        return updated ? undefined : newConfirmation.code
+        return updated ? newConfirmation.code : undefined
     }
     public async setEmailConfirmed(id:string): Promise<boolean> {
         return this.repo.updateEmailConfirmation(id, EmailConfirmationFactory.getConfirmed())

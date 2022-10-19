@@ -103,6 +103,10 @@ describe('authRouter tests', () => {
             })
         expect(result.statusCode).toBe(401)
     })
+    it('resendEmail should return 204', async () => {
+        const result = await request(root.app.server).post(`${base}/registration-email-resending`).send({email:userData.email})
+        expect(result.statusCode).toBe(204)
+    })
     it('confirm should return 204', async () => {
         const userModel = await root.userService.getByLogin(userData.login)
         expect(userModel).toBeTruthy()
