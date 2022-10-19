@@ -70,7 +70,7 @@ describe('authRouter tests', () => {
     it('should block if too many requests', async () => {
         const results:any[] = []
         for(let i=0;i<6;i++) {
-            results.push(await request(root.app.server).post(`${base}/login`).send({login:'login',password:'password'}))
+            results.push(await request(root.app.server).post(`${base}/registration`).send({login:`vasya${i}`,password:'password',email:`vasya${i}@example.com`}))
         }
         expect(results.some(r => r.statusCode === 429)).toBe(true)
     })

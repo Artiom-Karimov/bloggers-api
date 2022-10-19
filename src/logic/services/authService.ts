@@ -8,6 +8,7 @@ import { ConfirmEmailSender } from "../../email/confirmationEmailSender";
 import { AuthError } from "../models/authError";
 import TokenPair from "../models/tokenPair";
 import ClientActionService from "./clientActionService";
+import { ClientAction } from "../models/clientActionModel";
 
 export default class AuthService {
     
@@ -18,138 +19,88 @@ export default class AuthService {
         private readonly confirmSender: ConfirmEmailSender
     ) {}
     public async register(data:RegisterModelType): Promise<AuthError> {
-        if(this.actionService.clientActionLimit(data.ip)) {
-            this.actionService.writeRegiterAction(data)
-            return AuthError.ActionLimit
-        }
+        if(this.actionService.updateAndCheckLimit(data.ip,ClientAction.Register)) return AuthError.ActionLimit
+
         const existsError = await this.loginOrEmailExists(data)
-        if(existsError !== AuthError.NoError) {
-            this.actionService.writeRegiterAction(data)
-            return existsError
-        }
+        if(existsError !== AuthError.NoError) return existsError
+
         const user = await this.createAndGetUser(data)
-        if(!user) {
-            this.actionService.writeRegiterAction(data)
-            return AuthError.Unknown
-        }
+        if(!user) return AuthError.Unknown
 
         this.sendConfirmEmail(user)
-        this.actionService.writeRegiterAction(data,true)
 
         return AuthError.NoError
     }
     public async resendConfirmationEmail(data:ResendEmailModelType): Promise<AuthError> {
-        if(this.actionService.clientActionLimit(data.ip)) {
-            this.actionService.writeResendAction(data)
-            return AuthError.ActionLimit
-        }
-        const user = await this.userService.getByEmail(data.email)
-        if(!user) {
-            this.actionService.writeResendAction(data)
-            return AuthError.WrongCredentials
-        }
-        if(user.emailConfirmation.confirmed) {
-            this.actionService.writeResendAction(data,false,user.accountData.login)
-            return AuthError.AlreadyConfirmed
-        }
-        const newCode = await this.userService.renewEmailConfirmation(user.id)
-        if(!newCode) {
-            this.actionService.writeResendAction(data,false,user.accountData.login)
-            return AuthError.Unknown
-        }
-        this.sendConfirmEmail(user,newCode)
+        if(this.actionService.updateAndCheckLimit(data.ip,ClientAction.ResendEmail)) return AuthError.ActionLimit        
 
-        this.actionService.writeResendAction(data,true,user.accountData.login)
+        const user = await this.userService.getByEmail(data.email)
+        if(!user) return AuthError.WrongCredentials
+
+        if(user.emailConfirmation.confirmed) return AuthError.AlreadyConfirmed
+
+        const newCode = await this.userService.renewEmailConfirmation(user.id)
+        if(!newCode) return AuthError.Unknown
+
+        this.sendConfirmEmail(user,newCode)
 
         return AuthError.NoError
     }
     public async confirmRegistration(data:ConfirmEmailModelType): Promise<AuthError> {
-        if(this.actionService.clientActionLimit(data.ip)) {
-            this.actionService.writeConfirmAction(data)
-            return AuthError.ActionLimit
-        }
+        if(this.actionService.updateAndCheckLimit(data.ip,ClientAction.ConfirmEmail)) return AuthError.ActionLimit
+        
         const user = await this.userService.getByLogin(data.login)
-        if(!user) {
-            this.actionService.writeConfirmAction(data)
-            return AuthError.UserNotFound
-        }
+        if(!user) return AuthError.UserNotFound
+        
         if(user.emailConfirmation.codeExpiration < new Date().getDate() || 
             data.code !== user.emailConfirmation.code) {
-                this.actionService.writeConfirmAction(data)
                 return AuthError.WrongCode
         }
-        if(await this.userService.setEmailConfirmed(user.id)) {
-            this.actionService.writeConfirmAction(data,true)
-            return AuthError.NoError
-        }
-        this.actionService.writeConfirmAction(data)
+        if(await this.userService.setEmailConfirmed(user.id)) return AuthError.NoError
+        
         return AuthError.Unknown
     }
     public async confirmRegitrationByCodeOnly(data:ConfirmEmailModelType): Promise<AuthError> {
-        if(this.actionService.clientActionLimit(data.ip)) {
-            this.actionService.writeConfirmAction(data)
-            return AuthError.ActionLimit
-        }
+        if(this.actionService.updateAndCheckLimit(data.ip,ClientAction.ConfirmEmail)) return AuthError.ActionLimit
+
         const user = await this.userService.getByConfirmCode(data.code)
         if(!user || 
             user.emailConfirmation.codeExpiration < new Date().getDate() || 
-            data.code !== user.emailConfirmation.code) {
-                this.actionService.writeConfirmAction(data)
+            data.code !== user.emailConfirmation.code) {                
                 return AuthError.WrongCode
         }
-        if(await this.userService.setEmailConfirmed(user.id)) {
-            this.actionService.writeConfirmAction(data,true)
-            return AuthError.NoError
-        }
-        this.actionService.writeConfirmAction(data)
+        if(await this.userService.setEmailConfirmed(user.id)) return AuthError.NoError
+        
         return AuthError.Unknown
     }
     public async login(data:LoginModelType)
     : Promise<TokenPair|AuthError> {
-        if(this.actionService.clientActionLimit(data.ip)) {
-            this.actionService.writeLoginAction(data)
-            return AuthError.ActionLimit
-        }
-        const user = await this.userService.getByLogin(data.login)
-        if(!user || !await this.checkPassword(user,data.password)) {
-            this.actionService.writeLoginAction(data)
-            return AuthError.WrongCredentials
-        }   
+        if(this.actionService.updateAndCheckLimit(data.ip,ClientAction.Login)) return AuthError.ActionLimit
 
+        const user = await this.userService.getByLogin(data.login)
+        if(!user || !await this.checkPassword(user,data.password)) return AuthError.WrongCredentials
+           
         const pair = await this.sessionService.createDevice({
             ip:data.ip, deviceName:data.deviceName, userId:user.id})
-        if(!pair) {
-            this.actionService.writeLoginAction(data)
-            return AuthError.Unknown
-        }
-        this.actionService.writeLoginAction(data,true)
+        if(!pair) return AuthError.Unknown
+        
         return pair
     }
     public async renewTokenPair(data:RenewTokenModelType)
     : Promise<TokenPair|AuthError> {
-        if(this.actionService.clientActionLimit(data.ip)) {
-            this.actionService.writeRenewAction(data)
-            return AuthError.ActionLimit
-        }
+        if(this.actionService.updateAndCheckLimit(data.ip,ClientAction.RenewToken)) return AuthError.ActionLimit
+
         const tokenData = JwtTokenOperator.unpackRefreshToken(data.refreshToken)
-        if(!tokenData) {
-            this.actionService.writeRenewAction(data)
-            return AuthError.WrongToken
-        }
+        if(!tokenData) return AuthError.WrongToken
+        
         const user = await this.userService.get(tokenData.userId)
-        if(!user) {
-            this.actionService.writeRenewAction(data)
-            return AuthError.UserNotFound
-        }
+        if(!user) return AuthError.UserNotFound
 
         const pair = await this.sessionService.updateDevice(
             tokenData, 
             { ip:data.ip, deviceName:data.deviceName, userId:user.id })
-        if(!pair) {
-            this.actionService.writeRenewAction(data,false,user.accountData.login)
-            return AuthError.WrongToken
-        }
-        this.actionService.writeRenewAction(data,true,user.accountData.login)
+        if(!pair) return AuthError.WrongToken
+        
         return pair
     }
     public async logout(refreshToken:string): Promise<boolean> {

@@ -1,6 +1,7 @@
 export enum ClientAction {
     Unset = 'unset',
     Register = 'register',
+    ResendEmail = 'resendEmail',
     ConfirmEmail = 'confirmEmail',
     Login = 'login',
     RenewToken = 'renewToken'
@@ -8,12 +9,8 @@ export enum ClientAction {
 
 export default class ClentActionModel {
     constructor(
-        public id:string,
         public ip:string,
         public action:ClientAction,
-        public login:string,
-        public deviceName:string,
-        public success:boolean,
         public timestamp:number
     ) {}   
 }

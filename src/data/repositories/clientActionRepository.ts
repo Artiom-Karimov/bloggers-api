@@ -1,12 +1,12 @@
-import ClientActionModel from "../../logic/models/clientActionModel";
+import ClientActionModel, { ClientAction } from "../../logic/models/clientActionModel";
 
 export default class ClientActionRepository {
     private readonly actions: Array<ClientActionModel> = []
 
     constructor() {}
 
-    public countByIp(ip:string, fromTime:number): number {
-        return this.actions.filter(a => a.ip === ip && a.timestamp >= fromTime).length
+    public countByIp(ip:string, action:ClientAction): number {
+        return this.actions.filter(a => a.ip === ip && a.action === action).length
     }
     public create(data:ClientActionModel) {
         this.actions.push(data)
