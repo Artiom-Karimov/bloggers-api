@@ -1,8 +1,8 @@
 import { Collection, Filter, FindCursor } from "mongodb";
 import BloggersMongoDb from "../bloggersMongoDb";
-import MongoUserModel from "../models/mongoModels/mongoUserModel";
-import UserPageViewModel from "../models/pageViewModels/userPageViewModel";
-import UserViewModel from "../../presentation/models/userViewModel";
+import MongoUserModel from "../models/mongoUserModel";
+import PageViewModel from "../../presentation/models/viewModels/pageViewModel";
+import UserViewModel from "../../presentation/models/viewModels/userViewModel";
 import { calculateSkip } from "./utils/skipCalculator";
 
 export default class UserQueryRepository {
@@ -20,11 +20,11 @@ export default class UserQueryRepository {
         pageSize: number,
         sortBy: string,
         sortDirection: string
-    ): Promise<UserPageViewModel> {
+    ): Promise<PageViewModel<UserViewModel>> {
         const filter = this.getFilter(searchLoginTerm, searchEmailTerm)
         const cursor = this.getCursor(filter,sortBy,sortDirection)
         const total = await this.getTotalCount(filter)
-        const result = new UserPageViewModel(pageNumber, pageSize, total)
+        const result = new PageViewModel<UserViewModel>(pageNumber, pageSize, total)
         return await this.loadPageUsers(result, cursor)
     }
     public async getById(id:string): Promise<UserViewModel|undefined> {
@@ -59,10 +59,11 @@ export default class UserQueryRepository {
     private async getTotalCount(filter:Filter<MongoUserModel>): Promise<number> {
         return await this.users.countDocuments(filter)
     }
-    private async loadPageUsers(page:UserPageViewModel,cursor:FindCursor<MongoUserModel>)
-    : Promise<UserPageViewModel> {
+    private async loadPageUsers(page:PageViewModel<UserViewModel>,cursor:FindCursor<MongoUserModel>)
+    : Promise<PageViewModel<UserViewModel>> {
         const skip = calculateSkip(page.pageSize, page.page)
         const result = await cursor.skip(skip).limit(page.pageSize).toArray()
-        return page.add(...result)
+        const viewModels = result.map(m => MongoUserModel.getViewModel(m))
+        return page.add(...viewModels)
     }
 }

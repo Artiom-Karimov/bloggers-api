@@ -1,5 +1,5 @@
-import DeviceSessionModel from "../../../logic/models/deviceSessionModel"
-import DeviceSessionViewModel from "../../../presentation/models/deviceSessionViewModel"
+import DeviceSessionModel from "../../logic/models/deviceSessionModel"
+import DeviceSessionViewModel from "../../presentation/models/viewModels/deviceSessionViewModel"
 
 export default class MongoDeviceSessionModel {
     public _id: string

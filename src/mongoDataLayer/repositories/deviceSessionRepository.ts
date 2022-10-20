@@ -2,7 +2,7 @@ import { Collection } from "mongodb";
 import { DeviceSessionRepository as IDeviceSessionRepository } from "../../logic/interfaces/deviceSessionRepository"
 import DeviceSessionModel from "../../logic/models/deviceSessionModel";
 import BloggersMongoDb from "../bloggersMongoDb";
-import MongoDeviceSessionModel from "../models/mongoModels/mongoDeviceSessionModel";
+import MongoDeviceSessionModel from "../models/mongoDeviceSessionModel";
 
 export default class DeviceSessionRepository implements IDeviceSessionRepository {
     private readonly sessions: Collection<MongoDeviceSessionModel>

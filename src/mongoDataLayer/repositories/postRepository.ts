@@ -2,7 +2,7 @@ import BloggersMongDb from "../bloggersMongoDb";
 import { PostRepository as IPostRepository } from "../../logic/interfaces/postRepository"
 import PostModel, { PostInputModel } from "../../logic/models/postModel";
 import { Collection } from "mongodb";
-import MongoPostModel from "../models/mongoModels/mongoPostModel";
+import MongoPostModel from "../models/mongoPostModel";
 import BloggersMongoDb from "../bloggersMongoDb";
 
 export default class PostRepository implements IPostRepository {

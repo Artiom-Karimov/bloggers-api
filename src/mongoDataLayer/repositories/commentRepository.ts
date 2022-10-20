@@ -2,7 +2,7 @@ import BloggersMongoDb from "../bloggersMongoDb";
 import { CommentRepository as ICommentRepository } from "../../logic/interfaces/commentRepository"
 import CommentModel, { CommentInputModel } from "../../logic/models/commentModel";
 import { Collection } from "mongodb";
-import MongoCommentModel from "../models/mongoModels/mongoCommentModel";
+import MongoCommentModel from "../models/mongoCommentModel";
 
 export default class CommentRepository implements ICommentRepository {
     private readonly db: BloggersMongoDb

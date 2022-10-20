@@ -1,9 +1,9 @@
 import request from 'supertest'
-import BlogPageViewModel from '../../mongoDataLayer/models/pageViewModels/blogPageViewModel'
-import BlogViewModel from '../../presentation/models/blogViewModel'
-import PostPageViewModel from '../../mongoDataLayer/models/pageViewModels/postPageViewModel'
+import PageViewModel from '../../presentation/models/viewModels/pageViewModel'
+import BlogViewModel from '../../presentation/models/viewModels/blogViewModel'
 import * as helpers from './routerTestHelpers'
 import * as root from '../testCompositionRoot'
+import PostViewModel from '../../presentation/models/viewModels/postViewModel'
 
 const base = '/blogs'
 
@@ -40,7 +40,7 @@ describe('blogsRouter crud tests', () => {
     it('getAll should return empty array', async () => {
         const response = await request(root.app.server).get(base)
         expect(response.statusCode).toEqual(200)
-        const defaultResult = new BlogPageViewModel(1,10,0)
+        const defaultResult = new PageViewModel<BlogViewModel>(1,10,0)
         expect(response.body).toEqual(defaultResult)
     })
 
@@ -65,7 +65,7 @@ describe('blogsRouter crud tests', () => {
     it('post should create valid models', async () => {
         await helpers.createBlogSamples()
         const response = await request(root.app.server).get(base)
-        const body = response.body as BlogPageViewModel
+        const body = response.body as PageViewModel<BlogViewModel>
         expect(body).not.toBeUndefined()
         expect(body.totalCount).toBe(helpers.sampleBlogInputs.length)
         expect(body.pagesCount).toBe(4)
@@ -90,8 +90,8 @@ describe('blogsRouter crud tests', () => {
         await helpers.createPostSamplesByBlog(blog1.id,blog1.name)
         await helpers.createPostSamplesByBlog(blog2.id,blog2.name)
 
-        const blog1Posts = (await request(root.app.server).get(`${base}/${blog1.id}/posts`)).body as PostPageViewModel
-        const blog2Posts = (await request(root.app.server).get(`${base}/${blog2.id}/posts`)).body as PostPageViewModel
+        const blog1Posts = (await request(root.app.server).get(`${base}/${blog1.id}/posts`)).body as PageViewModel<PostViewModel>
+        const blog2Posts = (await request(root.app.server).get(`${base}/${blog2.id}/posts`)).body as PageViewModel<PostViewModel>
 
         expect(blog1Posts.totalCount).toBe(helpers.samplePostInputs.length)
         expect(blog2Posts.totalCount).toBe(helpers.samplePostInputs.length)

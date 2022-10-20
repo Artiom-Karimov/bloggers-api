@@ -1,9 +1,9 @@
 import { Collection, FindCursor } from "mongodb"
 import BloggersMongoDb from "../bloggersMongoDb"
-import MongoCommentModel from "../models/mongoModels/mongoCommentModel"
-import CommentPageViewModel from '../models/pageViewModels/commentPageViewModel'
+import MongoCommentModel from "../models/mongoCommentModel"
+import PageViewModel from "../../presentation/models/viewModels/pageViewModel"
 import { calculateSkip } from './utils/skipCalculator'
-import CommentViewModel from '../../presentation/models/commentViewModel'
+import CommentViewModel from '../../presentation/models/viewModels/commentViewModel'
 
 export default class CommentQueryRepository {
     private readonly db:BloggersMongoDb
@@ -19,9 +19,9 @@ export default class CommentQueryRepository {
         pageSize:number,
         sortBy:string,
         sortDirection:string
-    ): Promise<CommentPageViewModel> {
+    ): Promise<PageViewModel<CommentViewModel>> {
         const totalCount = await this.getTotalCount(postId)
-        const page = new CommentPageViewModel(pageNumber,pageSize,totalCount)
+        const page = new PageViewModel<CommentViewModel>(pageNumber,pageSize,totalCount)
         const cursor = this.getCursor(postId, sortBy, sortDirection)
         return await this.loadPageComments(page, cursor)
     }
@@ -36,10 +36,11 @@ export default class CommentQueryRepository {
     private async getTotalCount(postId:string): Promise<number> {
         return await this.comments.countDocuments({postId:postId})
     } 
-    private async loadPageComments(page:CommentPageViewModel,cursor:FindCursor<MongoCommentModel>)
-    : Promise<CommentPageViewModel> {
+    private async loadPageComments(page:PageViewModel<CommentViewModel>,cursor:FindCursor<MongoCommentModel>)
+    : Promise<PageViewModel<CommentViewModel>> {
         const skip = calculateSkip(page.pageSize, page.page)
         const result = await cursor.skip(skip).limit(page.pageSize).toArray()
-        return page.add(...result)
+        const viewModels = result.map(m => MongoCommentModel.getViewModel(m))
+        return page.add(...viewModels)
     }
 }

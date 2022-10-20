@@ -1,7 +1,7 @@
 import BloggersMongoDb from "../bloggersMongoDb";
 import BlogModel, { BlogInputModel } from "../../logic/models/blogModel";
 import { Collection } from "mongodb";
-import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
+import MongoBlogModel from "../models/mongoBlogModel";
 import { BlogRepository as IBlogRepository } from "../../logic/interfaces/blogRepositoty"
 
 export default class BlogRepository implements IBlogRepository {

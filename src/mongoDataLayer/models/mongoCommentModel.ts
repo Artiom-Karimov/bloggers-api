@@ -1,5 +1,5 @@
-import CommentModel from "../../../logic/models/commentModel"
-import CommentViewModel from "../../../presentation/models/commentViewModel"
+import CommentModel from "../../logic/models/commentModel"
+import CommentViewModel from "../../presentation/models/viewModels/commentViewModel"
 
 export default class MongoCommentModel {
     public _id: string

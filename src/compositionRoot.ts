@@ -7,7 +7,7 @@ import DeviceSessionQueryRepository from './mongoDataLayer/repositories/deviceSe
 import DeviceSessionRepository from './mongoDataLayer/repositories/deviceSessionRepository'
 import ClientActionCollection from './logic/utils/clientActionCollection'
 import PostRepository from './mongoDataLayer/repositories/postRepository'
-import QueryRepository from './mongoDataLayer/repositories/queryRepository'
+import QueryRepository from './mongoDataLayer/repositories/blogPostQueryRepository'
 import UserQueryRepository from './mongoDataLayer/repositories/userQueryRepository'
 import UserRepository from './mongoDataLayer/repositories/userRepository'
 import ConfirmationEmailSender from './email/confirmationEmailSender'

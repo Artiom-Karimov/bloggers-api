@@ -1,8 +1,9 @@
 import request from 'supertest'
-import PostPageViewModel from '../../mongoDataLayer/models/pageViewModels/postPageViewModel'
+import PageViewModel from '../../presentation/models/viewModels/pageViewModel'
 import PostModel, { PostInputModel } from '../../logic/models/postModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
+import PostViewModel from '../../presentation/models/viewModels/postViewModel'
 
 const base = '/posts'
 
@@ -48,7 +49,7 @@ describe('postsRouter crud tests', () => {
     it('getAll should return empty array', async () => {
         const response = await request(root.app.server).get(base)
         expect(response.statusCode).toEqual(200)
-        const model = response.body as PostPageViewModel
+        const model = response.body as PageViewModel<PostViewModel>
         expect(model.totalCount).toBe(0)
         expect(model.items).toEqual([])
     })
@@ -86,7 +87,7 @@ describe('postsRouter crud tests', () => {
     it('post should create valid models', async () => {
         await helpers.createPostSamples()
         const response = await request(root.app.server).get(base)
-        const body = response.body as PostPageViewModel
+        const body = response.body as PageViewModel<PostViewModel>
         expect(body).not.toBeUndefined()
         expect(body.totalCount).toBe(helpers.samplePostInputs.length)
 

@@ -1,10 +1,11 @@
 import BloggersMongoDb from "../bloggersMongoDb";
-import BlogPageViewModel from "../models/pageViewModels/blogPageViewModel";
+import PageViewModel from "../../presentation/models/viewModels/pageViewModel";
 import { Collection, FindCursor } from "mongodb";
-import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
-import MongoPostModel from "../models/mongoModels/mongoPostModel";
-import PostPageViewModel from "../models/pageViewModels/postPageViewModel";
+import MongoBlogModel from "../models/mongoBlogModel";
+import MongoPostModel from "../models/mongoPostModel";
 import { calculateSkip } from "./utils/skipCalculator";
+import BlogViewModel from "../../presentation/models/viewModels/blogViewModel";
+import PostViewModel from "../../presentation/models/viewModels/postViewModel";
 
 export default class QueryRepository {
     private readonly db:BloggersMongoDb
@@ -22,12 +23,12 @@ export default class QueryRepository {
         pageSize:number,
         sortBy:string,
         sortDirection:string
-    ): Promise<BlogPageViewModel> {
+    ): Promise<PageViewModel<BlogViewModel>> {
             const filter = this.getFilter(searchNameTerm)
             const cursor = this.getBlogCursor(filter,sortBy,sortDirection)
 
             const totalCount = await this.getBlogCount(filter)
-            const page = new BlogPageViewModel(pageNumber,pageSize,totalCount)
+            const page = new PageViewModel<BlogViewModel>(pageNumber,pageSize,totalCount)
             
             return await this.loadPageBlogs(page,cursor)
     }
@@ -36,10 +37,10 @@ export default class QueryRepository {
         pageSize:number,
         sortBy:string,
         sortDirection:string
-    ): Promise<PostPageViewModel> {
+    ): Promise<PageViewModel<PostViewModel>> {
         const cursor = this.getPostCursor(sortBy,sortDirection)
         const totalCount = await this.getPostCount()
-        const page = new PostPageViewModel(pageNumber,pageSize,totalCount)
+        const page = new PageViewModel<PostViewModel>(pageNumber,pageSize,totalCount)
 
         return await this.loadPagePosts(page,cursor)
     }
@@ -49,13 +50,13 @@ export default class QueryRepository {
         sortBy:string,
         sortDirection:string,
         blogId:string  
-    ): Promise<PostPageViewModel|undefined> {
+    ): Promise<PageViewModel<PostViewModel>|undefined> {
         const blog = await this.blogs.findOne({_id:blogId})
         if(!blog) return undefined
         const cursor = this.getPostCursor(sortBy,sortDirection,blogId)
 
         const totalCount = await this.getPostCount(blogId)
-        const page = new PostPageViewModel(pageNumber,pageSize,totalCount)
+        const page = new PageViewModel<PostViewModel>(pageNumber,pageSize,totalCount)
 
         return await this.loadPagePosts(page,cursor)
     }
@@ -81,15 +82,17 @@ export default class QueryRepository {
             return 0
         return count[0].total
     }
-    private async loadPageBlogs(page:BlogPageViewModel,cursor:FindCursor<MongoBlogModel>): Promise<BlogPageViewModel> {
+    private async loadPageBlogs(page:PageViewModel<BlogViewModel>,cursor:FindCursor<MongoBlogModel>): Promise<PageViewModel<BlogViewModel>> {
         const skip = calculateSkip(page.pageSize, page.page)
         const result = await cursor.skip(skip).limit(page.pageSize).toArray()
-        return page.add(...result)
+        const viewModels = result.map(m => MongoBlogModel.getViewModel(m))
+        return page.add(...viewModels)
     }
-    private async loadPagePosts(page:PostPageViewModel,cursor:FindCursor<MongoPostModel>): Promise<PostPageViewModel> {
+    private async loadPagePosts(page:PageViewModel<PostViewModel>,cursor:FindCursor<MongoPostModel>): Promise<PageViewModel<PostViewModel>> {
         const skip = calculateSkip(page.pageSize, page.page)
         const result = await cursor.skip(skip).limit(page.pageSize).toArray()
-        return page.add(...result)
+        const viewModels = result.map(m => MongoPostModel.getViewModel(m))
+        return page.add(...viewModels)
     }
     private getBlogCursor(filter: any, sortBy:string, sortDirection:string): FindCursor<MongoBlogModel> {
         const order = sortDirection === 'asc' ? 1 : -1

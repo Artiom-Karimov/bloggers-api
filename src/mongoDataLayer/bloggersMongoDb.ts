@@ -1,9 +1,9 @@
 import { MongoClient, Db, Collection } from "mongodb"
-import MongoBlogModel from "./models/mongoModels/mongoBlogModel"
-import MongoCommentModel from "./models/mongoModels/mongoCommentModel"
-import MongoDeviceSessionModel from "./models/mongoModels/mongoDeviceSessionModel"
-import MongoPostModel from "./models/mongoModels/mongoPostModel"
-import MongoUserModel from "./models/mongoModels/mongoUserModel"
+import MongoBlogModel from "./models/mongoBlogModel"
+import MongoCommentModel from "./models/mongoCommentModel"
+import MongoDeviceSessionModel from "./models/mongoDeviceSessionModel"
+import MongoPostModel from "./models/mongoPostModel"
+import MongoUserModel from "./models/mongoUserModel"
 
 export default class BloggersMongoDb {
     public readonly blogCollection: Collection<MongoBlogModel>

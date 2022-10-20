@@ -2,7 +2,7 @@ import { Collection } from "mongodb";
 import { UserRepository as IUserRepository } from "../../logic/interfaces/userRepository"
 import UserModel, { EmailConfirmation } from "../../logic/models/userModel";
 import BloggersMongoDb from "../bloggersMongoDb";
-import MongoUserModel from "../models/mongoModels/mongoUserModel";
+import MongoUserModel from "../models/mongoUserModel";
 
 export default class UserRepository implements IUserRepository {
     private readonly users: Collection<MongoUserModel>

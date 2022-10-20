@@ -3,9 +3,9 @@ import { Router, Request, Response } from 'express'
 import BlogService from '../../logic/services/blogService'
 import { blogValidation, postValidation } from '../validation/bodyValidators'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
-import QueryRepository from '../../mongoDataLayer/repositories/queryRepository'
-import GetBlogsQueryParams from '../models/getBlogsQueryParams'
-import GetPostsQueryParams from '../models/getPostsQueryParams'
+import QueryRepository from '../../mongoDataLayer/repositories/blogPostQueryRepository'
+import GetBlogsQueryParams from '../models/queryParams/getBlogsQueryParams'
+import GetPostsQueryParams from '../models/queryParams/getPostsQueryParams'
 import PostService from '../../logic/services/postService'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 

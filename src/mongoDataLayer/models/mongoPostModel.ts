@@ -1,5 +1,5 @@
-import PostModel from "../../../logic/models/postModel"
-import PostViewModel from "../../../presentation/models/postViewModel"
+import PostModel from "../../logic/models/postModel"
+import PostViewModel from "../../presentation/models/viewModels/postViewModel"
 
 export default class MongoPostModel {
     public _id: string

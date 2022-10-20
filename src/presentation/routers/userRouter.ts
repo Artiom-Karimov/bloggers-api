@@ -3,7 +3,7 @@ import UserQueryRepository from '../../mongoDataLayer/repositories/userQueryRepo
 import UserService from '../../logic/services/userService'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { validationMiddleware } from '../middlewares/validationMiddleware'
-import GetUsersQueryParams from '../models/getUsersQueryParams'
+import GetUsersQueryParams from '../models/queryParams/getUsersQueryParams'
 import { userValidation } from '../validation/bodyValidators'
 
 export default class UserRouter {
