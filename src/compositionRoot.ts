@@ -26,6 +26,9 @@ import PostRouter from './presentation/routers/postRouter'
 import SecurityRouter from './presentation/routers/securityRouter'
 import UserRouter from './presentation/routers/userRouter'
 import ClientActionService from './logic/services/clientActionService'
+import TestingRouter from './presentation/routers/testingRouter'
+import TestingService from './logic/services/testingService'
+import TestingRepository from './mongoDataLayer/repositories/testingRepository'
 
 export default class CompositionRoot {
     private readonly db = new BloggersMongoDb(config.mongoUri)
@@ -37,6 +40,7 @@ export default class CompositionRoot {
     private readonly commentRepository: CommentRepository
     private readonly deviceSessionRepository: DeviceSessionRepository
     private readonly clientActionRepository: ClientActionCollection
+    private readonly testingRepository: TestingRepository
 
     private readonly queryRepository: BlogPostQueryRepository
     private readonly userQueryRepository: UserQueryRepository
@@ -50,6 +54,7 @@ export default class CompositionRoot {
     private readonly commentService: CommentService
     private readonly clientActionService: ClientActionService
     private readonly authService: AuthService
+    private readonly testingService: TestingService
 
     private readonly authProvider: AuthMiddlewareProvider
 
@@ -59,6 +64,7 @@ export default class CompositionRoot {
     private readonly userRouter: UserRouter
     private readonly securityRouter: SecurityRouter   
     private readonly authRouter: AuthRouter
+    private readonly testingRouter: TestingRouter
 
     private app: BloggersApp|undefined
     
@@ -69,6 +75,7 @@ export default class CompositionRoot {
         this.commentRepository = new CommentRepository(this.db)
         this.deviceSessionRepository = new DeviceSessionRepository(this.db)
         this.clientActionRepository = new ClientActionCollection()
+        this.testingRepository = new TestingRepository(this.db)
 
         this.queryRepository = new BlogPostQueryRepository(this.db)
         this.userQueryRepository = new UserQueryRepository(this.db)
@@ -82,6 +89,7 @@ export default class CompositionRoot {
         this.commentService = new CommentService(this.commentRepository)
         this.clientActionService = new ClientActionService(this.clientActionRepository)
         this.authService = new AuthService(this.userService,this.deviceSessionService,this.clientActionService,this.confirmationEmailSender)
+        this.testingService = new TestingService(this.testingRepository)
         
         this.authProvider = new AuthMiddlewareProvider(this.userService)
 
@@ -91,18 +99,24 @@ export default class CompositionRoot {
         this.userRouter = new UserRouter(this.userService,this.userQueryRepository,this.authProvider)
         this.securityRouter = new SecurityRouter(this.deviceSessionService,this.deviceSessionQueryRepository,this.authProvider)
         this.authRouter = new AuthRouter(this.authService,this.userQueryRepository,this.authProvider)
+        this.testingRouter = new TestingRouter(this.testingService)
     }
 
     public async start() {
         this.app = new BloggersApp({
-            db:this.db,
             authRouter:this.authRouter,
             blogRouter:this.blogRouter,
             commentRouter:this.commentRouter,
             postRouter:this.postRouter,
             userRouter:this.userRouter,
-            securityRouter:this.securityRouter
+            securityRouter:this.securityRouter,
+            testingRouter:this.testingRouter
         })
+        await this.db.connect()
         await this.app.start()
+    }
+    public async stop() {
+        await this.app?.stop()
+        await this.db.close()
     }
 }
