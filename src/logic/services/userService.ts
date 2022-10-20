@@ -1,12 +1,11 @@
-import UserRepository from "../../data/repositories/userRepository"
+import { UserRepository } from "../interfaces/userRepository"
 import UserModel, { UserInputModel } from "../models/userModel"
 import UserFactory from "../utils/userFactory"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
 
 export default class UserService {    
 
-    constructor(
-        private readonly repo: UserRepository) {}
+    constructor(private readonly repo: UserRepository) {}
         
     public async get(id:string): Promise<UserModel|undefined> {
         return this.repo.get(id)
@@ -16,6 +15,9 @@ export default class UserService {
     }
     public async getByEmail(email:string): Promise<UserModel|undefined> {
         return this.repo.getByEmail(email)
+    }
+    public async getByConfirmCode(code:string): Promise<UserModel|undefined> {
+        return this.repo.getByConfirmationCode(code)
     }
     public async createUnconfirmed(data:UserInputModel): Promise<string|undefined> {
         if(await this.loginExists(data.login) || await this.emailExists(data.email))
@@ -34,10 +36,7 @@ export default class UserService {
     public async getLoginById(id:string): Promise<string|undefined> {
         const user = await this.get(id)
         return user? user.accountData.login : undefined
-    }
-    public async getByConfirmCode(code:string): Promise<UserModel|undefined> {
-        return this.repo.getByConfirmationCode(code)
-    }
+    }  
     public async delete(id:string): Promise<boolean> {
         return this.repo.delete(id)
     }

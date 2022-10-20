@@ -1,5 +1,6 @@
 import request from 'supertest'
-import UserPageViewModel from '../../data/models/pageViewModels/userPageViewModel'
+import PageViewModel from '../../presentation/models/viewModels/pageViewModel'
+import UserViewModel from '../../presentation/models/viewModels/userViewModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 
@@ -29,7 +30,7 @@ describe('userRouter tests', () => {
     it('should return empty user list', async () => {
         const response = await request(root.app.server).get(base)
         expect(response.statusCode).toEqual(200)
-        const model = response.body as UserPageViewModel
+        const model = response.body as PageViewModel<UserViewModel>
         expect(model.totalCount).toBe(0)
         expect(model.items).toEqual([])
     })
@@ -47,7 +48,7 @@ describe('userRouter tests', () => {
     it('get should return userList', async () => {
         const response = await request(root.app.server)
             .get(`${base}?pageSize=${helpers.sampleUserInputs.length}`)
-        const data = response.body as UserPageViewModel
+        const data = response.body as PageViewModel<UserViewModel>
 
         expect(data.totalCount).toBe(helpers.sampleUserInputs.length)
         expect(data.pageSize).toBe(helpers.sampleUserInputs.length)

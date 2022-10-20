@@ -1,9 +1,7 @@
+import { v4 as uuidv4 } from 'uuid'
+
 export default class IdGenerator {
-    public static generate():string {
-        let datetime = Number(new Date())
-        let randomNumber = Math.floor(Math.random()*4096)
-        randomNumber ^= Math.floor(Math.random()*4096)
-        let stringResult = `${datetime}${randomNumber}`    
-        return stringResult
+    public static generate():string {   
+        return uuidv4()
     }
 }

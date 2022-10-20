@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import UserQueryRepository from '../../data/repositories/userQueryRepository'
+import { UserQueryRepository } from '../interfaces/userQueryRepository'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { confirmCodeValidation, emailValidation, userValidation } from "../validation/bodyValidators";
 import { validationMiddleware } from "../middlewares/validationMiddleware";

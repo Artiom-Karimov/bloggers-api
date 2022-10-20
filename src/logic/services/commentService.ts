@@ -1,4 +1,4 @@
-import CommentRepository from "../../data/repositories/commentRepository";
+import { CommentRepository } from "../interfaces/commentRepository";
 import CommentModel, { CommentCreateModel } from "../models/commentModel";
 import DateGenerator from "../utils/dateGenerator";
 import IdGenerator from "../utils/idGenerator";
@@ -18,7 +18,7 @@ export default class CommentService {
             data,
             DateGenerator.generate()
         )
-        return (await this.repo.create(newComment))?.id
+        return this.repo.create(newComment)
     }
     public async update(id:string,content:string): Promise<boolean> {
         return this.repo.update(id,content)

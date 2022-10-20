@@ -1,4 +1,4 @@
-import ClientActionRepository from "../../data/repositories/clientActionRepository";
+import { ClientActionRepository } from "../interfaces/clientActionRepository";
 import ClientActionFactory from "../utils/clientActionFactory";
 
 import { userAuth as config } from '../../config/config'
@@ -19,7 +19,7 @@ export default class ClientActionService {
         this.clientActionRepo.deleteAllBeforeTime(fromTime)
     }
     private checkLimit(ip:string,action:ClientAction): boolean {
-        const actions = this.clientActionRepo.countByIp(ip,action)
+        const actions = this.clientActionRepo.count(ip,action)
         return actions > config.actionLimit
     }
 }

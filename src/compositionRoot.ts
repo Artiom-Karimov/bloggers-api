@@ -1,15 +1,15 @@
 import * as config from './config/config'
-import BloggersMongoDb from "./data/bloggersMongoDb"
-import BlogRepository from './data/repositories/blogRepository'
-import CommentQueryRepository from './data/repositories/commentQueryRepository'
-import CommentRepository from './data/repositories/commentRepository'
-import DeviceSessionQueryRepository from './data/repositories/deviceSessionQueryRepository'
-import DeviceSessionRepository from './data/repositories/deviceSessionRepository'
-import ClientActionRepository from './data/repositories/clientActionRepository'
-import PostRepository from './data/repositories/postRepository'
-import QueryRepository from './data/repositories/queryRepository'
-import UserQueryRepository from './data/repositories/userQueryRepository'
-import UserRepository from './data/repositories/userRepository'
+import BloggersMongoDb from "./mongoDataLayer/bloggersMongoDb"
+import BlogRepository from './mongoDataLayer/repositories/blogRepository'
+import CommentQueryRepository from './mongoDataLayer/repositories/commentQueryRepository'
+import CommentRepository from './mongoDataLayer/repositories/commentRepository'
+import DeviceSessionQueryRepository from './mongoDataLayer/repositories/deviceSessionQueryRepository'
+import DeviceSessionRepository from './mongoDataLayer/repositories/deviceSessionRepository'
+import ClientActionCollection from './logic/utils/clientActionCollection'
+import PostRepository from './mongoDataLayer/repositories/postRepository'
+import BlogPostQueryRepository from './mongoDataLayer/repositories/blogPostQueryRepository'
+import UserQueryRepository from './mongoDataLayer/repositories/userQueryRepository'
+import UserRepository from './mongoDataLayer/repositories/userRepository'
 import ConfirmationEmailSender from './email/confirmationEmailSender'
 import AuthService from './logic/services/authService'
 import BlogService from './logic/services/blogService'
@@ -36,9 +36,9 @@ export default class CompositionRoot {
     private readonly userRepository: UserRepository
     private readonly commentRepository: CommentRepository
     private readonly deviceSessionRepository: DeviceSessionRepository
-    private readonly clientActionRepository: ClientActionRepository
+    private readonly clientActionRepository: ClientActionCollection
 
-    private readonly queryRepository: QueryRepository
+    private readonly queryRepository: BlogPostQueryRepository
     private readonly userQueryRepository: UserQueryRepository
     private readonly commentQueryRepository: CommentQueryRepository
     private readonly deviceSessionQueryRepository: DeviceSessionQueryRepository
@@ -68,9 +68,9 @@ export default class CompositionRoot {
         this.userRepository = new UserRepository(this.db)
         this.commentRepository = new CommentRepository(this.db)
         this.deviceSessionRepository = new DeviceSessionRepository(this.db)
-        this.clientActionRepository = new ClientActionRepository()
+        this.clientActionRepository = new ClientActionCollection()
 
-        this.queryRepository = new QueryRepository(this.db)
+        this.queryRepository = new BlogPostQueryRepository(this.db)
         this.userQueryRepository = new UserQueryRepository(this.db)
         this.commentQueryRepository = new CommentQueryRepository(this.db)
         this.deviceSessionQueryRepository = new DeviceSessionQueryRepository(this.db)

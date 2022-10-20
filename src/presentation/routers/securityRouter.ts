@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import DeviceSessionQueryRepository from "../../data/repositories/deviceSessionQueryRepository";
+import { DeviceSessionQueryRepository } from "../interfaces/deviceSessionQueryRepository";
 import DeviceSessionService, { DeviceSessionError } from "../../logic/services/deviceSessionService";
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { refreshTokenCheckMiddleware } from "../middlewares/refreshTokenCheckMiddleware";
@@ -47,10 +47,11 @@ export default class SecurityRouter {
             const refreshToken = req.cookies.refreshToken
             const deleted = await this.service.deleteDevice(refreshToken,req.params.deviceId)
             switch(deleted) {
+                case DeviceSessionError.NoError: res.sendStatus(204); break
                 case DeviceSessionError.NotFoundError: res.sendStatus(404); break
                 case DeviceSessionError.TokenError: res.sendStatus(401); break
                 case DeviceSessionError.WrongUserError: res.sendStatus(403); break
-                default: res.sendStatus(204) 
+                default: res.sendStatus(400) 
             }
         })
     }

@@ -3,9 +3,9 @@ import { Router, Request, Response } from 'express'
 import BlogService from '../../logic/services/blogService'
 import { blogValidation, postValidation } from '../validation/bodyValidators'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
-import QueryRepository from '../../data/repositories/queryRepository'
-import GetBlogsQueryParams from '../models/getBlogsQueryParams'
-import GetPostsQueryParams from '../models/getPostsQueryParams'
+import { BlogPostQueryRepository } from '../interfaces/blogPostQueryRepository'
+import GetBlogsQueryParams from '../models/queryParams/getBlogsQueryParams'
+import GetPostsQueryParams from '../models/queryParams/getPostsQueryParams'
 import PostService from '../../logic/services/postService'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 
@@ -13,10 +13,10 @@ export default class BlogRouter {
     public readonly router: Router
     private readonly blogs: BlogService
     private readonly posts: PostService
-    private readonly queryRepo: QueryRepository
+    private readonly queryRepo: BlogPostQueryRepository
     private authProvider: AuthMiddlewareProvider
 
-    constructor(blogService:BlogService,postService:PostService,queryRepo:QueryRepository,authProvider:AuthMiddlewareProvider) {
+    constructor(blogService:BlogService,postService:PostService,queryRepo:BlogPostQueryRepository,authProvider:AuthMiddlewareProvider) {
         this.router = Router()
         this.blogs = blogService
         this.posts = postService
@@ -28,17 +28,13 @@ export default class BlogRouter {
     private setRoutes() {
         this.router.get('/', async (req:Request, res:Response) => {
             const query = new GetBlogsQueryParams(req.query)
-            const result = await this.queryRepo.getBlogs(
-                query.searchNameTerm, query.pageNumber, query.pageSize, query.sortBy, query.sortDirection
-            )
+            const result = await this.queryRepo.getBlogs(query)
             res.status(200).send(result)
         })
 
         this.router.get('/:blogId/posts', async (req:Request, res:Response) => {
             const query = new GetPostsQueryParams(req.query)
-            const result = await this.queryRepo.getBlogPosts(
-                query.pageNumber, query.pageSize, query.sortBy, query.sortDirection, req.params.blogId
-            )
+            const result = await this.queryRepo.getBlogPosts(req.params.blogId,query)
             if(!result) {
                 res.sendStatus(404)
                 return

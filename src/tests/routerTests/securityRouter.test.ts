@@ -1,5 +1,5 @@
 import request from 'supertest'
-import DeviceSessionViewModel from '../../data/models/viewModels/deviceSessionViewModel'
+import DeviceSessionViewModel from '../../presentation/models/viewModels/deviceSessionViewModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 
@@ -13,7 +13,7 @@ describe('securityRouter tests', () => {
         await root.stopApp()
     })
 
-    let refreshCookie: string
+    let refreshCookies: string[]
 
     it('should get session list', async () => {
         const login = 'emelya'
@@ -31,9 +31,9 @@ describe('securityRouter tests', () => {
         }
         const results = await Promise.all(promises)
 
-        refreshCookie = helpers.parseRefreshCookie(results[0].get("Set-Cookie"))
+        refreshCookies = results.map(r => helpers.parseRefreshCookie(r.get("Set-Cookie")))
 
-        const response = await request(root.app.server).get(`/security/devices`).set('Cookie', [ refreshCookie ])
+        const response = await request(root.app.server).get(`/security/devices`).set('Cookie', [ refreshCookies[0] ])
         expect(response.statusCode).toBe(200)
         const sessions = response.body as DeviceSessionViewModel[]
         expect(sessions).toBeTruthy()
@@ -41,18 +41,22 @@ describe('securityRouter tests', () => {
     })
 
     it('should delete one session and return others', async () => {
-        let sessionsResponse = await request(root.app.server).get(`/security/devices`).set('Cookie', [ refreshCookie ])
+        let sessionsResponse = await request(root.app.server).get(`/security/devices`).set('Cookie', [ refreshCookies[0] ])
         let sessions = sessionsResponse.body as DeviceSessionViewModel[]
         const initLength = sessions.length
-        const removedSession = sessions[sessions.length/2]
+        const removedSession = sessions[sessions.length - 1]
 
         const removeResponse = await request(root.app.server)
-            .delete(`/security/devices/${removedSession.deviceId}`).set('Cookie', [ refreshCookie ])
+            .delete(`/security/devices/${removedSession.deviceId}`).set('Cookie', [ refreshCookies[0] ])
         expect(removeResponse.statusCode).toBe(204)
 
-        sessionsResponse = await request(root.app.server).get(`/security/devices`).set('Cookie', [ refreshCookie ])
-        expect(sessionsResponse.statusCode).toBe(200)
-        sessions = sessionsResponse.body as DeviceSessionViewModel[]
+        let response = await request(root.app.server).get(`/security/devices`).set('Cookie', [ refreshCookies[0] ])
+        if(response.statusCode !== 200) {
+            response = await request(root.app.server).get(`/security/devices`).set('Cookie', [ refreshCookies[1] ])
+        }
+
+        expect(response.statusCode).toBe(200)
+        sessions = response.body as DeviceSessionViewModel[]
         expect(sessions.length).toBe(initLength - 1)
     })
 })
