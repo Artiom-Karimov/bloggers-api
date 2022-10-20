@@ -1,5 +1,5 @@
 import request from 'supertest'
-import UserPageViewModel from '../../data/models/pageViewModels/userPageViewModel'
+import UserPageViewModel from '../../mongoDataLayer/models/pageViewModels/userPageViewModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 

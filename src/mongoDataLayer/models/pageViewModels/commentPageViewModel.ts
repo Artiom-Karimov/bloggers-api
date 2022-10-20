@@ -1,5 +1,5 @@
 import MongoCommentModel from "../mongoModels/mongoCommentModel";
-import CommentViewModel from "../viewModels/commentViewModel";
+import CommentViewModel from "../../../presentation/models/commentViewModel";
 import PageViewModel from "./PageViewModel"
 
 export default class CommentPageViewModel extends PageViewModel<MongoCommentModel,CommentViewModel> {

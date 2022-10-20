@@ -1,12 +1,11 @@
 import BloggersMongDb from "../bloggersMongoDb";
+import { PostRepository as IPostRepository } from "../../logic/interfaces/postRepository"
 import PostModel, { PostInputModel } from "../../logic/models/postModel";
 import { Collection } from "mongodb";
-import BlogModel from "../../logic/models/blogModel";
 import MongoPostModel from "../models/mongoModels/mongoPostModel";
-import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
 import BloggersMongoDb from "../bloggersMongoDb";
 
-export default class PostRepository {
+export default class PostRepository implements IPostRepository {
     private readonly db:BloggersMongDb
     private readonly posts: Collection<MongoPostModel>
 
@@ -41,9 +40,5 @@ export default class PostRepository {
     public async delete(id: string): Promise<boolean> {
         const result = await this.posts.deleteOne({_id:id})
         return result.deletedCount === 1
-    }
-    public async getBlog(id:string): Promise<BlogModel|undefined> {
-        const blog = await this.db.blogCollection.findOne({_id:id})
-        return blog? MongoBlogModel.getBusinessModel(blog) : undefined
     }
 }

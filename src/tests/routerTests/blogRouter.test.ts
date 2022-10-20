@@ -1,7 +1,7 @@
 import request from 'supertest'
-import BlogPageViewModel from '../../data/models/pageViewModels/blogPageViewModel'
-import BlogViewModel from '../../data/models/viewModels/blogViewModel'
-import PostPageViewModel from '../../data/models/pageViewModels/postPageViewModel'
+import BlogPageViewModel from '../../mongoDataLayer/models/pageViewModels/blogPageViewModel'
+import BlogViewModel from '../../presentation/models/blogViewModel'
+import PostPageViewModel from '../../mongoDataLayer/models/pageViewModels/postPageViewModel'
 import * as helpers from './routerTestHelpers'
 import * as root from '../testCompositionRoot'
 

@@ -1,4 +1,4 @@
-import UserViewModel from "../viewModels/userViewModel"
+import UserViewModel from "../../../presentation/models/userViewModel"
 import MongoUserModel from "../mongoModels/mongoUserModel"
 import PageViewModel from "./PageViewModel"
 

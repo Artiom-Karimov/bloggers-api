@@ -2,7 +2,7 @@ import { Collection, Filter, FindCursor } from "mongodb";
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoModels/mongoUserModel";
 import UserPageViewModel from "../models/pageViewModels/userPageViewModel";
-import UserViewModel from "../models/viewModels/userViewModel";
+import UserViewModel from "../../presentation/models/userViewModel";
 import { calculateSkip } from "./utils/skipCalculator";
 
 export default class UserQueryRepository {

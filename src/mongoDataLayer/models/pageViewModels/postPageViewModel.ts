@@ -1,4 +1,4 @@
-import PostViewModel from "../viewModels/postViewModel"
+import PostViewModel from "../../../presentation/models/postViewModel"
 import MongoPostModel from "../mongoModels/mongoPostModel"
 import PageViewModel from "./PageViewModel"
 

@@ -3,7 +3,7 @@ import BloggersMongoDb from "../bloggersMongoDb"
 import MongoCommentModel from "../models/mongoModels/mongoCommentModel"
 import CommentPageViewModel from '../models/pageViewModels/commentPageViewModel'
 import { calculateSkip } from './utils/skipCalculator'
-import CommentViewModel from '../models/viewModels/commentViewModel'
+import CommentViewModel from '../../presentation/models/commentViewModel'
 
 export default class CommentQueryRepository {
     private readonly db:BloggersMongoDb

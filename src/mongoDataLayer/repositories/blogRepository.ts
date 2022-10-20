@@ -2,8 +2,9 @@ import BloggersMongoDb from "../bloggersMongoDb";
 import BlogModel, { BlogInputModel } from "../../logic/models/blogModel";
 import { Collection } from "mongodb";
 import MongoBlogModel from "../models/mongoModels/mongoBlogModel";
+import { BlogRepository as IBlogRepository } from "../../logic/interfaces/blogRepositoty"
 
-export default class BlogRepository {
+export default class BlogRepository implements IBlogRepository {
     private readonly db: BloggersMongoDb
     private readonly blogs: Collection<MongoBlogModel>
 

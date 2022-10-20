@@ -1,5 +1,5 @@
 import BlogModel, { BlogInputModel } from "../models/blogModel";
-import BlogRepository from "../../data/repositories/blogRepository";
+import { BlogRepository } from "../interfaces/blogRepositoty";
 import IdGenerator from "../utils/idGenerator";
 import DateGenerator from "../utils/dateGenerator";
 

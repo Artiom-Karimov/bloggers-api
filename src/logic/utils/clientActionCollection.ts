@@ -1,11 +1,12 @@
-import ClientActionModel, { ClientAction } from "../../logic/models/clientActionModel";
+import ClientActionModel, { ClientAction } from "../models/clientActionModel";
+import { ClientActionRepository } from "../interfaces/clientActionRepository"
 
-export default class ClientActionRepository {
+export default class ClientActionCollection implements ClientActionRepository {
     private readonly actions: Array<ClientActionModel> = []
 
     constructor() {}
 
-    public countByIp(ip:string, action:ClientAction): number {
+    public count(ip:string, action:ClientAction): number {
         return this.actions.filter(a => a.ip === ip && a.action === action).length
     }
     public create(data:ClientActionModel) {

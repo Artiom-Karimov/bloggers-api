@@ -9,7 +9,7 @@ import PostRouter from './routers/postRouter'
 import UserRouter from './routers/userRouter'
 import AuthRouter from './routers/authRouter'
 import CommentRouter from './routers/commentRouter'
-import BloggersMongoDb from '../data/bloggersMongoDb'
+import BloggersMongoDb from '../mongoDataLayer/bloggersMongoDb'
 import SecurityRouter from './routers/securityRouter'
 
 export type ConstructorParams = {

@@ -1,5 +1,5 @@
 import UserModel, { AccountData, EmailConfirmation } from "../../../logic/models/userModel"
-import UserViewModel from "../viewModels/userViewModel"
+import UserViewModel from "../../../presentation/models/userViewModel"
 
 
 export default class MongoUserModel {

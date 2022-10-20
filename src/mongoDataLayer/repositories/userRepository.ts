@@ -1,9 +1,10 @@
 import { Collection } from "mongodb";
-import UserModel, { EmailConfirmation, UserInputModel } from "../../logic/models/userModel";
+import { UserRepository as IUserRepository } from "../../logic/interfaces/userRepository"
+import UserModel, { EmailConfirmation } from "../../logic/models/userModel";
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoModels/mongoUserModel";
 
-export default class UserRepository {
+export default class UserRepository implements IUserRepository {
     private readonly users: Collection<MongoUserModel>
 
     constructor(db: BloggersMongoDb) {

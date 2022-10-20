@@ -1,5 +1,5 @@
 import request from 'supertest'
-import PostPageViewModel from '../../data/models/pageViewModels/postPageViewModel'
+import PostPageViewModel from '../../mongoDataLayer/models/pageViewModels/postPageViewModel'
 import PostModel, { PostInputModel } from '../../logic/models/postModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'

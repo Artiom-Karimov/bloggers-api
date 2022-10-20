@@ -7,10 +7,10 @@ import { commentValidation, postValidation } from '../validation/bodyValidators'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logic/services/blogService';
 import GetPostsQueryParams from '../models/getPostsQueryParams';
-import QueryRepository from '../../data/repositories/queryRepository';
+import QueryRepository from '../../mongoDataLayer/repositories/queryRepository';
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import GetCommentsQueryParams from '../models/getCommentsQueryParams';
-import CommentQueryRepository from '../../data/repositories/commentQueryRepository';
+import CommentQueryRepository from '../../mongoDataLayer/repositories/commentQueryRepository';
 import CommentService from '../../logic/services/commentService';
 import { CommentCreateModel } from '../../logic/models/commentModel';
 

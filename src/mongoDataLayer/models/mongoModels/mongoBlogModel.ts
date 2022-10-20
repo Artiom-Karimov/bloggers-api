@@ -1,5 +1,5 @@
 import BlogModel from "../../../logic/models/blogModel"
-import BlogViewModel from "../viewModels/blogViewModel"
+import BlogViewModel from "../../../presentation/models/blogViewModel"
 
 export default class MongoBlogModel {
     public _id: string

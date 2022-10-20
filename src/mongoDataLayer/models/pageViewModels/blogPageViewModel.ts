@@ -1,4 +1,4 @@
-import BlogViewModel from "../viewModels/blogViewModel"
+import BlogViewModel from "../../../presentation/models/blogViewModel"
 import MongoBlogModel from "../mongoModels/mongoBlogModel"
 import PageViewModel from "./PageViewModel"
 

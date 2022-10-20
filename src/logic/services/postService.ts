@@ -1,4 +1,4 @@
-import PostRepository from "../../data/repositories/postRepository";
+import { PostRepository } from "../interfaces/postRepository";
 import PostModel, { PostInputModel } from "../models/postModel";
 import DateGenerator from "../utils/dateGenerator";
 import IdGenerator from "../utils/idGenerator";
@@ -13,11 +13,11 @@ export default class PostService {
         return this.repo.get(id)
     }
     public async create(data:PostInputModel): Promise<PostModel|undefined> {
-        const newBlog = new PostModel(
+        const newPost = new PostModel(
             IdGenerator.generate(), 
             data, 
             DateGenerator.generate())
-        return this.repo.create(newBlog)
+        return this.repo.create(newPost)
     }
     public async update(id:string,data:PostInputModel): Promise<boolean> {
         return this.repo.update(id,data)

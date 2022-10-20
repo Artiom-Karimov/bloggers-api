@@ -1,7 +1,7 @@
 import { Collection } from "mongodb";
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoDeviceSessionModel from "../models/mongoModels/mongoDeviceSessionModel";
-import DeviceSessionViewModel from "../models/viewModels/deviceSessionViewModel";
+import DeviceSessionViewModel from "../../presentation/models/deviceSessionViewModel";
 
 export default class DeviceSessionQueryRepository {
     private readonly sessions: Collection<MongoDeviceSessionModel>

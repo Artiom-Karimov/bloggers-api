@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import DeviceSessionQueryRepository from "../../data/repositories/deviceSessionQueryRepository";
+import DeviceSessionQueryRepository from "../../mongoDataLayer/repositories/deviceSessionQueryRepository";
 import DeviceSessionService, { DeviceSessionError } from "../../logic/services/deviceSessionService";
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { refreshTokenCheckMiddleware } from "../middlewares/refreshTokenCheckMiddleware";

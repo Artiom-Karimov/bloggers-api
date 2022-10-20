@@ -1,9 +1,10 @@
 import { Collection } from "mongodb";
+import { DeviceSessionRepository as IDeviceSessionRepository } from "../../logic/interfaces/deviceSessionRepository"
 import DeviceSessionModel from "../../logic/models/deviceSessionModel";
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoDeviceSessionModel from "../models/mongoModels/mongoDeviceSessionModel";
 
-export default class DeviceSessionRepository {
+export default class DeviceSessionRepository implements IDeviceSessionRepository {
     private readonly sessions: Collection<MongoDeviceSessionModel>
 
     constructor(db:BloggersMongoDb) {
@@ -22,13 +23,13 @@ export default class DeviceSessionRepository {
         if(!result) return []
         return result.map(s => MongoDeviceSessionModel.getBusinessModel(s))
     }
-    public async create(data:DeviceSessionModel): Promise<boolean> {
+    public async create(data:DeviceSessionModel): Promise<string|undefined> {
         const model = new MongoDeviceSessionModel(data)
         try {
             const result = await this.sessions.insertOne(model)
-            return !!result.insertedId
+            return result.insertedId
         } catch {
-            return false
+            return undefined
         }
     }
     public async update(data:DeviceSessionModel): Promise<boolean> {

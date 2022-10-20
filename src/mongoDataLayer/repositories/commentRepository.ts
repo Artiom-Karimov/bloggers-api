@@ -1,9 +1,10 @@
 import BloggersMongoDb from "../bloggersMongoDb";
+import { CommentRepository as ICommentRepository } from "../../logic/interfaces/commentRepository"
 import CommentModel, { CommentInputModel } from "../../logic/models/commentModel";
 import { Collection } from "mongodb";
 import MongoCommentModel from "../models/mongoModels/mongoCommentModel";
 
-export default class CommentRepository {
+export default class CommentRepository implements ICommentRepository {
     private readonly db: BloggersMongoDb
     private readonly comments: Collection<MongoCommentModel>
 
@@ -19,14 +20,14 @@ export default class CommentRepository {
             return undefined
         }
     }
-    public async create(comment:CommentModel): Promise<CommentModel|undefined> {
+    public async create(comment:CommentModel): Promise<string|undefined> {
         try {
             const model = new MongoCommentModel(comment)
             const created = await this.comments.insertOne(model)
-            if(created.acknowledged) return await this.get(comment.id)
-        } catch {
-            return undefined
-        }     
+            if(created.acknowledged) return created.insertedId
+        } catch {}
+        
+        return undefined     
     }
     public async update(id:string,content:string): Promise<boolean> {
         try {

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import UserQueryRepository from '../../data/repositories/userQueryRepository'
+import UserQueryRepository from '../../mongoDataLayer/repositories/userQueryRepository'
 import UserService from '../../logic/services/userService'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { validationMiddleware } from '../middlewares/validationMiddleware'
