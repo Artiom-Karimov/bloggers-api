@@ -1,4 +1,5 @@
 import BloggersMongoDb from "../bloggersMongoDb";
+import { BlogPostQueryRepository as IBlogPostQueryRepository } from '../../presentation/interfaces/blogPostQueryRepository'
 import PageViewModel from "../../presentation/models/viewModels/pageViewModel";
 import { Collection, FindCursor } from "mongodb";
 import MongoBlogModel from "../models/mongoBlogModel";
@@ -6,8 +7,10 @@ import MongoPostModel from "../models/mongoPostModel";
 import { calculateSkip } from "./utils/skipCalculator";
 import BlogViewModel from "../../presentation/models/viewModels/blogViewModel";
 import PostViewModel from "../../presentation/models/viewModels/postViewModel";
+import GetBlogsQueryParams from "../../presentation/models/queryParams/getBlogsQueryParams";
+import GetPostsQueryParams from "../../presentation/models/queryParams/getPostsQueryParams";
 
-export default class QueryRepository {
+export default class BlogPostQueryRepository implements IBlogPostQueryRepository {
     private readonly db:BloggersMongoDb
     private readonly blogs:Collection<MongoBlogModel>
     private readonly posts:Collection<MongoPostModel>
@@ -17,46 +20,29 @@ export default class QueryRepository {
         this.blogs = this.db.blogCollection
         this.posts = this.db.postCollection
     }
-    public async getBlogs(
-        searchNameTerm:string|null,
-        pageNumber:number,
-        pageSize:number,
-        sortBy:string,
-        sortDirection:string
-    ): Promise<PageViewModel<BlogViewModel>> {
-            const filter = this.getFilter(searchNameTerm)
-            const cursor = this.getBlogCursor(filter,sortBy,sortDirection)
+    public async getBlogs(params:GetBlogsQueryParams): Promise<PageViewModel<BlogViewModel>> {
+            const filter = this.getFilter(params.searchNameTerm)
+            const cursor = this.getBlogCursor(filter,params.sortBy,params.sortDirection)
 
             const totalCount = await this.getBlogCount(filter)
-            const page = new PageViewModel<BlogViewModel>(pageNumber,pageSize,totalCount)
+            const page = new PageViewModel<BlogViewModel>(params.pageNumber,params.pageSize,totalCount)
             
             return await this.loadPageBlogs(page,cursor)
     }
-    public async getPosts(
-        pageNumber:number,
-        pageSize:number,
-        sortBy:string,
-        sortDirection:string
-    ): Promise<PageViewModel<PostViewModel>> {
-        const cursor = this.getPostCursor(sortBy,sortDirection)
+    public async getPosts(params:GetPostsQueryParams): Promise<PageViewModel<PostViewModel>> {
+        const cursor = this.getPostCursor(params.sortBy,params.sortDirection)
         const totalCount = await this.getPostCount()
-        const page = new PageViewModel<PostViewModel>(pageNumber,pageSize,totalCount)
+        const page = new PageViewModel<PostViewModel>(params.pageNumber,params.pageSize,totalCount)
 
         return await this.loadPagePosts(page,cursor)
     }
-    public async getBlogPosts(
-        pageNumber:number,
-        pageSize:number,
-        sortBy:string,
-        sortDirection:string,
-        blogId:string  
-    ): Promise<PageViewModel<PostViewModel>|undefined> {
+    public async getBlogPosts(blogId:string,params:GetPostsQueryParams): Promise<PageViewModel<PostViewModel>|undefined> {
         const blog = await this.blogs.findOne({_id:blogId})
         if(!blog) return undefined
-        const cursor = this.getPostCursor(sortBy,sortDirection,blogId)
+        const cursor = this.getPostCursor(params.sortBy,params.sortDirection,blogId)
 
         const totalCount = await this.getPostCount(blogId)
-        const page = new PageViewModel<PostViewModel>(pageNumber,pageSize,totalCount)
+        const page = new PageViewModel<PostViewModel>(params.pageNumber,params.pageSize,totalCount)
 
         return await this.loadPagePosts(page,cursor)
     }

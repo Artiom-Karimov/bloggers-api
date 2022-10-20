@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import UserQueryRepository from '../../mongoDataLayer/repositories/userQueryRepository'
+import { UserQueryRepository } from '../interfaces/userQueryRepository'
 import UserService from '../../logic/services/userService'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { validationMiddleware } from '../middlewares/validationMiddleware'
@@ -24,14 +24,7 @@ export default class UserRouter {
         this.router.get('/',
         async (req:Request, res:Response) => {
             const query = new GetUsersQueryParams(req.query)
-            const result = await this.queryRepo.get(
-                query.searchLoginTerm,
-                query.searchEmailTerm,
-                query.pageNumber,
-                query.pageSize,
-                query.sortBy,
-                query.sortDirection
-            )
+            const result = await this.queryRepo.get(query)
             res.status(200).send(result)
         })
 

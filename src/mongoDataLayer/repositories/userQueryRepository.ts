@@ -1,11 +1,13 @@
 import { Collection, Filter, FindCursor } from "mongodb";
+import { UserQueryRepository as IUserQueryRepository } from "../../presentation/interfaces/userQueryRepository";
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoUserModel";
 import PageViewModel from "../../presentation/models/viewModels/pageViewModel";
 import UserViewModel from "../../presentation/models/viewModels/userViewModel";
 import { calculateSkip } from "./utils/skipCalculator";
+import GetUsersQueryParams from "../../presentation/models/queryParams/getUsersQueryParams";
 
-export default class UserQueryRepository {
+export default class UserQueryRepository implements IUserQueryRepository {
     private readonly db:BloggersMongoDb
     private readonly users:Collection<MongoUserModel>
 
@@ -13,18 +15,11 @@ export default class UserQueryRepository {
         this.db = db
         this.users = this.db.userCollection
     }
-    public async get(
-        searchLoginTerm: string|null,
-        searchEmailTerm: string|null,
-        pageNumber: number,
-        pageSize: number,
-        sortBy: string,
-        sortDirection: string
-    ): Promise<PageViewModel<UserViewModel>> {
-        const filter = this.getFilter(searchLoginTerm, searchEmailTerm)
-        const cursor = this.getCursor(filter,sortBy,sortDirection)
+    public async get(params:GetUsersQueryParams): Promise<PageViewModel<UserViewModel>> {
+        const filter = this.getFilter(params.searchLoginTerm, params.searchEmailTerm)
+        const cursor = this.getCursor(filter,params.sortBy,params.sortDirection)
         const total = await this.getTotalCount(filter)
-        const result = new PageViewModel<UserViewModel>(pageNumber, pageSize, total)
+        const result = new PageViewModel<UserViewModel>(params.pageNumber, params.pageSize, total)
         return await this.loadPageUsers(result, cursor)
     }
     public async getById(id:string): Promise<UserViewModel|undefined> {

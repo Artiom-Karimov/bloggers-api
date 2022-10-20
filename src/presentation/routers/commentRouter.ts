@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express"
-import CommentQueryRepository from "../../mongoDataLayer/repositories/commentQueryRepository"
+import { CommentQueryRepository } from "../interfaces/commentQueryRepository"
 import CommentService from "../../logic/services/commentService"
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider"
 import { validationMiddleware } from "../middlewares/validationMiddleware"

@@ -1,9 +1,10 @@
 import { Collection } from "mongodb";
+import { DeviceSessionQueryRepository as IDeviceSessionQueryRepository } from '../../presentation/interfaces/deviceSessionQueryRepository'
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoDeviceSessionModel from "../models/mongoDeviceSessionModel";
 import DeviceSessionViewModel from "../../presentation/models/viewModels/deviceSessionViewModel";
 
-export default class DeviceSessionQueryRepository {
+export default class DeviceSessionQueryRepository implements IDeviceSessionQueryRepository {
     private readonly sessions: Collection<MongoDeviceSessionModel>
 
     constructor(db:BloggersMongoDb) {

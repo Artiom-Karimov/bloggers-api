@@ -1,11 +1,13 @@
 import { Collection, FindCursor } from "mongodb"
 import BloggersMongoDb from "../bloggersMongoDb"
+import { CommentQueryRepository as ICommentQueryRepository } from '../../presentation/interfaces/commentQueryRepository'
 import MongoCommentModel from "../models/mongoCommentModel"
 import PageViewModel from "../../presentation/models/viewModels/pageViewModel"
 import { calculateSkip } from './utils/skipCalculator'
 import CommentViewModel from '../../presentation/models/viewModels/commentViewModel'
+import GetCommentsQueryParams from "../../presentation/models/queryParams/getCommentsQueryParams"
 
-export default class CommentQueryRepository {
+export default class CommentQueryRepository implements ICommentQueryRepository {
     private readonly db:BloggersMongoDb
     private readonly comments:Collection<MongoCommentModel>
 
@@ -13,16 +15,10 @@ export default class CommentQueryRepository {
         this.db = db
         this.comments = this.db.commentCollection
     }
-    public async get(
-        postId:string,
-        pageNumber:number,
-        pageSize:number,
-        sortBy:string,
-        sortDirection:string
-    ): Promise<PageViewModel<CommentViewModel>> {
-        const totalCount = await this.getTotalCount(postId)
-        const page = new PageViewModel<CommentViewModel>(pageNumber,pageSize,totalCount)
-        const cursor = this.getCursor(postId, sortBy, sortDirection)
+    public async get(params:GetCommentsQueryParams): Promise<PageViewModel<CommentViewModel>> {
+        const totalCount = await this.getTotalCount(params.postId)
+        const page = new PageViewModel<CommentViewModel>(params.pageNumber,params.pageSize,totalCount)
+        const cursor = this.getCursor(params.postId, params.sortBy, params.sortDirection)
         return await this.loadPageComments(page, cursor)
     }
     public async getById(id:string): Promise<CommentViewModel|undefined> {

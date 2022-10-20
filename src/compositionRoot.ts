@@ -7,7 +7,7 @@ import DeviceSessionQueryRepository from './mongoDataLayer/repositories/deviceSe
 import DeviceSessionRepository from './mongoDataLayer/repositories/deviceSessionRepository'
 import ClientActionCollection from './logic/utils/clientActionCollection'
 import PostRepository from './mongoDataLayer/repositories/postRepository'
-import QueryRepository from './mongoDataLayer/repositories/blogPostQueryRepository'
+import BlogPostQueryRepository from './mongoDataLayer/repositories/blogPostQueryRepository'
 import UserQueryRepository from './mongoDataLayer/repositories/userQueryRepository'
 import UserRepository from './mongoDataLayer/repositories/userRepository'
 import ConfirmationEmailSender from './email/confirmationEmailSender'
@@ -38,7 +38,7 @@ export default class CompositionRoot {
     private readonly deviceSessionRepository: DeviceSessionRepository
     private readonly clientActionRepository: ClientActionCollection
 
-    private readonly queryRepository: QueryRepository
+    private readonly queryRepository: BlogPostQueryRepository
     private readonly userQueryRepository: UserQueryRepository
     private readonly commentQueryRepository: CommentQueryRepository
     private readonly deviceSessionQueryRepository: DeviceSessionQueryRepository
@@ -70,7 +70,7 @@ export default class CompositionRoot {
         this.deviceSessionRepository = new DeviceSessionRepository(this.db)
         this.clientActionRepository = new ClientActionCollection()
 
-        this.queryRepository = new QueryRepository(this.db)
+        this.queryRepository = new BlogPostQueryRepository(this.db)
         this.userQueryRepository = new UserQueryRepository(this.db)
         this.commentQueryRepository = new CommentQueryRepository(this.db)
         this.deviceSessionQueryRepository = new DeviceSessionQueryRepository(this.db)

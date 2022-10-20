@@ -7,10 +7,10 @@ import { commentValidation, postValidation } from '../validation/bodyValidators'
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logic/services/blogService';
 import GetPostsQueryParams from '../models/queryParams/getPostsQueryParams';
-import QueryRepository from '../../mongoDataLayer/repositories/blogPostQueryRepository';
+import { BlogPostQueryRepository } from '../interfaces/blogPostQueryRepository';
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import GetCommentsQueryParams from '../models/queryParams/getCommentsQueryParams';
-import CommentQueryRepository from '../../mongoDataLayer/repositories/commentQueryRepository';
+import { CommentQueryRepository } from '../interfaces/commentQueryRepository';
 import CommentService from '../../logic/services/commentService';
 import { CommentCreateModel } from '../../logic/models/commentModel';
 
@@ -21,7 +21,7 @@ export default class PostRouter {
     public readonly router: Router
     private readonly posts: PostService
     private readonly blogs: BlogService
-    private readonly queryRepo: QueryRepository
+    private readonly queryRepo: BlogPostQueryRepository
     private readonly comments: CommentService
     private readonly commentQueryRepo: CommentQueryRepository
     private authProvider: AuthMiddlewareProvider
@@ -30,7 +30,7 @@ export default class PostRouter {
         posts:PostService,
         blogs:BlogService,
         comments:CommentService,
-        queryRepo:QueryRepository,
+        queryRepo:BlogPostQueryRepository,
         commentQueryRepo:CommentQueryRepository,
         authProvider:AuthMiddlewareProvider
         ) {
@@ -48,12 +48,7 @@ export default class PostRouter {
     private setRoutes() {
         this.router.get('/', async (req:Request, res:Response) => {
             const query = new GetPostsQueryParams(req.query)
-            const result = await this.queryRepo.getPosts(
-                query.pageNumber,
-                query.pageSize,
-                query.sortBy,
-                query.sortDirection
-            )
+            const result = await this.queryRepo.getPosts(query)
             res.status(200).send(result)
         })
 
@@ -128,9 +123,7 @@ export default class PostRouter {
                 res.send(404)
                 return
             }
-            const page = await this.commentQueryRepo.get(
-                query.postId, query.pageNumber, query.pageSize, query.sortBy, query.sortDirection
-            )
+            const page = await this.commentQueryRepo.get(query)
             res.status(200).send(page)
         })
 
