@@ -9,27 +9,25 @@ import PostRouter from './routers/postRouter'
 import UserRouter from './routers/userRouter'
 import AuthRouter from './routers/authRouter'
 import CommentRouter from './routers/commentRouter'
-import BloggersMongoDb from '../mongoDataLayer/bloggersMongoDb'
 import SecurityRouter from './routers/securityRouter'
+import TestingRouter from './routers/testingRouter'
 
 export type ConstructorParams = {
-    db:BloggersMongoDb,
     blogRouter?:BlogRouter,
     postRouter?:PostRouter,
     userRouter?:UserRouter,
     authRouter?:AuthRouter,
     commentRouter?:CommentRouter,
-    securityRouter?:SecurityRouter
+    securityRouter?:SecurityRouter,
+    testingRouter?:TestingRouter
 }
 
 export default class BloggersApp {
     public readonly port: number
     public readonly server: http.Server
-    private readonly db: BloggersMongoDb
 
     constructor(params:ConstructorParams) {
         this.port = config.port
-        this.db = params.db
 
         const app = express()
         this.server = http.createServer(app)
@@ -44,24 +42,18 @@ export default class BloggersApp {
         if(params.authRouter) app.use('/auth', params.authRouter.router)
         if(params.commentRouter) app.use('/comments', params.commentRouter.router)
         if(params.securityRouter) app.use('/security', params.securityRouter.router)
+        if(params.testingRouter) app.use('/testing', params.testingRouter.router)
 
         app.get('/', (req: Request, res: Response) => {
-            res.sendStatus(404)
-        })
-        
-        app.delete('/testing/all-data', async (req: Request, res: Response) => {
-            await this.db.clearAll()
-            res.sendStatus(204)
+            res.status(200).send('<h1>Положь трубку!</h1>')
         })
     }
     public async start() {
-        await this.db.connect()
         this.server.listen(this.port, () => {
             console.log(`Listenning on port ${this.port}`)
         })
     }
     public async stop() {
-        await this.db.close()
         this.server.close()
     }
 }

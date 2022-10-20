@@ -27,6 +27,9 @@ import ClientActionRepository from '../logic/utils/clientActionCollection'
 import SecurityRouter from '../presentation/routers/securityRouter'
 import DeviceSessionQueryRepository from '../mongoDataLayer/repositories/deviceSessionQueryRepository'
 import ClientActionService from '../logic/services/clientActionService'
+import TestingRouter from '../presentation/routers/testingRouter'
+import TestingService from '../logic/services/testingService'
+import TestingRepository from '../mongoDataLayer/repositories/testingRepository'
 
 const login = config.userName
 const password = config.password
@@ -44,6 +47,7 @@ let commentQueryRepository: CommentQueryRepository
 let deviceSessionRepository: DeviceSessionRepository
 let clientActionRepository: ClientActionRepository
 let deviceSessionQueryRepository: DeviceSessionQueryRepository
+let testingRepository: TestingRepository
 
 const fakeConfirmEmailSender: ConfirmEmailSender = {
     send(login:string,email:string,code:string): Promise<boolean> {
@@ -58,6 +62,7 @@ let userService: UserService
 let commentService: CommentService
 let authService: AuthService
 let actionService: ClientActionService
+let testingService: TestingService
 
 let authProvider: AuthMiddlewareProvider
 
@@ -67,6 +72,7 @@ let commentRouter: CommentRouter
 let postRouter: PostRouter
 let userRouter: UserRouter
 let securityRouter: SecurityRouter
+let testingRouter: TestingRouter
 
 let app: BloggersApp
 
@@ -91,6 +97,7 @@ const initRepos = async () => {
     deviceSessionRepository = new DeviceSessionRepository(db)
     clientActionRepository = new ClientActionRepository()
     deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)
+    testingRepository = new TestingRepository(db)
 }
 const initServices = async () => {
     if(!blogRepository) await initRepos()
@@ -101,6 +108,7 @@ const initServices = async () => {
     commentService = new CommentService(commentRepository)
     actionService = new ClientActionService(clientActionRepository)
     authService = new AuthService(userService,deviceService,actionService,fakeConfirmEmailSender)
+    testingService = new TestingService(testingRepository)
 }
 const initRouters = async () => {
     if(!blogService) await initServices()
@@ -111,25 +119,24 @@ const initRouters = async () => {
     postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)
     userRouter = new UserRouter(userService,userQueryRepository,authProvider)
     securityRouter = new SecurityRouter(deviceService,deviceSessionQueryRepository,authProvider)
+    testingRouter = new TestingRouter(testingService)
 }
 
 const initApp = async () => {
     if(!authRouter) await initRouters()
     app = new BloggersApp({
-        db,
         blogRouter,
         postRouter,
         userRouter,
         authRouter,
         commentRouter,
-        securityRouter
+        securityRouter,
+        testingRouter
     })
-}
-const stopDb = async () => {
-    await db.close()
 }
 const stopApp = async () => {
     await app.stop()
+    await db.close()
     await mongoServ.stop()
 }
 
@@ -142,7 +149,6 @@ export {
     userService,
     initServices,
     initApp,
-    stopDb,
     stopApp
 }
 

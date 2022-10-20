@@ -45,7 +45,7 @@ export default class BlogRouter {
         this.router.get('/:id', async (req:Request, res:Response) => {
             const blog = await this.blogs.get(req.params.id)
             if(blog === undefined)
-                res.send(404)
+                res.sendStatus(404)
             else
                 res.status(200).send(blog)
         })
@@ -57,7 +57,7 @@ export default class BlogRouter {
         async (req:Request, res:Response) => {
             const created = await this.blogs.create({ name:req.body.name, youtubeUrl:req.body.youtubeUrl })
             if(created) res.status(201).send(created)
-            else res.send(404)
+            else res.sendStatus(404)
         })
 
         this.router.post('/:blogId/posts', 
@@ -91,10 +91,10 @@ export default class BlogRouter {
         async (req:Request,res:Response) => {
             const blog = await this.blogs.get(req.params.id)
             if(blog === undefined)
-                res.send(404)
+                res.sendStatus(404)
             else {
                 const updated = await this.blogs.update(req.params.id, { name:req.body.name, youtubeUrl:req.body.youtubeUrl })
-                res.send(updated? 204 : 500)
+                res.sendStatus(updated? 204 : 500)
             }
         })
 
@@ -102,9 +102,9 @@ export default class BlogRouter {
             this.authProvider.basicAuthMiddleware,
             async (req:Request,res:Response) => {
             if(await this.blogs.delete(req.params.id))
-                res.send(204)
+                res.sendStatus(204)
             else
-                res.send(404)
+                res.sendStatus(404)
         })
     }
 }
