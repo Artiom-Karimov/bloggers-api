@@ -4,10 +4,10 @@ import BloggersMongoDb from '../mongoDataLayer/bloggersMongoDb'
 
 import BlogRepository from '../mongooseDataLayer/repositories/blogRepository'
 import PostRepository from '../mongooseDataLayer/repositories/postRepository'
+import BlogPostQueryRepository from '../mongooseDataLayer/repositories/blogPostQueryRepository'
 
 import UserRepository from '../mongoDataLayer/repositories/userRepository'
 import CommentRepository from '../mongoDataLayer/repositories/commentRepository'
-import QueryRepository from '../mongoDataLayer/repositories/blogPostQueryRepository'
 import UserQueryRepository from '../mongoDataLayer/repositories/userQueryRepository'
 import CommentQueryRepository from '../mongoDataLayer/repositories/commentQueryRepository'
 import { ConfirmEmailSender } from '../email/confirmationEmailSender'
@@ -44,7 +44,7 @@ let blogRepository: BlogRepository
 let postRepository: PostRepository
 let userRepository: UserRepository
 let commentRepository: CommentRepository
-let queryRepository: QueryRepository
+let queryRepository: BlogPostQueryRepository
 let userQueryRepository: UserQueryRepository
 let commentQueryRepository: CommentQueryRepository
 let deviceSessionRepository: DeviceSessionRepository
@@ -98,7 +98,7 @@ const initRepos = async () => {
     postRepository = new PostRepository()
     userRepository = new UserRepository(db)
     commentRepository = new CommentRepository(db)
-    queryRepository = new QueryRepository(db)
+    queryRepository = new BlogPostQueryRepository()
     userQueryRepository = new UserQueryRepository(db)
     commentQueryRepository = new CommentQueryRepository(db)
     deviceSessionRepository = new DeviceSessionRepository(db)
