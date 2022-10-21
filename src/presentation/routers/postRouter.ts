@@ -55,7 +55,7 @@ export default class PostRouter {
         this.router.get('/:id', async (req:Request, res:Response) => {
             const post = await this.posts.get(req.params.id)
             if(post === undefined)
-                res.send(404)
+                res.sendStatus(404)
             else
                 res.status(200).send(post)
         })
@@ -67,7 +67,7 @@ export default class PostRouter {
         async (req:Request, res:Response) => {
             const blog = await this.blogs.get(req.body.blogId)
             if(!blog) { 
-                res.send(404)
+                res.sendStatus(404)
                 return;
             }
             const created = await this.posts.create({
@@ -78,7 +78,7 @@ export default class PostRouter {
                 blogName: blog.name
                 })
             if(created) res.status(201).send(created)
-            else res.send(404)
+            else res.sendStatus(404)
         })
 
         this.router.put('/:id',
@@ -88,7 +88,7 @@ export default class PostRouter {
         async (req:Request,res:Response) => {
             const post = await this.posts.get(req.params.id)
             if(post === undefined)
-                res.send(404)
+                res.sendStatus(404)
             else {
                 const blog = await this.blogs.get(req.body.blogId)
                 if(blog === undefined)
@@ -110,7 +110,7 @@ export default class PostRouter {
             this.authProvider.basicAuthMiddleware,
         async (req:Request,res:Response) => {
             const deleted = await this.posts.delete(req.params.id)
-            res.send(deleted? 204 : 404)
+            res.sendStatus(deleted? 204 : 404)
         })
     }
 
@@ -120,7 +120,7 @@ export default class PostRouter {
             const query = new GetCommentsQueryParams(req.query,req.params.postId)
             const post = await this.posts.get(query.postId)
             if(!post) {
-                res.send(404)
+                res.sendStatus(404)
                 return
             }
             const page = await this.commentQueryRepo.get(query)
@@ -134,7 +134,7 @@ export default class PostRouter {
         async (req:Request,res:Response) => {
             const post = await this.posts.get(req.params.postId)
             if(!post) {
-                res.send(404)
+                res.sendStatus(404)
                 return
             }
 
@@ -152,7 +152,7 @@ export default class PostRouter {
                     res.status(201).send(retrieved)
                     return
                 }
-                res.send(500)
+                res.sendStatus(500)
             }
         })
     }

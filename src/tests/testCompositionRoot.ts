@@ -1,8 +1,10 @@
 import * as config from '../config/config'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import BloggersMongoDb from '../mongoDataLayer/bloggersMongoDb'
-import BlogRepository from '../mongoDataLayer/repositories/blogRepository'
-import PostRepository from '../mongoDataLayer/repositories/postRepository'
+
+import BlogRepository from '../mongooseDataLayer/repositories/blogRepository'
+import PostRepository from '../mongooseDataLayer/repositories/postRepository'
+
 import UserRepository from '../mongoDataLayer/repositories/userRepository'
 import CommentRepository from '../mongoDataLayer/repositories/commentRepository'
 import QueryRepository from '../mongoDataLayer/repositories/blogPostQueryRepository'
@@ -30,6 +32,7 @@ import ClientActionService from '../logic/services/clientActionService'
 import TestingRouter from '../presentation/routers/testingRouter'
 import TestingService from '../logic/services/testingService'
 import TestingRepository from '../mongoDataLayer/repositories/testingRepository'
+import mongoose from 'mongoose'
 
 const login = config.userName
 const password = config.password
@@ -76,19 +79,23 @@ let testingRouter: TestingRouter
 
 let app: BloggersApp
 
-const initDb = async () => {
-    mongoServ = await MongoMemoryServer.create()
-    db = new BloggersMongoDb(mongoServ.getUri())
-    await db.connect()
-}
 // const initDb = async () => {
-//     db = new BloggersMongoDb('mongodb://0.0.0.0:27017')
+//     mongoServ = await MongoMemoryServer.create()
+//     const uri = mongoServ.getUri()
+//     db = new BloggersMongoDb(uri)
+//     await mongoose.connect(uri)
 //     await db.connect()
 // }
+const initDb = async () => {
+    const uri = 'mongodb://0.0.0.0:27017'
+    db = new BloggersMongoDb(uri)
+    await mongoose.connect(uri + '/bloggers')
+    await db.connect()
+}
 const initRepos = async () => {
     if(!db) await initDb()
-    blogRepository = new BlogRepository(db)
-    postRepository = new PostRepository(db)
+    blogRepository = new BlogRepository()
+    postRepository = new PostRepository()
     userRepository = new UserRepository(db)
     commentRepository = new CommentRepository(db)
     queryRepository = new QueryRepository(db)
@@ -137,7 +144,8 @@ const initApp = async () => {
 const stopApp = async () => {
     await app.stop()
     await db.close()
-    await mongoServ.stop()
+    await mongoose.disconnect()
+    //await mongoServ.stop()
 }
 
 export {
