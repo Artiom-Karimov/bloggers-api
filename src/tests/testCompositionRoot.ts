@@ -5,11 +5,11 @@ import BloggersMongoDb from '../mongoDataLayer/bloggersMongoDb'
 import BlogRepository from '../mongooseDataLayer/repositories/blogRepository'
 import PostRepository from '../mongooseDataLayer/repositories/postRepository'
 import BlogPostQueryRepository from '../mongooseDataLayer/repositories/blogPostQueryRepository'
+import CommentRepository from '../mongooseDataLayer/repositories/commentRepository'
+import CommentQueryRepository from '../mongooseDataLayer/repositories/commentQueryRepository'
 
 import UserRepository from '../mongoDataLayer/repositories/userRepository'
-import CommentRepository from '../mongoDataLayer/repositories/commentRepository'
 import UserQueryRepository from '../mongoDataLayer/repositories/userQueryRepository'
-import CommentQueryRepository from '../mongoDataLayer/repositories/commentQueryRepository'
 import { ConfirmEmailSender } from '../email/confirmationEmailSender'
 import BlogService from '../logic/services/blogService'
 import PostService from '../logic/services/postService'
@@ -97,10 +97,10 @@ const initRepos = async () => {
     blogRepository = new BlogRepository()
     postRepository = new PostRepository()
     userRepository = new UserRepository(db)
-    commentRepository = new CommentRepository(db)
+    commentRepository = new CommentRepository()
     queryRepository = new BlogPostQueryRepository()
     userQueryRepository = new UserQueryRepository(db)
-    commentQueryRepository = new CommentQueryRepository(db)
+    commentQueryRepository = new CommentQueryRepository()
     deviceSessionRepository = new DeviceSessionRepository(db)
     clientActionRepository = new ClientActionRepository()
     deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)

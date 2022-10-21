@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose'
+import { Schema, model } from 'mongoose'
 
 export interface IBlog {
     _id:string
@@ -14,4 +14,4 @@ const blogSchema = new Schema<IBlog>({
     createdAt:{ type:String, required:true, immutable:true }
 })
 
-export const Blogs = model<IBlog>('blogs', blogSchema)
+export const Blog = model<IBlog>('blogs', blogSchema)

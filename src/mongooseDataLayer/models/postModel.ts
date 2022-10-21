@@ -20,4 +20,4 @@ const postSchema = new Schema<IPost>({
     createdAt: { type:String, required:true }
 })
 
-export const Posts = model<IPost>('posts', postSchema)
+export const Post = model<IPost>('posts', postSchema)

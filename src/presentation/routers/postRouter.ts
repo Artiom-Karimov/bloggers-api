@@ -101,7 +101,7 @@ export default class PostRouter {
                         blogId: req.body.blogId,
                         blogName: blog.name
                     })
-                    res.send(updated? 204 : 500)
+                    res.sendStatus(updated? 204 : 500)
                 }
             }
         })

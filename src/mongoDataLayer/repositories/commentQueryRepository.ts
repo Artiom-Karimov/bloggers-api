@@ -30,7 +30,7 @@ export default class CommentQueryRepository implements ICommentQueryRepository {
         return this.comments.find({postId:postId}).sort(sortBy,order)
     }
     private async getTotalCount(postId:string): Promise<number> {
-        return await this.comments.countDocuments({postId:postId})
+        return this.comments.countDocuments({postId:postId})
     } 
     private async loadPageComments(page:PageViewModel<CommentViewModel>,cursor:FindCursor<MongoCommentModel>)
     : Promise<PageViewModel<CommentViewModel>> {
