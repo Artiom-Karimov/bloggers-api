@@ -31,6 +31,7 @@ import ClientActionService from './logic/services/clientActionService'
 import TestingRouter from './presentation/routers/testingRouter'
 import TestingService from './logic/services/testingService'
 import mongoose from 'mongoose'
+import ErrorHandler from './errorHandler'
 
 
 export default class CompositionRoot {
@@ -70,8 +71,12 @@ export default class CompositionRoot {
     private readonly testingRouter: TestingRouter
 
     private app: BloggersApp|undefined
+
+    private readonly errorHandler: ErrorHandler
     
     constructor() {
+        this.errorHandler = new ErrorHandler()
+
         this.blogRepository = new BlogRepository()
         this.postRepository = new PostRepository()
         this.userRepository = new UserRepository()
