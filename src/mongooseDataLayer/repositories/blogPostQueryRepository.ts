@@ -8,6 +8,7 @@ import BlogMapper from "../mappers/blogMapper";
 import PostMapper from "../mappers/postMapper";
 import { Blog, IBlog } from "../models/blogModel";
 import { IPost, Post } from "../models/postModel";
+import SortFactory from "./utils/sortFactory";
 
 export default class BlogPostQueryRepository implements IBlogPostQueryRepository {
     public async getBlogs(params: GetBlogQueryParams): Promise<PageViewModel<BlogViewModel>> {
@@ -48,11 +49,11 @@ export default class BlogPostQueryRepository implements IBlogPostQueryRepository
         }
     }
     private getBlogQuery(filter:any,sortBy:string,sortDirection:string): any {
-        return Blog.find(filter).sort(this.getSortObject(sortBy,sortDirection))
+        return Blog.find(filter).sort(SortFactory.get(sortBy,sortDirection))
     }
     private getPostQuery(sortBy:string, sortDirection:string, blogId:string|null = null): any {
         const filter = blogId? {blogId:blogId} : {}
-        return Post.find(filter).sort(this.getSortObject(sortBy,sortDirection))
+        return Post.find(filter).sort(SortFactory.get(sortBy,sortDirection))
     }
     private async loadPageBlog(page:PageViewModel<BlogViewModel>,query:any): Promise<PageViewModel<BlogViewModel>> {
         try {
@@ -71,11 +72,5 @@ export default class BlogPostQueryRepository implements IBlogPostQueryRepository
         } catch (error) {
             return page
         }
-    }
-    private getSortObject(sortBy:string,sortDirection:string): any {
-        const order = sortDirection === 'asc' ? 1 : -1 
-        const sortObj: {[key:string]:number} = {}
-        sortObj[sortBy] = order
-        return sortObj
     }
 }

@@ -1,15 +1,17 @@
 import * as config from './config/config'
-import BloggersMongoDb from "./mongoDataLayer/bloggersMongoDb"
-import BlogRepository from './mongoDataLayer/repositories/blogRepository'
-import CommentQueryRepository from './mongoDataLayer/repositories/commentQueryRepository'
-import CommentRepository from './mongoDataLayer/repositories/commentRepository'
-import DeviceSessionQueryRepository from './mongoDataLayer/repositories/deviceSessionQueryRepository'
-import DeviceSessionRepository from './mongoDataLayer/repositories/deviceSessionRepository'
+//import BloggersMongoDb from "./mongoDataLayer/bloggersMongoDb"
+import BlogRepository from './mongooseDataLayer/repositories/blogRepository'
+import CommentQueryRepository from './mongooseDataLayer/repositories/commentQueryRepository'
+import CommentRepository from './mongooseDataLayer/repositories/commentRepository'
+import DeviceSessionQueryRepository from './mongooseDataLayer/repositories/deviceSessionQueryRepository'
+import DeviceSessionRepository from './mongooseDataLayer/repositories/deviceSessionRepository'
+import PostRepository from './mongooseDataLayer/repositories/postRepository'
+import BlogPostQueryRepository from './mongooseDataLayer/repositories/blogPostQueryRepository'
+import UserQueryRepository from './mongooseDataLayer/repositories/userQueryRepository'
+import UserRepository from './mongooseDataLayer/repositories/userRepository'
+import TestingRepository from './mongooseDataLayer/repositories/testingRepository'
+
 import ClientActionCollection from './logic/utils/clientActionCollection'
-import PostRepository from './mongoDataLayer/repositories/postRepository'
-import BlogPostQueryRepository from './mongoDataLayer/repositories/blogPostQueryRepository'
-import UserQueryRepository from './mongoDataLayer/repositories/userQueryRepository'
-import UserRepository from './mongoDataLayer/repositories/userRepository'
 import ConfirmationEmailSender from './email/confirmationEmailSender'
 import AuthService from './logic/services/authService'
 import BlogService from './logic/services/blogService'
@@ -28,10 +30,11 @@ import UserRouter from './presentation/routers/userRouter'
 import ClientActionService from './logic/services/clientActionService'
 import TestingRouter from './presentation/routers/testingRouter'
 import TestingService from './logic/services/testingService'
-import TestingRepository from './mongoDataLayer/repositories/testingRepository'
+import mongoose from 'mongoose'
+
 
 export default class CompositionRoot {
-    private readonly db = new BloggersMongoDb(config.mongoUri)
+    //private readonly db = new BloggersMongoDb(config.mongoUri)
     private readonly confirmationEmailSender = new ConfirmationEmailSender()
 
     private readonly blogRepository: BlogRepository
@@ -69,18 +72,18 @@ export default class CompositionRoot {
     private app: BloggersApp|undefined
     
     constructor() {
-        this.blogRepository = new BlogRepository(this.db)
-        this.postRepository = new PostRepository(this.db)
-        this.userRepository = new UserRepository(this.db)
-        this.commentRepository = new CommentRepository(this.db)
-        this.deviceSessionRepository = new DeviceSessionRepository(this.db)
+        this.blogRepository = new BlogRepository()
+        this.postRepository = new PostRepository()
+        this.userRepository = new UserRepository()
+        this.commentRepository = new CommentRepository()
+        this.deviceSessionRepository = new DeviceSessionRepository()
         this.clientActionRepository = new ClientActionCollection()
-        this.testingRepository = new TestingRepository(this.db)
+        this.testingRepository = new TestingRepository()
 
-        this.queryRepository = new BlogPostQueryRepository(this.db)
-        this.userQueryRepository = new UserQueryRepository(this.db)
-        this.commentQueryRepository = new CommentQueryRepository(this.db)
-        this.deviceSessionQueryRepository = new DeviceSessionQueryRepository(this.db)
+        this.queryRepository = new BlogPostQueryRepository()
+        this.userQueryRepository = new UserQueryRepository()
+        this.commentQueryRepository = new CommentQueryRepository()
+        this.deviceSessionQueryRepository = new DeviceSessionQueryRepository()
 
         this.blogService = new BlogService(this.blogRepository) 
         this.postService = new PostService(this.postRepository) 
@@ -112,11 +115,11 @@ export default class CompositionRoot {
             securityRouter:this.securityRouter,
             testingRouter:this.testingRouter
         })
-        await this.db.connect()
+        await mongoose.connect(config.mongoUri + '/bloggers')
         await this.app.start()
     }
     public async stop() {
         await this.app?.stop()
-        await this.db.close()
+        await mongoose.disconnect()
     }
 }

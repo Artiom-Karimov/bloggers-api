@@ -4,6 +4,7 @@ import CommentViewModel from "../../presentation/models/viewModels/commentViewMo
 import PageViewModel from "../../presentation/models/viewModels/pageViewModel";
 import CommentMapper from "../mappers/commentMapper";
 import { Comment, IComment } from "../models/commentModel";
+import SortFactory from "./utils/sortFactory";
 
 export default class CommentQueryRepository implements ICommentQueryRepository {
     public async getById(id: string): Promise<CommentViewModel | undefined> {
@@ -24,14 +25,8 @@ export default class CommentQueryRepository implements ICommentQueryRepository {
         return Comment.countDocuments({postId:postId})
     } 
     private getQuery(postId:string,sortBy:string,sortDirection:string): any {
-        const sortObj = this.getSortObject(sortBy,sortDirection)
+        const sortObj = SortFactory.get(sortBy,sortDirection)
         return Comment.find({postId:postId}).sort(sortObj)
-    }
-    private getSortObject(sortBy:string,sortDirection:string): any {
-        const order = sortDirection === 'asc' ? 1 : -1 
-        const sortObj: {[key:string]:number} = {}
-        sortObj[sortBy] = order
-        return sortObj
     }
     private async loadPageComments(page:PageViewModel<CommentViewModel>,query:any): Promise<PageViewModel<CommentViewModel>> {
         try {

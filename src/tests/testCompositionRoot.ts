@@ -7,9 +7,12 @@ import PostRepository from '../mongooseDataLayer/repositories/postRepository'
 import BlogPostQueryRepository from '../mongooseDataLayer/repositories/blogPostQueryRepository'
 import CommentRepository from '../mongooseDataLayer/repositories/commentRepository'
 import CommentQueryRepository from '../mongooseDataLayer/repositories/commentQueryRepository'
+import UserRepository from '../mongooseDataLayer/repositories/userRepository'
+import UserQueryRepository from '../mongooseDataLayer/repositories/userQueryRepository'
+import DeviceSessionRepository from '../mongooseDataLayer/repositories/deviceSessionRepository'
+import DeviceSessionQueryRepository from '../mongooseDataLayer/repositories/deviceSessionQueryRepository'
+import TestingRepository from '../mongooseDataLayer/repositories/testingRepository'
 
-import UserRepository from '../mongoDataLayer/repositories/userRepository'
-import UserQueryRepository from '../mongoDataLayer/repositories/userQueryRepository'
 import { ConfirmEmailSender } from '../email/confirmationEmailSender'
 import BlogService from '../logic/services/blogService'
 import PostService from '../logic/services/postService'
@@ -22,16 +25,14 @@ import PostRouter from '../presentation/routers/postRouter'
 import UserRouter from '../presentation/routers/userRouter'
 import BloggersApp from '../presentation/bloggersApp'
 import AuthMiddlewareProvider from '../presentation/middlewares/authMiddlewareProvider'
-import DeviceSessionRepository from '../mongoDataLayer/repositories/deviceSessionRepository'
 import DeviceSessionService from '../logic/services/deviceSessionService'
 import AuthService from '../logic/services/authService'
 import ClientActionRepository from '../logic/utils/clientActionCollection'
 import SecurityRouter from '../presentation/routers/securityRouter'
-import DeviceSessionQueryRepository from '../mongoDataLayer/repositories/deviceSessionQueryRepository'
 import ClientActionService from '../logic/services/clientActionService'
 import TestingRouter from '../presentation/routers/testingRouter'
 import TestingService from '../logic/services/testingService'
-import TestingRepository from '../mongoDataLayer/repositories/testingRepository'
+
 import mongoose from 'mongoose'
 
 const login = config.userName
@@ -96,15 +97,15 @@ const initRepos = async () => {
     if(!db) await initDb()
     blogRepository = new BlogRepository()
     postRepository = new PostRepository()
-    userRepository = new UserRepository(db)
+    userRepository = new UserRepository()
     commentRepository = new CommentRepository()
     queryRepository = new BlogPostQueryRepository()
-    userQueryRepository = new UserQueryRepository(db)
+    userQueryRepository = new UserQueryRepository()
     commentQueryRepository = new CommentQueryRepository()
-    deviceSessionRepository = new DeviceSessionRepository(db)
+    deviceSessionRepository = new DeviceSessionRepository()
     clientActionRepository = new ClientActionRepository()
-    deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)
-    testingRepository = new TestingRepository(db)
+    deviceSessionQueryRepository = new DeviceSessionQueryRepository()
+    testingRepository = new TestingRepository()
 }
 const initServices = async () => {
     if(!blogRepository) await initRepos()

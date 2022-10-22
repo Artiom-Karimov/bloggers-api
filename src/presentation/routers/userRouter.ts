@@ -44,7 +44,7 @@ export default class UserRouter {
                 res.status(201).send(retrieved)
                 return
             }
-            res.send(500)
+            res.sendStatus(400)
         })
 
         this.router.delete('/:id',
