@@ -1,13 +1,18 @@
 import * as config from '../config/config'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import BloggersMongoDb from '../mongoDataLayer/bloggersMongoDb'
-import BlogRepository from '../mongoDataLayer/repositories/blogRepository'
-import PostRepository from '../mongoDataLayer/repositories/postRepository'
-import UserRepository from '../mongoDataLayer/repositories/userRepository'
-import CommentRepository from '../mongoDataLayer/repositories/commentRepository'
-import QueryRepository from '../mongoDataLayer/repositories/blogPostQueryRepository'
-import UserQueryRepository from '../mongoDataLayer/repositories/userQueryRepository'
-import CommentQueryRepository from '../mongoDataLayer/repositories/commentQueryRepository'
+
+import BlogRepository from '../mongooseDataLayer/repositories/blogRepository'
+import PostRepository from '../mongooseDataLayer/repositories/postRepository'
+import BlogPostQueryRepository from '../mongooseDataLayer/repositories/blogPostQueryRepository'
+import CommentRepository from '../mongooseDataLayer/repositories/commentRepository'
+import CommentQueryRepository from '../mongooseDataLayer/repositories/commentQueryRepository'
+import UserRepository from '../mongooseDataLayer/repositories/userRepository'
+import UserQueryRepository from '../mongooseDataLayer/repositories/userQueryRepository'
+import DeviceSessionRepository from '../mongooseDataLayer/repositories/deviceSessionRepository'
+import DeviceSessionQueryRepository from '../mongooseDataLayer/repositories/deviceSessionQueryRepository'
+import TestingRepository from '../mongooseDataLayer/repositories/testingRepository'
+
 import { ConfirmEmailSender } from '../email/confirmationEmailSender'
 import BlogService from '../logic/services/blogService'
 import PostService from '../logic/services/postService'
@@ -20,16 +25,15 @@ import PostRouter from '../presentation/routers/postRouter'
 import UserRouter from '../presentation/routers/userRouter'
 import BloggersApp from '../presentation/bloggersApp'
 import AuthMiddlewareProvider from '../presentation/middlewares/authMiddlewareProvider'
-import DeviceSessionRepository from '../mongoDataLayer/repositories/deviceSessionRepository'
 import DeviceSessionService from '../logic/services/deviceSessionService'
 import AuthService from '../logic/services/authService'
 import ClientActionRepository from '../logic/utils/clientActionCollection'
 import SecurityRouter from '../presentation/routers/securityRouter'
-import DeviceSessionQueryRepository from '../mongoDataLayer/repositories/deviceSessionQueryRepository'
 import ClientActionService from '../logic/services/clientActionService'
 import TestingRouter from '../presentation/routers/testingRouter'
 import TestingService from '../logic/services/testingService'
-import TestingRepository from '../mongoDataLayer/repositories/testingRepository'
+
+import mongoose from 'mongoose'
 
 const login = config.userName
 const password = config.password
@@ -41,7 +45,7 @@ let blogRepository: BlogRepository
 let postRepository: PostRepository
 let userRepository: UserRepository
 let commentRepository: CommentRepository
-let queryRepository: QueryRepository
+let queryRepository: BlogPostQueryRepository
 let userQueryRepository: UserQueryRepository
 let commentQueryRepository: CommentQueryRepository
 let deviceSessionRepository: DeviceSessionRepository
@@ -76,28 +80,32 @@ let testingRouter: TestingRouter
 
 let app: BloggersApp
 
-const initDb = async () => {
-    mongoServ = await MongoMemoryServer.create()
-    db = new BloggersMongoDb(mongoServ.getUri())
-    await db.connect()
-}
 // const initDb = async () => {
-//     db = new BloggersMongoDb('mongodb://0.0.0.0:27017')
+//     mongoServ = await MongoMemoryServer.create()
+//     const uri = mongoServ.getUri()
+//     db = new BloggersMongoDb(uri)
+//     await mongoose.connect(uri)
 //     await db.connect()
 // }
+const initDb = async () => {
+    const uri = 'mongodb://0.0.0.0:27017'
+    db = new BloggersMongoDb(uri)
+    await mongoose.connect(uri + '/bloggers')
+    await db.connect()
+}
 const initRepos = async () => {
     if(!db) await initDb()
-    blogRepository = new BlogRepository(db)
-    postRepository = new PostRepository(db)
-    userRepository = new UserRepository(db)
-    commentRepository = new CommentRepository(db)
-    queryRepository = new QueryRepository(db)
-    userQueryRepository = new UserQueryRepository(db)
-    commentQueryRepository = new CommentQueryRepository(db)
-    deviceSessionRepository = new DeviceSessionRepository(db)
+    blogRepository = new BlogRepository()
+    postRepository = new PostRepository()
+    userRepository = new UserRepository()
+    commentRepository = new CommentRepository()
+    queryRepository = new BlogPostQueryRepository()
+    userQueryRepository = new UserQueryRepository()
+    commentQueryRepository = new CommentQueryRepository()
+    deviceSessionRepository = new DeviceSessionRepository()
     clientActionRepository = new ClientActionRepository()
-    deviceSessionQueryRepository = new DeviceSessionQueryRepository(db)
-    testingRepository = new TestingRepository(db)
+    deviceSessionQueryRepository = new DeviceSessionQueryRepository()
+    testingRepository = new TestingRepository()
 }
 const initServices = async () => {
     if(!blogRepository) await initRepos()
@@ -137,7 +145,8 @@ const initApp = async () => {
 const stopApp = async () => {
     await app.stop()
     await db.close()
-    await mongoServ.stop()
+    await mongoose.disconnect()
+    //await mongoServ.stop()
 }
 
 export {
