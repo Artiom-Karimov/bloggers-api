@@ -1,7 +1,7 @@
 import DeviceSessionService, { DeviceSessionError } from "./deviceSessionService";
 import UserService from "./userService";
 import Hasher from "../utils/hasher"
-import { LoginModelType, RegisterModelType, ResendEmailModelType, RenewTokenModelType, ConfirmEmailModelType } from "../models/clientActionTypes"
+import { LoginModelType, RegisterModelType, ResendEmailModelType, RenewTokenModelType, ConfirmEmailModelType, RecoverPasswordModelType } from "../models/clientActionTypes"
 import JwtTokenOperator from "../utils/jwtTokenOperator"
 import UserModel from "../models/userModel";
 import { ConfirmEmailSender } from "../../email/confirmationEmailSender";
@@ -114,7 +114,7 @@ export default class AuthService {
     } 
     private async checkPassword(user:UserModel,password:string): Promise<boolean> {
         if(!user.emailConfirmation.confirmed) return false
-        return Hasher.check(password,user.accountData.passwordHash,user.accountData.salt)
+        return Hasher.check(password,{ hash:user.accountData.passwordHash, salt:user.accountData.salt })
     }
     private async createAndGetUser(data:RegisterModelType): Promise<UserModel|undefined> {
         const createdId = await this.userService.createUnconfirmed({

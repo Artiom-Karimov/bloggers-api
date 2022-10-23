@@ -5,7 +5,7 @@ export interface ConfirmEmailSender {
     send(login:string,email:string,code:string): Promise<boolean>
 }
 
-export default class ConfirmationEmailSender extends EmailSender {
+export default class ConfirmationEmailSender extends EmailSender implements ConfirmEmailSender {
 
     constructor() {
         super()

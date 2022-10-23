@@ -21,7 +21,9 @@ const userAuth = {
     actionLimit:
         process.env.clientActionLimit ? Number(process.env.clientActionLimit ) : 5,
     actionLimitTime:
-        process.env.clientActionLimitTime ? Number(process.env.clientActionLimitTime) : 10_000
+        process.env.clientActionLimitTime ? Number(process.env.clientActionLimitTime) : 10_000,
+    recoveryExpiration:
+        process.env.recoveryExpiration ? Number(process.env.recoveryExpiration) : 600_000 // 10 min
 }
 
 export {

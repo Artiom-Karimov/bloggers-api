@@ -2,6 +2,7 @@ import { UserRepository } from "../interfaces/userRepository"
 import UserModel, { UserInputModel } from "../models/userModel"
 import UserFactory from "../utils/userFactory"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
+import Hasher from "../utils/hasher"
 
 export default class UserService {    
 
@@ -55,5 +56,9 @@ export default class UserService {
     }
     public async setEmailConfirmed(id:string): Promise<boolean> {
         return this.repo.updateEmailConfirmation(id, EmailConfirmationFactory.getConfirmed())
+    }
+    public async setNewPassword(id:string,password:string): Promise<boolean> {
+        const newPair = await Hasher.hash(password)
+        return this.repo.updatePassword(id,newPair.hash,newPair.salt)
     }
 }

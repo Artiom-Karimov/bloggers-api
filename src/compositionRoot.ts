@@ -32,11 +32,15 @@ import TestingRouter from './presentation/routers/testingRouter'
 import TestingService from './logic/services/testingService'
 import mongoose from 'mongoose'
 import ErrorHandler from './errorHandler'
+import PasswordRecoveryService from './logic/services/passwordRecoveryService'
+import PasswordRecoveryRepository from './mongooseDataLayer/repositories/passwordRecoveryRepository'
+import RecoveryEmailSender from './email/recoveryEmailSender'
 
 
 export default class CompositionRoot {
     //private readonly db = new BloggersMongoDb(config.mongoUri)
-    private readonly confirmationEmailSender = new ConfirmationEmailSender()
+    private readonly confirmationSender = new ConfirmationEmailSender()
+    private readonly recoverySender = new RecoveryEmailSender()
 
     private readonly blogRepository: BlogRepository
     private readonly postRepository: PostRepository
@@ -45,6 +49,7 @@ export default class CompositionRoot {
     private readonly deviceSessionRepository: DeviceSessionRepository
     private readonly clientActionRepository: ClientActionCollection
     private readonly testingRepository: TestingRepository
+    private readonly recoveryRepository: PasswordRecoveryRepository
 
     private readonly queryRepository: BlogPostQueryRepository
     private readonly userQueryRepository: UserQueryRepository
@@ -58,6 +63,7 @@ export default class CompositionRoot {
     private readonly commentService: CommentService
     private readonly clientActionService: ClientActionService
     private readonly authService: AuthService
+    private readonly recoveryService: PasswordRecoveryService
     private readonly testingService: TestingService
 
     private readonly authProvider: AuthMiddlewareProvider
@@ -84,6 +90,7 @@ export default class CompositionRoot {
         this.deviceSessionRepository = new DeviceSessionRepository()
         this.clientActionRepository = new ClientActionCollection()
         this.testingRepository = new TestingRepository()
+        this.recoveryRepository = new PasswordRecoveryRepository()
 
         this.queryRepository = new BlogPostQueryRepository()
         this.userQueryRepository = new UserQueryRepository()
@@ -96,8 +103,9 @@ export default class CompositionRoot {
         this.userService = new UserService(this.userRepository) 
         this.commentService = new CommentService(this.commentRepository)
         this.clientActionService = new ClientActionService(this.clientActionRepository)
-        this.authService = new AuthService(this.userService,this.deviceSessionService,this.clientActionService,this.confirmationEmailSender)
+        this.authService = new AuthService(this.userService,this.deviceSessionService,this.clientActionService,this.confirmationSender)
         this.testingService = new TestingService(this.testingRepository)
+        this.recoveryService = new PasswordRecoveryService(this.recoveryRepository,this.clientActionService,this.userService,this.recoverySender)
         
         this.authProvider = new AuthMiddlewareProvider(this.userService)
 
@@ -106,7 +114,7 @@ export default class CompositionRoot {
         this.commentRouter = new CommentRouter(this.commentService,this.commentQueryRepository,this.authProvider)
         this.userRouter = new UserRouter(this.userService,this.userQueryRepository,this.authProvider)
         this.securityRouter = new SecurityRouter(this.deviceSessionService,this.deviceSessionQueryRepository,this.authProvider)
-        this.authRouter = new AuthRouter(this.authService,this.userQueryRepository,this.authProvider)
+        this.authRouter = new AuthRouter(this.authService,this.recoveryService,this.userQueryRepository,this.authProvider)
         this.testingRouter = new TestingRouter(this.testingService)
     }
 

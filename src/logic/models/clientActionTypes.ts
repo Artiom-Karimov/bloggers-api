@@ -27,3 +27,12 @@ export type ConfirmEmailModelType = {
     deviceName:string,
     code:string
 }
+export type RecoverPasswordModelType = {
+    ip:string,
+    email:string
+}
+export type SetNewPasswordModelType = {
+    ip:string,
+    password:string,
+    code:string
+}

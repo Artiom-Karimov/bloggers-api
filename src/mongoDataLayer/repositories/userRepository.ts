@@ -4,7 +4,7 @@ import UserModel, { EmailConfirmation } from "../../logic/models/userModel";
 import BloggersMongoDb from "../bloggersMongoDb";
 import MongoUserModel from "../models/mongoUserModel";
 
-export default class UserRepository implements IUserRepository {
+export default class UserRepository { //implements IUserRepository {
     private readonly users: Collection<MongoUserModel>
 
     constructor(db: BloggersMongoDb) {

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { UserQueryRepository } from '../interfaces/userQueryRepository'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
-import { confirmCodeValidation, emailValidation, userValidation } from "../validation/bodyValidators";
+import { confirmCodeValidation, emailValidation, newPasswordValidation, userValidation } from "../validation/bodyValidators";
 import { validationMiddleware } from "../middlewares/validationMiddleware";
 import { confirmQueryValidation } from "../validation/queryValidators";
 import { APIErrorResult } from "../validation/apiErrorResultFormatter";
@@ -11,12 +11,14 @@ import * as config from '../../config/config'
 import AuthService from "../../logic/services/authService";
 import { AuthError } from "../../logic/models/authError";
 import TokenPair from "../../logic/models/tokenPair";
+import PasswordRecoveryService from "../../logic/services/passwordRecoveryService";
 
 export default class AuthRouter {
     public readonly router: Router
 
     constructor(
         private readonly authService:AuthService,
+        private readonly recoveryService:PasswordRecoveryService,
         private readonly queryRepo:UserQueryRepository,
         private readonly authProvider:AuthMiddlewareProvider) {
             this.router = Router()
@@ -186,6 +188,39 @@ export default class AuthRouter {
                 return
             }
             res.send(401)
+        })
+
+        this.router.post('/password-recovery',
+        emailValidation,
+        validationMiddleware,
+        async (req:Request,res:Response) => {
+            const result = await this.recoveryService.sendRecoveryEmail({
+                ip:req.ip,
+                email:req.body.email
+            })
+            if(result === AuthError.ActionLimit) {
+                res.sendStatus(429)
+                return
+            }
+            res.sendStatus(204)
+        })
+
+        this.router.post('/new-password',
+        newPasswordValidation,
+        validationMiddleware,
+        async (req:Request,res:Response) => {
+            const result = await this.recoveryService.setNewPassword({
+                ip:req.ip,
+                password:req.body.newPassword,
+                code:req.body.recoveryCode
+            })
+            if(result === AuthError.ActionLimit) {
+                res.sendStatus(429); return
+            }
+            if(result === AuthError.NoError) {
+                res.sendStatus(204); return
+            }
+            res.sendStatus(400)
         })
     }
     private getCookieSettings(): any {
