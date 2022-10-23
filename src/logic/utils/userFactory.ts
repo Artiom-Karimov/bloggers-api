@@ -23,12 +23,12 @@ export default class UserFactory {
     }
 
     private static async getAccountData(data:UserInputModel): Promise<AccountData> {
-        const [passwordHash, salt] = await Hasher.hash(data.password)
+        const pair = await Hasher.hash(data.password)
         return {
             login:data.login,
             email:data.email,
-            passwordHash:passwordHash,
-            salt:salt,
+            passwordHash:pair.hash,
+            salt:pair.salt,
             createdAt: DateGenerator.generate()
         }
     }

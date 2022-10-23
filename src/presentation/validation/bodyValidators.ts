@@ -39,3 +39,8 @@ export const postValidation = [ titleValidation, shortDescriptionValidation, con
 export const userValidation = [ loginValidation, passwordValidation, emailValidation ]
 export const authValidation = [ loginValidation, passwordValidation ]
 export const commentValidation = stringValidation('content', 20, 300, commentErrorMessage)
+
+export const newPasswordValidation = [
+    stringValidation('newPassword',6,20,'invalid password'),
+    stringValidation('recoveryCode',10,200,'incorrect recoveryCode')
+]

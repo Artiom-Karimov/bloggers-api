@@ -59,6 +59,21 @@ export default class UserRepository implements IUserRepository {
             return false
         }
     }
+    public async updatePassword(id: string, hash: string, salt: string): Promise<boolean> {
+        try {
+            const user = await User.findOne({_id:id})
+            if(!user) return false
+
+            user.accountData.passwordHash = hash
+            user.accountData.salt = salt
+            const saved = await user.save()
+            
+            return !!saved
+        } catch (error) {
+            console.log(error)
+            return false
+        }
+    }
     public async delete(id: string): Promise<boolean> {
         try {
             const result = await User.deleteOne({_id:id})
@@ -68,5 +83,4 @@ export default class UserRepository implements IUserRepository {
             return false
         }
     }
-
 }

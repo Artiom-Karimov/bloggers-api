@@ -8,5 +8,6 @@ export interface UserRepository {
 
     create(user:UserModel): Promise<string|undefined>
     updateEmailConfirmation(id:string,data:EmailConfirmation): Promise<boolean>
+    updatePassword(id:string,hash:string,salt:string): Promise<boolean>
     delete(id:string): Promise<boolean>
 }

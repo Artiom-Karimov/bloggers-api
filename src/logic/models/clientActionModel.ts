@@ -4,7 +4,9 @@ export enum ClientAction {
     ResendEmail = 'resendEmail',
     ConfirmEmail = 'confirmEmail',
     Login = 'login',
-    RenewToken = 'renewToken'
+    RenewToken = 'renewToken',
+    RecoverPassword = 'recoverPassword',
+    SetNewPassword = 'setNewPassword'
 }
 
 export default class ClentActionModel {

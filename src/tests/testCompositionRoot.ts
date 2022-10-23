@@ -1,6 +1,5 @@
 import * as config from '../config/config'
 import { MongoMemoryServer } from 'mongodb-memory-server'
-import BloggersMongoDb from '../mongoDataLayer/bloggersMongoDb'
 
 import BlogRepository from '../mongooseDataLayer/repositories/blogRepository'
 import PostRepository from '../mongooseDataLayer/repositories/postRepository'
@@ -34,117 +33,80 @@ import TestingRouter from '../presentation/routers/testingRouter'
 import TestingService from '../logic/services/testingService'
 
 import mongoose from 'mongoose'
+import PasswordRecoveryRepository from '../mongooseDataLayer/repositories/passwordRecoveryRepository'
+import PasswordRecoveryService from '../logic/services/passwordRecoveryService'
+import { RecoverEmailSender } from '../email/recoveryEmailSender'
 
 const login = config.userName
 const password = config.password
 
 let mongoServ: MongoMemoryServer
-let db: BloggersMongoDb
 
-let blogRepository: BlogRepository
-let postRepository: PostRepository
-let userRepository: UserRepository
-let commentRepository: CommentRepository
-let queryRepository: BlogPostQueryRepository
-let userQueryRepository: UserQueryRepository
-let commentQueryRepository: CommentQueryRepository
-let deviceSessionRepository: DeviceSessionRepository
-let clientActionRepository: ClientActionRepository
-let deviceSessionQueryRepository: DeviceSessionQueryRepository
-let testingRepository: TestingRepository
+const blogRepository = new BlogRepository()
+const postRepository = new PostRepository()
+const userRepository = new UserRepository()
+const commentRepository = new CommentRepository()
+const queryRepository = new BlogPostQueryRepository()
+const userQueryRepository = new UserQueryRepository()
+const commentQueryRepository = new CommentQueryRepository()
+const deviceSessionRepository = new DeviceSessionRepository()
+const clientActionRepository = new ClientActionRepository()
+const deviceSessionQueryRepository = new DeviceSessionQueryRepository()
+const recoveryRepository = new PasswordRecoveryRepository()
+const testingRepository = new TestingRepository()
 
 const fakeConfirmEmailSender: ConfirmEmailSender = {
     send(login:string,email:string,code:string): Promise<boolean> {
         return new Promise((resolve, reject) => resolve(true))
     }
 }
+const fakeRecoverEmailSender: RecoverEmailSender = {
+    send: function (email: string, code: string): Promise<boolean> {
+        return new Promise((resolve, reject) => resolve(true))
+    }
+}
 
-let blogService: BlogService
-let postService: PostService
-let deviceService: DeviceSessionService
-let userService: UserService
-let commentService: CommentService
-let authService: AuthService
-let actionService: ClientActionService
-let testingService: TestingService
+const blogService = new BlogService(blogRepository)
+const postService = new PostService(postRepository)
+const deviceService = new DeviceSessionService(deviceSessionRepository)
+const userService = new UserService(userRepository)
+const commentService = new CommentService(commentRepository)
+const actionService = new ClientActionService(clientActionRepository)
+const authService = new AuthService(userService,deviceService,actionService,fakeConfirmEmailSender)
+const recoveryService = new PasswordRecoveryService(recoveryRepository,actionService,userService,fakeRecoverEmailSender)
+const testingService = new TestingService(testingRepository)
 
-let authProvider: AuthMiddlewareProvider
+const authProvider = new AuthMiddlewareProvider(userService)
+const authRouter = new AuthRouter(authService,recoveryService,userQueryRepository,authProvider)
+const blogRouter = new BlogRouter(blogService,postService,queryRepository,authProvider)
+const commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
+const postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)
+const userRouter = new UserRouter(userService,userQueryRepository,authProvider)
+const securityRouter = new SecurityRouter(deviceService,deviceSessionQueryRepository,authProvider)
+const testingRouter = new TestingRouter(testingService)
 
-let authRouter: AuthRouter
-let blogRouter: BlogRouter
-let commentRouter: CommentRouter
-let postRouter: PostRouter
-let userRouter: UserRouter
-let securityRouter: SecurityRouter
-let testingRouter: TestingRouter
+const app = new BloggersApp({
+    blogRouter,
+    postRouter,
+    userRouter,
+    authRouter,
+    commentRouter,
+    securityRouter,
+    testingRouter
+})
 
-let app: BloggersApp
-
-// const initDb = async () => {
+// const initApp = async () => {
 //     mongoServ = await MongoMemoryServer.create()
 //     const uri = mongoServ.getUri()
-//     db = new BloggersMongoDb(uri)
-//     await mongoose.connect(uri)
-//     await db.connect()
+//     await mongoose.connect(uri + '/bloggers')
 // }
-const initDb = async () => {
-    const uri = 'mongodb://0.0.0.0:27017'
-    db = new BloggersMongoDb(uri)
-    await mongoose.connect(uri + '/bloggers')
-    await db.connect()
-}
-const initRepos = async () => {
-    if(!db) await initDb()
-    blogRepository = new BlogRepository()
-    postRepository = new PostRepository()
-    userRepository = new UserRepository()
-    commentRepository = new CommentRepository()
-    queryRepository = new BlogPostQueryRepository()
-    userQueryRepository = new UserQueryRepository()
-    commentQueryRepository = new CommentQueryRepository()
-    deviceSessionRepository = new DeviceSessionRepository()
-    clientActionRepository = new ClientActionRepository()
-    deviceSessionQueryRepository = new DeviceSessionQueryRepository()
-    testingRepository = new TestingRepository()
-}
-const initServices = async () => {
-    if(!blogRepository) await initRepos()
-    blogService = new BlogService(blogRepository)
-    postService = new PostService(postRepository)
-    deviceService = new DeviceSessionService(deviceSessionRepository)
-    userService = new UserService(userRepository)
-    commentService = new CommentService(commentRepository)
-    actionService = new ClientActionService(clientActionRepository)
-    authService = new AuthService(userService,deviceService,actionService,fakeConfirmEmailSender)
-    testingService = new TestingService(testingRepository)
-}
-const initRouters = async () => {
-    if(!blogService) await initServices()
-    authProvider = new AuthMiddlewareProvider(userService)
-    authRouter = new AuthRouter(authService,userQueryRepository,authProvider)
-    blogRouter = new BlogRouter(blogService,postService,queryRepository,authProvider)
-    commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
-    postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)
-    userRouter = new UserRouter(userService,userQueryRepository,authProvider)
-    securityRouter = new SecurityRouter(deviceService,deviceSessionQueryRepository,authProvider)
-    testingRouter = new TestingRouter(testingService)
-}
 
 const initApp = async () => {
-    if(!authRouter) await initRouters()
-    app = new BloggersApp({
-        blogRouter,
-        postRouter,
-        userRouter,
-        authRouter,
-        commentRouter,
-        securityRouter,
-        testingRouter
-    })
+    const uri = 'mongodb://0.0.0.0:27017'
+    await mongoose.connect(uri + '/bloggers')
 }
 const stopApp = async () => {
     await app.stop()
-    await db.close()
     await mongoose.disconnect()
     //await mongoServ.stop()
 }
@@ -152,11 +114,10 @@ const stopApp = async () => {
 export {
     login,
     password,
-    db,
     app,
-
     userService,
-    initServices,
+    recoveryService,
+    recoveryRepository,
     initApp,
     stopApp
 }
