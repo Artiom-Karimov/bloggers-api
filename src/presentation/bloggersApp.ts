@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express'
 import http from 'http'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
 
 import * as config from '../config/config'
 import BlogRouter from './routers/blogRouter'
@@ -32,6 +33,7 @@ export default class BloggersApp {
         const app = express()
         this.server = http.createServer(app)
 
+        app.use(cors())
         app.use(bodyParser.json())
         app.use(cookieParser())
         app.set('trust proxy', true)
