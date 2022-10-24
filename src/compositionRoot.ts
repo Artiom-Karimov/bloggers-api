@@ -38,7 +38,6 @@ import RecoveryEmailSender from './email/recoveryEmailSender'
 
 
 export default class CompositionRoot {
-    //private readonly db = new BloggersMongoDb(config.mongoUri)
     private readonly confirmationSender = new ConfirmationEmailSender()
     private readonly recoverySender = new RecoveryEmailSender()
 
@@ -128,7 +127,7 @@ export default class CompositionRoot {
             securityRouter:this.securityRouter,
             testingRouter:this.testingRouter
         })
-        await mongoose.connect(config.mongoUri + '/bloggers')
+        await mongoose.connect(config.mongoUri)
         await this.app.start()
     }
     public async stop() {

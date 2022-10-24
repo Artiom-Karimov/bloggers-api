@@ -3,7 +3,7 @@ const baseUrl:string = process.env.baseUrl || `http://localhost:${port}`
 const userName:string = process.env.USER_NAME!
 const password:string = process.env.PASSWORD!
 const cookieMaxAge:number = Number(process.env.cookieMaxAge) || 24 * 3600
-const mongoUri:string = process.env.mongoUri || 'mongodb://0.0.0.0:27017'
+const mongoUri:string = process.env.mongoUri || 'mongodb://0.0.0.0:27017/bloggers'
 const jwt = {
     secret:process.env.jwtSecret!,
     expire:process.env.jwtExpire || '10s',
