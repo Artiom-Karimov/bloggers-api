@@ -1,5 +1,6 @@
 import CommentModel from "../../logic/models/commentModel";
 import CommentViewModel from "../../presentation/models/viewModels/commentViewModel";
+import LikesInfoViewModel from "../../presentation/models/viewModels/likesInfoViewModel";
 import { IComment } from "../models/commentModel";
 
 export default class CommentMapper {
@@ -25,13 +26,14 @@ export default class CommentMapper {
             model.createdAt
         )
     }
-    public static toView(model:IComment): CommentViewModel {
+    public static toView(model:IComment,likes:LikesInfoViewModel): CommentViewModel {
         return new CommentViewModel(
             model._id,
             model.content,
             model.userId,
             model.userLogin,
-            model.createdAt
+            model.createdAt,
+            likes
         )
     }
 }

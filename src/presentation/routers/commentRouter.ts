@@ -3,7 +3,8 @@ import { CommentQueryRepository } from "../interfaces/commentQueryRepository"
 import CommentService from "../../logic/services/commentService"
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider"
 import { validationMiddleware } from "../middlewares/validationMiddleware"
-import { commentValidation } from "../validation/bodyValidators"
+import { commentValidation, likeStatusValidation } from "../validation/bodyValidators"
+import { LikeStatus } from "../../logic/models/likeModel"
 
 export default class CommentRouter {
     public readonly router: Router
@@ -20,8 +21,9 @@ export default class CommentRouter {
     }
     private setRoutes() {
         this.router.get('/:id', 
+        this.authProvider.optionalBearerAuthMiddleware,
         async (req:Request,res:Response) => {
-            const result = await this.queryRepo.getById(req.params.id)
+            const result = await this.queryRepo.getById(req.params.id,req.headers.userId as string|undefined)
             if(!result) {
                 res.sendStatus(404)
                 return
@@ -34,7 +36,7 @@ export default class CommentRouter {
         commentValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-            const comment = await this.queryRepo.getById(req.params.id)
+            const comment = await this.queryRepo.getWithoutLikes(req.params.id)
             if(!comment) {
                 res.sendStatus(404)
                 return
@@ -50,7 +52,7 @@ export default class CommentRouter {
         this.router.delete('/:id',
         this.authProvider.bearerAuthMiddleware,
         async (req:Request,res:Response) => {
-            const comment = await this.queryRepo.getById(req.params.id)
+            const comment = await this.queryRepo.getWithoutLikes(req.params.id)
             if(!comment) {
                 res.sendStatus(404)
                 return
@@ -61,6 +63,24 @@ export default class CommentRouter {
             }
             const deleted = await this.service.delete(req.params.id)
             res.sendStatus(deleted? 204 : 500)
+        })
+
+        this.router.put('/:id/like-status',
+        this.authProvider.bearerAuthMiddleware,
+        likeStatusValidation,
+        validationMiddleware,
+        async (req:Request,res:Response) => {
+            const comment = await this.queryRepo.getWithoutLikes(req.params.id)
+            if(!comment) {
+                res.sendStatus(404)
+                return
+            }
+            const result = await this.service.putLikeInfo({
+                userId:req.headers.userId as string,
+                entityId:req.params.id,
+                status:req.body.likeStatus as LikeStatus
+            })
+            res.sendStatus(result ? 204 : 400)
         })
     }
 }

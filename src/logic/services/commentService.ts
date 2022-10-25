@@ -1,5 +1,7 @@
 import { CommentRepository } from "../interfaces/commentRepository";
+import { PutLikeInfoModelType } from "../models/clientActionTypes";
 import CommentModel, { CommentCreateModel } from "../models/commentModel";
+import LikeModel from "../models/likeModel";
 import DateGenerator from "../utils/dateGenerator";
 import IdGenerator from "../utils/idGenerator";
 
@@ -24,6 +26,16 @@ export default class CommentService {
         return this.repo.update(id,content)
     }
     public async delete(id:string): Promise<boolean> {
-        return this.repo.delete(id)
+        const deleted = await this.repo.delete(id)
+        if(deleted) this.repo.deleteLikes(id)
+        return deleted
+    }
+    public async putLikeInfo(data:PutLikeInfoModelType): Promise<boolean> {
+        let like = await this.repo.getLike(data.entityId,data.userId)
+        if(!like) { 
+            like = LikeModel.create(data)
+            return this.repo.createLike(like)
+        }
+        return this.repo.updateLike(LikeModel.update(like,data.status))
     }
 }

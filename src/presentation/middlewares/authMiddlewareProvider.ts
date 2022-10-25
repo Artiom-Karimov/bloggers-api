@@ -22,23 +22,28 @@ export default class AuthMiddlewareProvider {
         res.sendStatus(401)
     }
     public bearerAuthMiddleware = async (req:Request,res:Response,next:NextFunction) => {
-        if(!req.headers.authorization) {
-            res.sendStatus(401)
-            return
-        }
+        const result = await this.validateBearerInjectUser(req)
+        if(result) next()
+        else res.sendStatus(401)
+    }
+    public optionalBearerAuthMiddleware = async (req:Request,res:Response,next:NextFunction) => {
+        await this.validateBearerInjectUser(req)
+        next()
+    }
+    private async validateBearerInjectUser(req:Request): Promise<boolean> {
+        if(!req.headers.authorization) return false
         const authHeader = req.headers.authorization.split(' ')
-    
-        if(authHeader[0] === 'Bearer') { 
-            try {
-                const authorizedId = JwtTokenOperator.unpackToken(authHeader[1])
-                if(authorizedId) {
-                    req.headers.userId = authorizedId
-                    req.headers.userLogin = await this.userService.getLoginById(authorizedId)
-                    next()
-                    return
-                }  
-            } catch {}
-        }
-        res.sendStatus(401)
+        if(authHeader[0] !== 'Bearer') return false 
+
+        try {
+            const authorizedId = JwtTokenOperator.unpackToken(authHeader[1])
+            if(authorizedId) {
+                req.headers.userId = authorizedId
+                req.headers.userLogin = await this.userService.getLoginById(authorizedId)
+                return true
+            }  
+        } catch {}
+        
+        return false
     }
 }

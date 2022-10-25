@@ -147,7 +147,7 @@ export default class PostRouter {
 
             const created = await this.comments.create(data)
             if(created) {
-                const retrieved = await this.commentQueryRepo.getById(created)
+                const retrieved = await this.commentQueryRepo.getWithoutLikes(created)
                 if(retrieved) {
                     res.status(201).send(retrieved)
                     return

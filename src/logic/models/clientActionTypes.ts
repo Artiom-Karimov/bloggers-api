@@ -1,3 +1,5 @@
+import { LikeStatus } from "./likeModel"
+
 export type LoginModelType = {
     login:string,
     password:string,
@@ -35,4 +37,9 @@ export type SetNewPasswordModelType = {
     ip:string,
     password:string,
     code:string
+}
+export type PutLikeInfoModelType = {
+    userId:string,
+    entityId:string,
+    status:LikeStatus
 }
