@@ -1,7 +1,6 @@
 import PageQueryParams from "./pageQueryParams"
 
 export default class GetCommentsQueryParams extends PageQueryParams {
-    public postId: string = ''
 
     protected override sortByValues = [
          'createdAt', 
@@ -10,10 +9,9 @@ export default class GetCommentsQueryParams extends PageQueryParams {
          'userLogin'
         ]
 
-    constructor(query: any, postId: string) {
+    constructor(query: any, public postId: string, public userId:string = '') {
         super(query)
         if(!query) return;
         this.assignSortBy(query.sortBy)
-        this.postId = postId
     }
 }

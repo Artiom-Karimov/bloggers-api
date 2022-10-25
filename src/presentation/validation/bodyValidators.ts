@@ -1,4 +1,5 @@
 import { body } from "express-validator";
+import { LikeStatus } from "../../logic/models/likeModel";
 
 const httpsRegex = /^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/
 const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
@@ -14,10 +15,16 @@ const emailErrorMessage = 'email should be valid'
 const commentErrorMessage = 'content should be 20-300 chars long'
 const confirmCodeErrorMessage = 'you shuld provide valid confirmation code'
 
+const likeStatusErrorMessage = 'likeStatus should be None, Like or Dislike'
+
 const stringValidation = (param:string, minLength:number, maxLength:number, message:string) => {
     return body(param).isString().withMessage(message)
         .trim().isLength({min:minLength,max:maxLength}).withMessage(message)
 } 
+
+const enumValidation = (param:string, values:string[], message:string) => {
+    return body(param).isIn(values).withMessage(message)
+}
 
 const nameValidation = stringValidation('name', 1, 15, nameErrorMessage)
 const youtubeUrlValidation = [ 
@@ -39,6 +46,7 @@ export const postValidation = [ titleValidation, shortDescriptionValidation, con
 export const userValidation = [ loginValidation, passwordValidation, emailValidation ]
 export const authValidation = [ loginValidation, passwordValidation ]
 export const commentValidation = stringValidation('content', 20, 300, commentErrorMessage)
+export const likeStatusValidation = enumValidation('likeStatus', [ 'None','Like','Dislike' ], likeStatusErrorMessage)
 
 export const newPasswordValidation = [
     stringValidation('newPassword',6,20,'invalid password'),

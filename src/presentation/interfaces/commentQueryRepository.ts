@@ -3,6 +3,7 @@ import CommentViewModel from "../models/viewModels/commentViewModel";
 import PageViewModel from "../models/viewModels/pageViewModel";
 
 export interface CommentQueryRepository {
-    getById(id:string): Promise<CommentViewModel|undefined>
+    getWithoutLikes(id:string): Promise<CommentViewModel|undefined>
+    getById(id:string,userId:string|undefined): Promise<CommentViewModel|undefined>
     get(params:GetCommentsQueryParams): Promise<PageViewModel<CommentViewModel>>
 }
