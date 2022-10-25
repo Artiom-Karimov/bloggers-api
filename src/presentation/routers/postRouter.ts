@@ -116,8 +116,9 @@ export default class PostRouter {
 
     private setCommentRoutes() {
         this.router.get('/:postId/comments',
+        this.authProvider.optionalBearerAuthMiddleware,
         async (req:Request,res:Response) => {
-            const query = new GetCommentsQueryParams(req.query,req.params.postId)
+            const query = new GetCommentsQueryParams(req.query,req.params.postId,req.headers.userId as string|undefined)
             const post = await this.posts.get(query.postId)
             if(!post) {
                 res.sendStatus(404)
