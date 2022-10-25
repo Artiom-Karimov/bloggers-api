@@ -95,20 +95,20 @@ const app = new BloggersApp({
     testingRouter
 })
 
+const initApp = async () => {
+    mongoServ = await MongoMemoryServer.create()
+    const uri = mongoServ.getUri()
+    await mongoose.connect(uri )//+ '/bloggers')
+}
+
 // const initApp = async () => {
-//     mongoServ = await MongoMemoryServer.create()
-//     const uri = mongoServ.getUri()
+//     const uri = 'mongodb://0.0.0.0:27017'
 //     await mongoose.connect(uri + '/bloggers')
 // }
-
-const initApp = async () => {
-    const uri = 'mongodb://0.0.0.0:27017'
-    await mongoose.connect(uri + '/bloggers')
-}
 const stopApp = async () => {
     await app.stop()
     await mongoose.disconnect()
-    //await mongoServ.stop()
+    await mongoServ.stop()
 }
 
 export {
