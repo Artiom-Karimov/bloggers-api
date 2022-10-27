@@ -1,9 +1,9 @@
 import request from 'supertest'
-import PageViewModel from '../../presentation/models/viewModels/pageViewModel'
-import BlogViewModel from '../../presentation/models/viewModels/blogViewModel'
+import PageViewModel from '../../presentationLayer/models/viewModels/pageViewModel'
+import BlogViewModel from '../../presentationLayer/models/viewModels/blogViewModel'
 import * as helpers from './routerTestHelpers'
 import * as root from '../testCompositionRoot'
-import PostViewModel from '../../presentation/models/viewModels/postViewModel'
+import PostViewModel from '../../presentationLayer/models/viewModels/postViewModel'
 
 const base = '/blogs'
 

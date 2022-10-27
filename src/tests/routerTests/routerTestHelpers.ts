@@ -1,9 +1,9 @@
 import request from 'supertest'
 
-import { BlogInputModel } from "../../logic/models/blogModel"
-import { CommentInputModel } from '../../logic/models/commentModel'
-import { PostInputModel } from "../../logic/models/postModel"
-import { UserInputModel } from '../../logic/models/userModel'
+import { BlogInputModel } from "../../logicLayer/models/blogModel"
+import { CommentInputModel } from '../../logicLayer/models/commentModel'
+import { PostInputModel } from "../../logicLayer/models/postModel"
+import { UserInputModel } from '../../logicLayer/models/userModel'
 import * as root from '../testCompositionRoot'
 
 export let sampleBlogInputs: Array<BlogInputModel> = []

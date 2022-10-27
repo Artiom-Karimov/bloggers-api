@@ -1,6 +1,5 @@
 import request from 'supertest'
-import { UserInputModel } from '../../logic/models/userModel'
-import UserFactory from '../../logic/utils/userFactory'
+import { UserInputModel } from '../../logicLayer/models/userModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 

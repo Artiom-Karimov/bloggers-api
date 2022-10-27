@@ -1,5 +1,5 @@
 import request from 'supertest'
-import DeviceSessionViewModel from '../../presentation/models/viewModels/deviceSessionViewModel'
+import DeviceSessionViewModel from '../../presentationLayer/models/viewModels/deviceSessionViewModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 
