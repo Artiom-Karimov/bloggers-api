@@ -32,8 +32,10 @@ export default class BlogRouter {
             res.status(200).send(result)
         })
 
-        this.router.get('/:blogId/posts', async (req:Request, res:Response) => {
-            const query = new GetPostsQueryParams(req.query)
+        this.router.get('/:blogId/posts', 
+        this.authProvider.optionalBearerAuthMiddleware,
+        async (req:Request, res:Response) => {
+            const query = new GetPostsQueryParams(req.query, req.headers.userId as string|undefined)
             const result = await this.queryRepo.getBlogPosts(req.params.blogId,query)
             if(!result) {
                 res.sendStatus(404)

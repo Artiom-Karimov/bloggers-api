@@ -9,5 +9,6 @@ export interface BlogPostQueryRepository {
     getBlogPosts(blogId:string,params:GetPostsQueryParams)
         : Promise<PageViewModel<PostViewModel>|undefined>
 
+    getPost(id:string,userId:string|undefined): Promise<PostViewModel|undefined>
     getPosts(params:GetPostsQueryParams): Promise<PageViewModel<PostViewModel>>
 }

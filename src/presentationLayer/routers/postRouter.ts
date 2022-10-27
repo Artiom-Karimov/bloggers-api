@@ -46,18 +46,21 @@ export default class PostRouter {
     }
 
     private setRoutes() {
-        this.router.get('/', async (req:Request, res:Response) => {
-            const query = new GetPostsQueryParams(req.query)
+        this.router.get('/',
+        this.authProvider.optionalBearerAuthMiddleware,
+        async (req:Request, res:Response) => {
+            const query = new GetPostsQueryParams(req.query, req.headers.userId as string|undefined)
             const result = await this.queryRepo.getPosts(query)
             res.status(200).send(result)
         })
 
-        this.router.get('/:id', async (req:Request, res:Response) => {
-            const post = await this.posts.get(req.params.id)
-            if(post === undefined)
-                res.sendStatus(404)
-            else
-                res.status(200).send(post)
+        this.router.get('/:id',
+        this.authProvider.optionalBearerAuthMiddleware,
+        async (req:Request, res:Response) => {
+            const post = await this.queryRepo.getPost(req.params.id, req.headers.userId as string|undefined)
+
+            if(!post) res.sendStatus(404)
+            else res.status(200).send(post)
         })
 
         this.router.post('/',

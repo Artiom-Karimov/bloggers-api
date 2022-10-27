@@ -28,6 +28,12 @@ export default class BlogPostQueryRepository implements IBlogPostQueryRepository
         const query = this.getPostQuery(params.sortBy, params.sortDirection, blogId);
         return this.loadPagePosts(page,query,params.userId)
     }
+    public async getPost(id:string,userId:string|undefined): Promise<PostViewModel|undefined> {
+        const post = await Post.findOne({_id:id})
+        if(!post) return undefined
+
+        return this.mergePostWithLikes(post,userId)
+    }
     public async getPosts(params: getPostQueryParams): Promise<PageViewModel<PostViewModel>> {
         const count = await this.getPostCount()
         const page = new PageViewModel<PostViewModel>(params.pageNumber,params.pageSize,count)
@@ -68,7 +74,7 @@ export default class BlogPostQueryRepository implements IBlogPostQueryRepository
             return page
         }
     }
-    private async loadPagePosts(page:PageViewModel<PostViewModel>,query:any,userId:string): Promise<PageViewModel<PostViewModel>> {
+    private async loadPagePosts(page:PageViewModel<PostViewModel>,query:any,userId:string|undefined): Promise<PageViewModel<PostViewModel>> {
         try {
             const posts: IPost[] = await query.skip(page.calculateSkip()).limit(page.pageSize).exec()
             const promises = posts.map(p => this.mergePostWithLikes(p,userId))
@@ -78,7 +84,7 @@ export default class BlogPostQueryRepository implements IBlogPostQueryRepository
             return page
         }
     }
-    private async mergePostWithLikes(model:IPost,userId:string): Promise<PostViewModel> {
+    private async mergePostWithLikes(model:IPost,userId:string|undefined): Promise<PostViewModel> {
         const likes = await this.likeRepo.getExtendedLikes(model._id,userId)
         return PostMapper.toView(model,likes)
     }

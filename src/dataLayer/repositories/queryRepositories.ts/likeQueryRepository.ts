@@ -8,12 +8,12 @@ import { User } from "../../models/userModel"
 export default class LikeQueryRepository {
     constructor(private readonly model:Model<ILike>) {}
 
-    public async getExtendedLikes(entityId: string, userId:string): Promise<ExtendedLikesInfoModel> {
+    public async getExtendedLikes(entityId: string, userId:string|undefined): Promise<ExtendedLikesInfoModel> {
         const basicLikes = await this.getLikes(entityId,userId)
         const newestLikes = await this.getNewestLikes(entityId)
         return ExtendedLikesInfoModel.fromBasicModel(basicLikes,newestLikes)
     }
-    public async getLikes(entityId: string, userId:string): Promise<LikesInfoViewModel> {
+    public async getLikes(entityId: string, userId:string|undefined): Promise<LikesInfoViewModel> {
         try {
             return new LikesInfoViewModel(
                 await this.getLikesCount(entityId),
@@ -30,7 +30,7 @@ export default class LikeQueryRepository {
     private async getDislikesCount(entityId:string): Promise<number> {
         return this.model.countDocuments({entityId:entityId}).where('status').equals('Dislike')
     }
-    private async getUserLike(entityId:string,userId:string): Promise<string> {
+    private async getUserLike(entityId:string,userId:string|undefined): Promise<string> {
         if(!userId) return 'None'
         const result = await this.model.findOne({entityId:entityId,userId:userId})
         return result ? result.status : 'None'
