@@ -1,6 +1,6 @@
 import request from 'supertest'
-import PageViewModel from '../../presentation/models/viewModels/pageViewModel'
-import UserViewModel from '../../presentation/models/viewModels/userViewModel'
+import PageViewModel from '../../presentationLayer/models/viewModels/pageViewModel'
+import UserViewModel from '../../presentationLayer/models/viewModels/userViewModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 

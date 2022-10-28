@@ -1,6 +1,6 @@
 import request from 'supertest'
-import CommentViewModel from '../../presentation/models/viewModels/commentViewModel'
-import { PostInputModel } from '../../logic/models/postModel'
+import CommentViewModel from '../../presentationLayer/models/viewModels/commentViewModel'
+import { PostInputModel } from '../../logicLayer/models/postModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 

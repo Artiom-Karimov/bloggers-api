@@ -1,40 +1,42 @@
 import * as config from './config/config'
 //import BloggersMongoDb from "./mongoDataLayer/bloggersMongoDb"
-import BlogRepository from './mongooseDataLayer/repositories/blogRepository'
-import CommentQueryRepository from './mongooseDataLayer/repositories/commentQueryRepository'
-import CommentRepository from './mongooseDataLayer/repositories/commentRepository'
-import DeviceSessionQueryRepository from './mongooseDataLayer/repositories/deviceSessionQueryRepository'
-import DeviceSessionRepository from './mongooseDataLayer/repositories/deviceSessionRepository'
-import PostRepository from './mongooseDataLayer/repositories/postRepository'
-import BlogPostQueryRepository from './mongooseDataLayer/repositories/blogPostQueryRepository'
-import UserQueryRepository from './mongooseDataLayer/repositories/userQueryRepository'
-import UserRepository from './mongooseDataLayer/repositories/userRepository'
-import TestingRepository from './mongooseDataLayer/repositories/testingRepository'
+import BlogRepository from './dataLayer/repositories/blogRepository'
+import CommentQueryRepository from './dataLayer/repositories/queryRepositories.ts/commentQueryRepository'
+import CommentRepository from './dataLayer/repositories/commentRepository'
+import DeviceSessionQueryRepository from './dataLayer/repositories/queryRepositories.ts/deviceSessionQueryRepository'
+import DeviceSessionRepository from './dataLayer/repositories/deviceSessionRepository'
+import PostRepository from './dataLayer/repositories/postRepository'
+import BlogPostQueryRepository from './dataLayer/repositories/queryRepositories.ts/blogPostQueryRepository'
+import UserQueryRepository from './dataLayer/repositories/queryRepositories.ts/userQueryRepository'
+import UserRepository from './dataLayer/repositories/userRepository'
+import TestingRepository from './dataLayer/repositories/testingRepository'
 
-import ClientActionCollection from './logic/utils/clientActionCollection'
+import ClientActionCollection from './logicLayer/utils/clientActionCollection'
 import ConfirmationEmailSender from './email/confirmationEmailSender'
-import AuthService from './logic/services/authService'
-import BlogService from './logic/services/blogService'
-import CommentService from './logic/services/commentService'
-import DeviceSessionService from './logic/services/deviceSessionService'
-import PostService from './logic/services/postService'
-import UserService from './logic/services/userService'
-import BloggersApp from './presentation/bloggersApp'
-import AuthMiddlewareProvider from './presentation/middlewares/authMiddlewareProvider'
-import AuthRouter from './presentation/routers/authRouter'
-import BlogRouter from './presentation/routers/blogRouter'
-import CommentRouter from './presentation/routers/commentRouter'
-import PostRouter from './presentation/routers/postRouter'
-import SecurityRouter from './presentation/routers/securityRouter'
-import UserRouter from './presentation/routers/userRouter'
-import ClientActionService from './logic/services/clientActionService'
-import TestingRouter from './presentation/routers/testingRouter'
-import TestingService from './logic/services/testingService'
+import AuthService from './logicLayer/services/authService'
+import BlogService from './logicLayer/services/blogService'
+import CommentService from './logicLayer/services/commentService'
+import DeviceSessionService from './logicLayer/services/deviceSessionService'
+import PostService from './logicLayer/services/postService'
+import UserService from './logicLayer/services/userService'
+import BloggersApp from './presentationLayer/bloggersApp'
+import AuthMiddlewareProvider from './presentationLayer/middlewares/authMiddlewareProvider'
+import AuthRouter from './presentationLayer/routers/authRouter'
+import BlogRouter from './presentationLayer/routers/blogRouter'
+import CommentRouter from './presentationLayer/routers/commentRouter'
+import PostRouter from './presentationLayer/routers/postRouter'
+import SecurityRouter from './presentationLayer/routers/securityRouter'
+import UserRouter from './presentationLayer/routers/userRouter'
+import ClientActionService from './logicLayer/services/clientActionService'
+import TestingRouter from './presentationLayer/routers/testingRouter'
+import TestingService from './logicLayer/services/testingService'
 import mongoose from 'mongoose'
 import ErrorHandler from './errorHandler'
-import PasswordRecoveryService from './logic/services/passwordRecoveryService'
-import PasswordRecoveryRepository from './mongooseDataLayer/repositories/passwordRecoveryRepository'
+import PasswordRecoveryService from './logicLayer/services/passwordRecoveryService'
+import PasswordRecoveryRepository from './dataLayer/repositories/passwordRecoveryRepository'
 import RecoveryEmailSender from './email/recoveryEmailSender'
+import LikeQueryRepository from './dataLayer/repositories/queryRepositories.ts/likeQueryRepository'
+import { CommentLike, PostLike } from './dataLayer/models/likeModel'
 
 
 export default class CompositionRoot {
@@ -49,6 +51,9 @@ export default class CompositionRoot {
     private readonly clientActionRepository: ClientActionCollection
     private readonly testingRepository: TestingRepository
     private readonly recoveryRepository: PasswordRecoveryRepository
+
+    private readonly commentLikeRepository: LikeQueryRepository
+    private readonly postLikeRepository: LikeQueryRepository
 
     private readonly queryRepository: BlogPostQueryRepository
     private readonly userQueryRepository: UserQueryRepository
@@ -91,9 +96,12 @@ export default class CompositionRoot {
         this.testingRepository = new TestingRepository()
         this.recoveryRepository = new PasswordRecoveryRepository()
 
-        this.queryRepository = new BlogPostQueryRepository()
+        this.commentLikeRepository = new LikeQueryRepository(CommentLike)
+        this.postLikeRepository = new LikeQueryRepository(PostLike)
+
+        this.queryRepository = new BlogPostQueryRepository(this.postLikeRepository)
         this.userQueryRepository = new UserQueryRepository()
-        this.commentQueryRepository = new CommentQueryRepository()
+        this.commentQueryRepository = new CommentQueryRepository(this.commentLikeRepository)
         this.deviceSessionQueryRepository = new DeviceSessionQueryRepository()
 
         this.blogService = new BlogService(this.blogRepository) 
