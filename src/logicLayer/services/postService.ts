@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { PostRepository } from "../interfaces/postRepository";
 import { PutLikeInfoModelType } from "../models/clientActionTypes";
 import LikeModel from "../models/likeModel";
@@ -5,6 +7,7 @@ import PostModel, { PostInputModel } from "../models/postModel";
 import DateGenerator from "../utils/dateGenerator";
 import IdGenerator from "../utils/idGenerator";
 
+@injectable()
 export default class PostService {
     private readonly repo: PostRepository
 

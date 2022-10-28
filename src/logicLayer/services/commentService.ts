@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { CommentRepository } from "../interfaces/commentRepository";
 import { PutLikeInfoModelType } from "../models/clientActionTypes";
 import CommentModel, { CommentCreateModel } from "../models/commentModel";
@@ -5,6 +7,7 @@ import LikeModel from "../models/likeModel";
 import DateGenerator from "../utils/dateGenerator";
 import IdGenerator from "../utils/idGenerator";
 
+@injectable()
 export default class CommentService {
     private readonly repo: CommentRepository
 

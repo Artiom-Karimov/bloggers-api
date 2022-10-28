@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { RecoverEmailSender } from "../../email/recoveryEmailSender";
 import { PasswordRecoveryRepository } from "../interfaces/passwordRecoveryRepository";
 import { AuthError } from "../models/authError";
@@ -7,6 +9,7 @@ import PasswordRecoveryModel from "../models/passwordRecoveryModel";
 import ClientActionService from "./clientActionService";
 import UserService from "./userService";
 
+@injectable()
 export default class PasswordRecoveryService {
     constructor(
         private readonly repo: PasswordRecoveryRepository,

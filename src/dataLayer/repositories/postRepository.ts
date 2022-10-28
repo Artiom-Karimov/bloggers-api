@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { UpdateResult } from "mongodb";
 import { PostRepository as IPostRepository } from "../../logicLayer/interfaces/postRepository";
 import LikeModel from "../../logicLayer/models/likeModel";
@@ -7,6 +9,7 @@ import PostMapper from "../mappers/postMapper";
 import { PostLike } from "../models/likeModel";
 import { IPost, Post } from "../models/postModel";
 
+@injectable()
 export default class PostRepository implements IPostRepository {
     public async get(id: string): Promise<PostModel | undefined> {
         try {

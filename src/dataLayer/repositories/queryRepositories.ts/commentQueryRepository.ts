@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { CommentQueryRepository as ICommentQueryRepository } from "../../../presentationLayer/interfaces/commentQueryRepository";
 import GetCommentsQueryParams from "../../../presentationLayer/models/queryParams/getCommentsQueryParams";
 import CommentViewModel from "../../../presentationLayer/models/viewModels/commentViewModel";
@@ -8,6 +10,7 @@ import { Comment, IComment } from "../../models/commentModel";
 import SortFactory from "../utils/sortFactory";
 import LikeQueryRepository from "./likeQueryRepository";
 
+@injectable()
 export default class CommentQueryRepository implements ICommentQueryRepository {
     constructor(private readonly likeRepo:LikeQueryRepository) {}
 

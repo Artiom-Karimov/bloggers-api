@@ -1,7 +1,10 @@
+import "reflect-metadata";
 import { PasswordRecovery } from "../models/passwordRecoveryModel";
 import PasswordRecoveryMapper from "../mappers/passwordRecoveryMapper";
 import PasswordRecoveryModel from "../../logicLayer/models/passwordRecoveryModel";
+import { injectable } from "inversify";
 
+@injectable()
 export default class PasswordRecoveryRepository {
     public async create(data:PasswordRecoveryModel): Promise<string|undefined> {
         try {

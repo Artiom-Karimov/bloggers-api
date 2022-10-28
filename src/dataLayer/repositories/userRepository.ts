@@ -1,8 +1,11 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { UserRepository as IUserRepository } from "../../logicLayer/interfaces/userRepository";
 import UserModel, { EmailConfirmation } from "../../logicLayer/models/userModel";
 import UserMapper from "../mappers/userMapper";
 import { User } from "../models/userModel";
 
+@injectable()
 export default class UserRepository implements IUserRepository {
     public async get(id: string): Promise<UserModel | undefined> {
         try {

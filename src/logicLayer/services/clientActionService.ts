@@ -1,9 +1,12 @@
+import "reflect-metadata";
 import { ClientActionRepository } from "../interfaces/clientActionRepository";
 import ClientActionFactory from "../utils/clientActionFactory";
 
 import { userAuth as config } from '../../config/config'
 import { ClientAction } from "../models/clientActionModel";
+import { injectable } from "inversify";
 
+@injectable()
 export default class ClientActionService {
     constructor(
         private readonly clientActionRepo: ClientActionRepository

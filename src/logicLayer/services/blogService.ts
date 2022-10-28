@@ -1,8 +1,11 @@
+import "reflect-metadata";
 import BlogModel, { BlogInputModel } from "../models/blogModel";
 import { BlogRepository } from "../interfaces/blogRepositoty";
 import IdGenerator from "../utils/idGenerator";
 import DateGenerator from "../utils/dateGenerator";
+import { injectable } from "inversify";
 
+@injectable()
 export default class BlogService {
     private readonly repo: BlogRepository
 

@@ -1,8 +1,9 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { BlogPostQueryRepository as IBlogPostQueryRepository } from "../../../presentationLayer/interfaces/blogPostQueryRepository";
 import GetBlogQueryParams from "../../../presentationLayer/models/queryParams/getBlogsQueryParams";
 import getPostQueryParams from "../../../presentationLayer/models/queryParams/getPostsQueryParams";
 import BlogViewModel from "../../../presentationLayer/models/viewModels/blogViewModel";
-import ExtendedLikesInfoModel from "../../../presentationLayer/models/viewModels/extendedLikesInfoModel";
 import PageViewModel from "../../../presentationLayer/models/viewModels/pageViewModel";
 import PostViewModel from "../../../presentationLayer/models/viewModels/postViewModel";
 import BlogMapper from "../../mappers/blogMapper";
@@ -12,6 +13,7 @@ import { IPost, Post } from "../../models/postModel";
 import SortFactory from "../utils/sortFactory";
 import LikeQueryRepository from "./likeQueryRepository";
 
+@injectable()
 export default class BlogPostQueryRepository implements IBlogPostQueryRepository {
     constructor(private readonly likeRepo:LikeQueryRepository) {}
 

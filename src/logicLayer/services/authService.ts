@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import DeviceSessionService, { DeviceSessionError } from "./deviceSessionService";
 import UserService from "./userService";
 import Hasher from "../utils/hasher"
@@ -9,7 +10,9 @@ import { AuthError } from "../models/authError";
 import TokenPair from "../models/tokenPair";
 import ClientActionService from "./clientActionService";
 import { ClientAction } from "../models/clientActionModel";
+import { injectable } from "inversify";
 
+@injectable()
 export default class AuthService {
     
     constructor(

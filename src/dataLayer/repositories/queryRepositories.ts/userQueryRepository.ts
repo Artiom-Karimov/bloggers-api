@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { UserQueryRepository as IUserQueryRepository } from "../../../presentationLayer/interfaces/userQueryRepository";
 import GetUsersQueryParams from "../../../presentationLayer/models/queryParams/getUsersQueryParams";
 import PageViewModel from "../../../presentationLayer/models/viewModels/pageViewModel";
@@ -6,6 +8,7 @@ import UserMapper from "../../mappers/userMapper";
 import { IUser, User } from "../../models/userModel";
 import SortFactory from "../utils/sortFactory";
 
+@injectable()
 export default class UserQueryRepository implements IUserQueryRepository {
     public async getById(id: string): Promise<UserViewModel | undefined> {
         try {

@@ -1,8 +1,11 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { DeviceSessionRepository as IDeviceSessionRepository } from "../../logicLayer/interfaces/deviceSessionRepository";
 import DeviceSessionModel from "../../logicLayer/models/deviceSessionModel";
 import DeviceSessionMapper from "../mappers/deviceSessionMapper";
 import { DeviceSession } from "../models/deviceSessionModel";
 
+@injectable()
 export default class DeviceSessionRepository implements IDeviceSessionRepository {
     public async get(id: string): Promise<DeviceSessionModel | undefined> {
         try {

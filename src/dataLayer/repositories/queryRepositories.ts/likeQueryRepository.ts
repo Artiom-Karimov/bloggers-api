@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { injectable } from "inversify"
 import { Model } from "mongoose"
 import ExtendedLikesInfoModel from "../../../presentationLayer/models/viewModels/extendedLikesInfoModel"
 import LikesInfoViewModel from "../../../presentationLayer/models/viewModels/likesInfoViewModel"
@@ -5,6 +7,7 @@ import LikeViewModel from "../../../presentationLayer/models/viewModels/likeView
 import { ILike } from "../../models/likeModel"
 import { User } from "../../models/userModel"
 
+@injectable()
 export default class LikeQueryRepository {
     constructor(private readonly model:Model<ILike>) {}
 

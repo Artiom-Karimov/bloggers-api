@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import { injectable } from "inversify";
 import { DeviceSessionRepository } from "../interfaces/deviceSessionRepository";
 import { DeviceSessionCreateType } from "../models/deviceSessionModel";
 import TokenPair from "../models/tokenPair";
@@ -11,6 +13,7 @@ export enum DeviceSessionError {
     NotFoundError
 }
 
+@injectable()
 export default class DeviceSessionService {
 
     constructor(private readonly repo:DeviceSessionRepository) {}

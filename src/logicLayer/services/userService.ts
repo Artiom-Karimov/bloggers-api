@@ -1,11 +1,13 @@
+import "reflect-metadata";
 import { UserRepository } from "../interfaces/userRepository"
 import UserModel, { UserInputModel } from "../models/userModel"
 import UserFactory from "../utils/userFactory"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
 import Hasher from "../utils/hasher"
+import { injectable } from "inversify"
 
+@injectable()
 export default class UserService {    
-
     constructor(private readonly repo: UserRepository) {}
         
     public async get(id:string): Promise<UserModel|undefined> {
