@@ -4,6 +4,8 @@ import PostModel, { PostInputModel } from '../../logicLayer/models/postModel'
 import * as root from '../testCompositionRoot'
 import * as helpers from './routerTestHelpers'
 import PostViewModel from '../../presentationLayer/models/viewModels/postViewModel'
+import ExtendedLikesInfoModel from '../../presentationLayer/models/viewModels/extendedLikesInfoModel'
+import { UserInputModel } from '../../logicLayer/models/userModel'
 
 const base = '/posts'
 
@@ -147,9 +149,7 @@ describe('postRouter tests', () => {
     })
 
     describe('postRouter comment tests', () => {
-        beforeAll(async () => {
-            await helpers.createPostSamples()
-        })
+        beforeAll(async () => helpers.createPostSamples())
 
         it('get should return 404', async () => {
             const result = await request(root.app.server).get(`${base}/ololo/comments`)
@@ -185,6 +185,56 @@ describe('postRouter tests', () => {
             expect(created.statusCode).toBe(201)
             expect(created.body.id).toBeTruthy()
             expect(created.body.content).toBe(content)
+        })
+    })
+
+    describe('postRouter like tests', () => {
+        let post:PostViewModel
+        let user:UserInputModel = { login: 'doorynda', email: 'doorynda@example.com', password:'p-p-password'}
+        let token:string
+
+        beforeAll(async () => {
+            await helpers.createPostSamples()
+            const posts = await request(root.app.server).get(base)
+            post = posts.body.items[posts.body.items.length - 1]
+            token = await helpers.createUserToken(user.login,user.email,user.password)
+        })
+        it('created post should contain empty likeInfo', async () => {           
+            const likeInfo = post.extendedLikesInfo as ExtendedLikesInfoModel
+            expect(likeInfo).toBeTruthy()
+            expect(likeInfo.likesCount).toBe(0)
+            expect(likeInfo.dislikesCount).toBe(0)
+            expect(likeInfo.myStatus).toBe('None')
+            expect(likeInfo.newestLikes.length).toBe(0) 
+        })
+        it('unauthrized 401', async () => {
+            const result = await request(root.app.server).put(`${base}/${post.id}/like-status`)
+                .send({likeStatus:'Like'})
+            expect(result.statusCode).toBe(401)
+        })
+        it('user should be able to leave a like', async () => {
+            const result = await request(root.app.server).put(`${base}/${post.id}/like-status`)
+                .send({likeStatus:'Like'}).set({authorization:`Bearer ${token}`})
+            expect(result.statusCode).toBe(204)
+            const postResult = await request(root.app.server).get(`${base}/${post.id}`).set({authorization:`Bearer ${token}`})
+            expect(postResult.statusCode).toBe(200)
+            post = postResult.body
+            expect(post.extendedLikesInfo.likesCount).toBe(1)
+            expect(post.extendedLikesInfo.dislikesCount).toBe(0)
+            expect(post.extendedLikesInfo.myStatus).toBe('Like')
+            expect(post.extendedLikesInfo.newestLikes[0].login).toBe(user.login)
+        })
+        it('user should be able to unlike', async () => {
+            const result = await request(root.app.server).put(`${base}/${post.id}/like-status`)
+                .send({likeStatus:'None'}).set({authorization:`Bearer ${token}`})
+            expect(result.statusCode).toBe(204)
+            const postResult = await request(root.app.server).get(`${base}/${post.id}`).set({authorization:`Bearer ${token}`})
+            expect(postResult.statusCode).toBe(200)
+            post = postResult.body
+            expect(post.extendedLikesInfo.likesCount).toBe(0)
+            expect(post.extendedLikesInfo.dislikesCount).toBe(0)
+            expect(post.extendedLikesInfo.myStatus).toBe('None')
+            expect(post.extendedLikesInfo.newestLikes.length).toBe(0)
         })
     })
 })

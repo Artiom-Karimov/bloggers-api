@@ -121,7 +121,15 @@ export default class PostRouter {
         likeStatusValidation,
         validationMiddleware,
         async (req:Request,res:Response) => {
-
+            if(!await this.posts.get(req.params.id)) {
+                res.sendStatus(404); return
+            }
+            const result = await this.posts.putLikeInfo({
+                userId:req.headers.userId as string,
+                entityId:req.params.id,
+                status:req.body.likeStatus
+            })
+            res.sendStatus(result ? 204 : 400)
         })
     }
 
