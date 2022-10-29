@@ -78,11 +78,10 @@ export default class BlogRouter {
                 blogId: blog.id,
                 blogName: blog.name
             })
-            if(!created) {
-                res.sendStatus(500)
-                return
-            }
-            res.status(201).send(created)
+            if(!created) { res.sendStatus(400); return }
+            const retrieved = await this.queryRepo.getPost(created.id, undefined)
+            if(!retrieved) { res.sendStatus(400); return }
+            res.status(201).send(retrieved) 
         })
 
         this.router.put('/:id',
