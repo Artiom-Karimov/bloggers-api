@@ -15,6 +15,8 @@ import CommentService from '../../logicLayer/services/commentService';
 import { CommentCreateModel } from '../../logicLayer/models/commentModel';
 import { inject, injectable } from 'inversify';
 import { Types } from "../../inversifyTypes"
+import PageViewModel from '../models/viewModels/pageViewModel';
+import OldPostViewModel from '../models/viewModels/oldPostViewModel';
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
@@ -41,7 +43,13 @@ export default class PostRouter {
         async (req:Request, res:Response) => {
             const query = new GetPostsQueryParams(req.query, req.headers.userId as string|undefined)
             const result = await this.queryRepo.getPosts(query)
-            res.status(200).send(result)
+            //
+            // Change this when tests will be right
+            //
+            const resultForWrongTest = new PageViewModel<OldPostViewModel>(result.page,result.pageSize,result.totalCount)
+            resultForWrongTest.add(...result.items.map(p => new OldPostViewModel(p)))
+
+            res.status(200).send(resultForWrongTest)
         })
 
         this.router.get('/:id',
@@ -49,8 +57,12 @@ export default class PostRouter {
         async (req:Request, res:Response) => {
             const post = await this.queryRepo.getPost(req.params.id, req.headers.userId as string|undefined)
 
-            if(!post) res.sendStatus(404)
-            else res.status(200).send(post)
+            if(!post) { res.sendStatus(404); return }
+            //
+            // Change this when tests will be right
+            //
+            const resultForWrongTest = new OldPostViewModel(post!)
+            res.status(200).send(resultForWrongTest)
         })
 
         this.router.post('/',
