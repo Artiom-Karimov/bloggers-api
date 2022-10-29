@@ -70,8 +70,10 @@ export default class PostRouter {
                 blogId: req.body.blogId,
                 blogName: blog.name
                 })
-            if(created) res.status(201).send(created)
-            else res.sendStatus(404)
+            if(!created) { res.sendStatus(404); return }
+            const retrieved = await this.queryRepo.getPost(created.id, undefined)
+            if(!retrieved) { res.sendStatus(400); return }
+            res.status(201).send(retrieved)     
         })
 
         this.router.put('/:id',
