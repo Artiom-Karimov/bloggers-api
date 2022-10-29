@@ -1,15 +1,16 @@
 import "reflect-metadata";
-import { ClientActionRepository } from "../interfaces/clientActionRepository";
+import { IClientActionRepository } from "../interfaces/clientActionRepository";
 import ClientActionFactory from "../utils/clientActionFactory";
 
 import { userAuth as config } from '../../config/config'
 import { ClientAction } from "../models/clientActionModel";
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
+import { Types } from "../../inversifyTypes";
 
 @injectable()
 export default class ClientActionService {
     constructor(
-        private readonly clientActionRepo: ClientActionRepository
+        @inject(Types.ClientActionRepository) private readonly clientActionRepo: IClientActionRepository
     ) {}
 
     public updateAndCheckLimit(ip:string,action:ClientAction): boolean {

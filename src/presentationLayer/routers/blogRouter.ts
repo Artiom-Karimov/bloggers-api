@@ -3,26 +3,25 @@ import { Router, Request, Response } from 'express'
 import BlogService from '../../logicLayer/services/blogService'
 import { blogValidation, postValidation } from '../validation/bodyValidators'
 import { validationMiddleware } from '../middlewares/validationMiddleware'
-import { BlogPostQueryRepository } from '../interfaces/blogPostQueryRepository'
+import { IBlogPostQueryRepository } from '../interfaces/blogPostQueryRepository'
 import GetBlogsQueryParams from '../models/queryParams/getBlogsQueryParams'
 import GetPostsQueryParams from '../models/queryParams/getPostsQueryParams'
 import PostService from '../../logicLayer/services/postService'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
+import { inject, injectable } from 'inversify'
+import { Types } from '../../inversifyTypes'
 
+@injectable()
 export default class BlogRouter {
     public readonly router: Router
-    private readonly blogs: BlogService
-    private readonly posts: PostService
-    private readonly queryRepo: BlogPostQueryRepository
-    private authProvider: AuthMiddlewareProvider
 
-    constructor(blogService:BlogService,postService:PostService,queryRepo:BlogPostQueryRepository,authProvider:AuthMiddlewareProvider) {
-        this.router = Router()
-        this.blogs = blogService
-        this.posts = postService
-        this.queryRepo = queryRepo
-        this.authProvider = authProvider
-        this.setRoutes()
+    constructor(
+        @inject(Types.BlogService) private readonly blogs:BlogService,
+        @inject(Types.PostService) private readonly posts:PostService,
+        @inject(Types.BlogPostQueryRepository) private readonly queryRepo:IBlogPostQueryRepository,
+        @inject(Types.AuthMiddlewareProvider) private readonly authProvider:AuthMiddlewareProvider) {
+            this.router = Router()
+            this.setRoutes()
     }
 
     private setRoutes() {

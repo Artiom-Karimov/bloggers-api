@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { injectable } from 'inversify';
 import { UpdateResult } from 'mongodb';
-import { BlogRepository as IBlogRepository } from '../../logicLayer/interfaces/blogRepositoty'
+import { IBlogRepository } from '../../logicLayer/interfaces/blogRepositoty'
 import blogModel, { BlogInputModel } from '../../logicLayer/models/blogModel';
 import BlogMapper from '../mappers/blogMapper';
 import { Blog, IBlog } from '../models/blogModel';

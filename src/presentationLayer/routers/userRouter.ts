@@ -1,22 +1,22 @@
 import { Router, Request, Response } from 'express'
-import { UserQueryRepository } from '../interfaces/userQueryRepository'
+import { IUserQueryRepository } from '../interfaces/userQueryRepository'
 import UserService from '../../logicLayer/services/userService'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { validationMiddleware } from '../middlewares/validationMiddleware'
 import GetUsersQueryParams from '../models/queryParams/getUsersQueryParams'
 import { userValidation } from '../validation/bodyValidators'
+import { inject, injectable } from 'inversify'
+import { Types } from "../../inversifyTypes"
 
+@injectable()
 export default class UserRouter {
     public readonly router: Router
-    private service: UserService
-    private queryRepo: UserQueryRepository
-    private authProvider: AuthMiddlewareProvider
 
-    constructor(service:UserService,queryRepo:UserQueryRepository,authProvider:AuthMiddlewareProvider) {
+    constructor(
+        @inject(Types.UserService) private readonly service:UserService,
+        @inject(Types.UserQueryRepository) private readonly queryRepo:IUserQueryRepository,
+        @inject(Types.AuthMiddlewareProvider) private readonly authProvider:AuthMiddlewareProvider) {
         this.router = Router()
-        this.service = service
-        this.queryRepo = queryRepo
-        this.authProvider = authProvider
         this.setRoutes()
     }
 

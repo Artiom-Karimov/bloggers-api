@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { UserQueryRepository } from '../interfaces/userQueryRepository'
+import { IUserQueryRepository } from '../interfaces/userQueryRepository'
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import { confirmCodeValidation, emailValidation, newPasswordValidation, userValidation } from "../validation/bodyValidators";
 import { validationMiddleware } from "../middlewares/validationMiddleware";
@@ -11,16 +11,19 @@ import * as config from '../../config/config'
 import AuthService from "../../logicLayer/services/authService";
 import { AuthError } from "../../logicLayer/models/authError";
 import TokenPair from "../../logicLayer/models/tokenPair";
-import PasswordRecoveryService from "../../logicLayer/services/passwordRecoveryService";
+import RecoveryService from "../../logicLayer/services/recoveryService";
+import { inject, injectable } from "inversify";
+import { Types } from "../../inversifyTypes";
 
+@injectable()
 export default class AuthRouter {
     public readonly router: Router
 
     constructor(
-        private readonly authService:AuthService,
-        private readonly recoveryService:PasswordRecoveryService,
-        private readonly queryRepo:UserQueryRepository,
-        private readonly authProvider:AuthMiddlewareProvider) {
+        @inject(Types.AuthService) private readonly authService:AuthService,
+        @inject(Types.RecoveryService) private readonly recoveryService:RecoveryService,
+        @inject(Types.UserQueryRepository) private readonly queryRepo:IUserQueryRepository,
+        @inject(Types.AuthMiddlewareProvider) private readonly authProvider:AuthMiddlewareProvider) {
             this.router = Router()
             this.setRoutes()
     }

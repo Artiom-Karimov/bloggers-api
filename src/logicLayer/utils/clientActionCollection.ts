@@ -1,10 +1,10 @@
 import ClientActionModel, { ClientAction } from "../models/clientActionModel";
-import { ClientActionRepository } from "../interfaces/clientActionRepository"
+import { IClientActionRepository } from "../interfaces/clientActionRepository"
+import { injectable } from "inversify";
 
-export default class ClientActionCollection implements ClientActionRepository {
+@injectable()
+export default class ClientActionCollection implements IClientActionRepository {
     private readonly actions: Array<ClientActionModel> = []
-
-    constructor() {}
 
     public count(ip:string, action:ClientAction): number {
         return this.actions.filter(a => a.ip === ip && a.action === action).length

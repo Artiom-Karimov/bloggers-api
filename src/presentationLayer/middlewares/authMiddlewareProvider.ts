@@ -1,12 +1,15 @@
 import { Request, Response, NextFunction } from "express";
+import { inject, injectable } from "inversify";
 import * as config from '../../config/config'
+import { Types } from "../../inversifyTypes";
 import UserService from "../../logicLayer/services/userService";
 import JwtTokenOperator from "../../logicLayer/utils/jwtTokenOperator";
 
+@injectable()
 export default class AuthMiddlewareProvider {
     private readonly basicValue: string
     
-    constructor(private userService:UserService) {
+    constructor(@inject(Types.UserService) private userService:UserService) {
         this.basicValue  = 'Basic ' + Buffer.from(`${config.userName}:${config.password}`,'utf-8').toString('base64')
     }
 

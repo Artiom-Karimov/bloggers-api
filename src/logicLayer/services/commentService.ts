@@ -1,17 +1,16 @@
 import "reflect-metadata";
-import { injectable } from "inversify";
-import { CommentRepository } from "../interfaces/commentRepository";
+import { inject, injectable } from "inversify";
+import { ICommentRepository } from "../interfaces/commentRepository";
 import { PutLikeInfoModelType } from "../models/clientActionTypes";
 import CommentModel, { CommentCreateModel } from "../models/commentModel";
 import LikeModel from "../models/likeModel";
 import DateGenerator from "../utils/dateGenerator";
 import IdGenerator from "../utils/idGenerator";
+import { Types } from "../../inversifyTypes";
 
 @injectable()
 export default class CommentService {
-    private readonly repo: CommentRepository
-
-    constructor(repo: CommentRepository) {
+    constructor(@inject(Types.CommentRepository) private readonly repo: ICommentRepository) {
         this.repo = repo
     }
     public async get(id:string): Promise<CommentModel|undefined> {

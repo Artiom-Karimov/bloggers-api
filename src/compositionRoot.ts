@@ -1,145 +1,120 @@
+import 'reflect-metadata'
+import { Container } from 'inversify'
 import * as config from './config/config'
-//import BloggersMongoDb from "./mongoDataLayer/bloggersMongoDb"
+
+import { Types } from './inversifyTypes'
+
+import { IBlogRepository } from './logicLayer/interfaces/blogRepositoty'
+import { IPostRepository } from './logicLayer/interfaces/postRepository'
+import { IUserRepository } from './logicLayer/interfaces/userRepository'
+import { ICommentRepository } from './logicLayer/interfaces/commentRepository'
+import { ISessionRepository } from './logicLayer/interfaces/sessionRepository'
+import { IClientActionRepository } from './logicLayer/interfaces/clientActionRepository'
+import { ITestingRepository } from './logicLayer/interfaces/testingRepository'
+import { IRecoveryRepository } from './logicLayer/interfaces/recoveryRepository'
+
+import { IBlogPostQueryRepository } from './presentationLayer/interfaces/blogPostQueryRepository'
+import { IUserQueryRepository } from './presentationLayer/interfaces/userQueryRepository'
+import { ICommentQueryRepository } from './presentationLayer/interfaces/commentQueryRepository'
+import { ISessionQueryRepository } from './presentationLayer/interfaces/sessionQueryRepository'
+
 import BlogRepository from './dataLayer/repositories/blogRepository'
-import CommentQueryRepository from './dataLayer/repositories/queryRepositories.ts/commentQueryRepository'
-import CommentRepository from './dataLayer/repositories/commentRepository'
-import DeviceSessionQueryRepository from './dataLayer/repositories/queryRepositories.ts/deviceSessionQueryRepository'
-import DeviceSessionRepository from './dataLayer/repositories/deviceSessionRepository'
 import PostRepository from './dataLayer/repositories/postRepository'
+import UserRepository from './dataLayer/repositories/userRepository'
+import CommentRepository from './dataLayer/repositories/commentRepository'
+import SessionRepository from './dataLayer/repositories/sessionRepository'
+import ClientActionCollection from './logicLayer/utils/clientActionCollection'
+import TestingRepository from './dataLayer/repositories/testingRepository'
+import RecoveryRepository from './dataLayer/repositories/recoveryRepository'
+
+import CommentLikeQueryRepository from './dataLayer/repositories/queryRepositories.ts/commentLikeQueryRepository'
+import PostLikeQueryRepository from './dataLayer/repositories/queryRepositories.ts/postLikeQueryRepository'
 import BlogPostQueryRepository from './dataLayer/repositories/queryRepositories.ts/blogPostQueryRepository'
 import UserQueryRepository from './dataLayer/repositories/queryRepositories.ts/userQueryRepository'
-import UserRepository from './dataLayer/repositories/userRepository'
-import TestingRepository from './dataLayer/repositories/testingRepository'
+import CommentQueryRepository from './dataLayer/repositories/queryRepositories.ts/commentQueryRepository'
+import SessionQueryRepository from './dataLayer/repositories/queryRepositories.ts/sessionQueryRepository'
 
-import ClientActionCollection from './logicLayer/utils/clientActionCollection'
-import ConfirmationEmailSender from './email/confirmationEmailSender'
-import AuthService from './logicLayer/services/authService'
+import ConfirmationEmailSender, { IConfirmationEmailSender } from './email/confirmationEmailSender'
+import RecoveryEmailSender, { IRecoveryEmailSender } from './email/recoveryEmailSender'
+
 import BlogService from './logicLayer/services/blogService'
-import CommentService from './logicLayer/services/commentService'
-import DeviceSessionService from './logicLayer/services/deviceSessionService'
 import PostService from './logicLayer/services/postService'
+import SessionService from './logicLayer/services/sessionService'
 import UserService from './logicLayer/services/userService'
-import BloggersApp from './presentationLayer/bloggersApp'
-import AuthMiddlewareProvider from './presentationLayer/middlewares/authMiddlewareProvider'
-import AuthRouter from './presentationLayer/routers/authRouter'
-import BlogRouter from './presentationLayer/routers/blogRouter'
-import CommentRouter from './presentationLayer/routers/commentRouter'
-import PostRouter from './presentationLayer/routers/postRouter'
-import SecurityRouter from './presentationLayer/routers/securityRouter'
-import UserRouter from './presentationLayer/routers/userRouter'
+import CommentService from './logicLayer/services/commentService'
 import ClientActionService from './logicLayer/services/clientActionService'
-import TestingRouter from './presentationLayer/routers/testingRouter'
+import AuthService from './logicLayer/services/authService'
 import TestingService from './logicLayer/services/testingService'
-import mongoose from 'mongoose'
-import ErrorHandler from './errorHandler'
-import PasswordRecoveryService from './logicLayer/services/passwordRecoveryService'
-import PasswordRecoveryRepository from './dataLayer/repositories/passwordRecoveryRepository'
-import RecoveryEmailSender from './email/recoveryEmailSender'
-import LikeQueryRepository from './dataLayer/repositories/queryRepositories.ts/likeQueryRepository'
-import { CommentLike, PostLike } from './dataLayer/models/likeModel'
+import RecoveryService from './logicLayer/services/recoveryService'
 
+import AuthMiddlewareProvider from './presentationLayer/middlewares/authMiddlewareProvider'
+import BlogRouter from './presentationLayer/routers/blogRouter'
+import PostRouter from './presentationLayer/routers/postRouter'
+import CommentRouter from './presentationLayer/routers/commentRouter'
+import UserRouter from './presentationLayer/routers/userRouter'
+import SecurityRouter from './presentationLayer/routers/securityRouter'
+import AuthRouter from './presentationLayer/routers/authRouter'
+import TestingRouter from './presentationLayer/routers/testingRouter'
+import BloggersApp from './presentationLayer/bloggersApp'
+import ErrorHandler from './errorHandler'
+import mongoose from 'mongoose'
 
 export default class CompositionRoot {
-    private readonly confirmationSender = new ConfirmationEmailSender()
-    private readonly recoverySender = new RecoveryEmailSender()
+    private readonly container = new Container({ defaultScope: "Singleton" })
 
-    private readonly blogRepository: BlogRepository
-    private readonly postRepository: PostRepository
-    private readonly userRepository: UserRepository
-    private readonly commentRepository: CommentRepository
-    private readonly deviceSessionRepository: DeviceSessionRepository
-    private readonly clientActionRepository: ClientActionCollection
-    private readonly testingRepository: TestingRepository
-    private readonly recoveryRepository: PasswordRecoveryRepository
-
-    private readonly commentLikeRepository: LikeQueryRepository
-    private readonly postLikeRepository: LikeQueryRepository
-
-    private readonly queryRepository: BlogPostQueryRepository
-    private readonly userQueryRepository: UserQueryRepository
-    private readonly commentQueryRepository: CommentQueryRepository
-    private readonly deviceSessionQueryRepository: DeviceSessionQueryRepository
-
-    private readonly blogService: BlogService
-    private readonly postService: PostService
-    private readonly deviceSessionService: DeviceSessionService
-    private readonly userService: UserService
-    private readonly commentService: CommentService
-    private readonly clientActionService: ClientActionService
-    private readonly authService: AuthService
-    private readonly recoveryService: PasswordRecoveryService
-    private readonly testingService: TestingService
-
-    private readonly authProvider: AuthMiddlewareProvider
-
-    private readonly blogRouter: BlogRouter
-    private readonly postRouter: PostRouter
-    private readonly commentRouter: CommentRouter
-    private readonly userRouter: UserRouter
-    private readonly securityRouter: SecurityRouter   
-    private readonly authRouter: AuthRouter
-    private readonly testingRouter: TestingRouter
-
-    private app: BloggersApp|undefined
-
-    private readonly errorHandler: ErrorHandler
-    
     constructor() {
-        this.errorHandler = new ErrorHandler()
+        this.container.bind<ErrorHandler>(ErrorHandler).toSelf()
 
-        this.blogRepository = new BlogRepository()
-        this.postRepository = new PostRepository()
-        this.userRepository = new UserRepository()
-        this.commentRepository = new CommentRepository()
-        this.deviceSessionRepository = new DeviceSessionRepository()
-        this.clientActionRepository = new ClientActionCollection()
-        this.testingRepository = new TestingRepository()
-        this.recoveryRepository = new PasswordRecoveryRepository()
+        this.container.bind<IBlogRepository>(Types.BlogRepository).to(BlogRepository)
+        this.container.bind<IPostRepository>(Types.PostRepository).to(PostRepository)
+        this.container.bind<IUserRepository>(Types.UserRepository).to(UserRepository)
+        this.container.bind<ICommentRepository>(Types.CommentRepository).to(CommentRepository)
+        this.container.bind<ISessionRepository>(Types.SessionRepository).to(SessionRepository)
+        this.container.bind<IClientActionRepository>(Types.ClientActionRepository).to(ClientActionCollection)
+        this.container.bind<ITestingRepository>(Types.TestingRepository).to(TestingRepository)
+        this.container.bind<IRecoveryRepository>(Types.RecoveryRepository).to(RecoveryRepository)
 
-        this.commentLikeRepository = new LikeQueryRepository(CommentLike)
-        this.postLikeRepository = new LikeQueryRepository(PostLike)
+        this.container.bind<CommentLikeQueryRepository>(Types.CommentLikeRepository).to(CommentLikeQueryRepository)
+        this.container.bind<PostLikeQueryRepository>(Types.PostLikeRepository).to(PostLikeQueryRepository)
+        this.container.bind<IBlogPostQueryRepository>(Types.BlogPostQueryRepository).to(BlogPostQueryRepository)
+        this.container.bind<IUserQueryRepository>(Types.UserQueryRepository).to(UserQueryRepository)
+        this.container.bind<ICommentQueryRepository>(Types.CommentQueryRepository).to(CommentQueryRepository)
+        this.container.bind<ISessionQueryRepository>(Types.SessionQueryRepository).to(SessionQueryRepository)
 
-        this.queryRepository = new BlogPostQueryRepository(this.postLikeRepository)
-        this.userQueryRepository = new UserQueryRepository()
-        this.commentQueryRepository = new CommentQueryRepository(this.commentLikeRepository)
-        this.deviceSessionQueryRepository = new DeviceSessionQueryRepository()
+        this.container.bind<IConfirmationEmailSender>(Types.ConfirmEmailSender).to(ConfirmationEmailSender)
+        this.container.bind<IRecoveryEmailSender>(Types.RecoveryEmailSender).to(RecoveryEmailSender)
 
-        this.blogService = new BlogService(this.blogRepository) 
-        this.postService = new PostService(this.postRepository) 
-        this.deviceSessionService = new DeviceSessionService(this.deviceSessionRepository) 
-        this.userService = new UserService(this.userRepository) 
-        this.commentService = new CommentService(this.commentRepository)
-        this.clientActionService = new ClientActionService(this.clientActionRepository)
-        this.authService = new AuthService(this.userService,this.deviceSessionService,this.clientActionService,this.confirmationSender)
-        this.testingService = new TestingService(this.testingRepository)
-        this.recoveryService = new PasswordRecoveryService(this.recoveryRepository,this.clientActionService,this.userService,this.recoverySender)
+        this.container.bind<BlogService>(Types.BlogService).to(BlogService)
+        this.container.bind<PostService>(Types.PostService).to(PostService)
+        this.container.bind<SessionService>(Types.SessionService).to(SessionService)
+        this.container.bind<UserService>(Types.UserService).to(UserService)
+        this.container.bind<CommentService>(Types.CommentService).to(CommentService)
+        this.container.bind<ClientActionService>(Types.ClientActionService).to(ClientActionService)
+        this.container.bind<AuthService>(Types.AuthService).to(AuthService)
+        this.container.bind<TestingService>(Types.TestingService).to(TestingService)
+        this.container.bind<RecoveryService>(Types.RecoveryService).to(RecoveryService)
+
+        this.container.bind<AuthMiddlewareProvider>(Types.AuthMiddlewareProvider).to(AuthMiddlewareProvider)
+
+        this.container.bind<BlogRouter>(Types.BlogRouter).to(BlogRouter)
+        this.container.bind<PostRouter>(Types.PostRouter).to(PostRouter)
+        this.container.bind<CommentRouter>(Types.CommentRouter).to(CommentRouter)
+        this.container.bind<UserRouter>(Types.UserRouter).to(UserRouter)
+        this.container.bind<SecurityRouter>(Types.SecurityRouter).to(SecurityRouter)
+        this.container.bind<AuthRouter>(Types.AuthRouter).to(AuthRouter)
+        this.container.bind<TestingRouter>(Types.TestingRouter).to(TestingRouter)
         
-        this.authProvider = new AuthMiddlewareProvider(this.userService)
-
-        this.blogRouter = new BlogRouter(this.blogService,this.postService,this.queryRepository,this.authProvider)
-        this.postRouter = new PostRouter(this.postService,this.blogService,this.commentService,this.queryRepository,this.commentQueryRepository,this.authProvider)
-        this.commentRouter = new CommentRouter(this.commentService,this.commentQueryRepository,this.authProvider)
-        this.userRouter = new UserRouter(this.userService,this.userQueryRepository,this.authProvider)
-        this.securityRouter = new SecurityRouter(this.deviceSessionService,this.deviceSessionQueryRepository,this.authProvider)
-        this.authRouter = new AuthRouter(this.authService,this.recoveryService,this.userQueryRepository,this.authProvider)
-        this.testingRouter = new TestingRouter(this.testingService)
+        this.container.bind<BloggersApp>(Types.BloggersApp).to(BloggersApp)
     }
 
     public async start() {
-        this.app = new BloggersApp({
-            authRouter:this.authRouter,
-            blogRouter:this.blogRouter,
-            commentRouter:this.commentRouter,
-            postRouter:this.postRouter,
-            userRouter:this.userRouter,
-            securityRouter:this.securityRouter,
-            testingRouter:this.testingRouter
-        })
+        const app: BloggersApp = this.container.get(Types.BloggersApp)
         await mongoose.connect(config.mongoUri)
-        await this.app.start()
+        await app.start()
     }
     public async stop() {
-        await this.app?.stop()
+        const app: BloggersApp = this.container.get(Types.BloggersApp)
+        await app?.stop()
         await mongoose.disconnect()
     }
 }

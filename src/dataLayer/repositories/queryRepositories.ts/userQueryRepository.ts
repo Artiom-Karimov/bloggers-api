@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { injectable } from "inversify";
-import { UserQueryRepository as IUserQueryRepository } from "../../../presentationLayer/interfaces/userQueryRepository";
+import { IUserQueryRepository } from "../../../presentationLayer/interfaces/userQueryRepository";
 import GetUsersQueryParams from "../../../presentationLayer/models/queryParams/getUsersQueryParams";
 import PageViewModel from "../../../presentationLayer/models/viewModels/pageViewModel";
 import UserViewModel from "../../../presentationLayer/models/viewModels/userViewModel";

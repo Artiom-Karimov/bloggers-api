@@ -1,22 +1,17 @@
 import { Router, Request, Response } from "express";
-import { DeviceSessionQueryRepository } from "../interfaces/deviceSessionQueryRepository";
-import DeviceSessionService, { DeviceSessionError } from "../../logicLayer/services/deviceSessionService";
-import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
+import { ISessionQueryRepository } from "../interfaces/sessionQueryRepository";
+import SessionService, { DeviceSessionError } from "../../logicLayer/services/sessionService";
 import { refreshTokenCheckMiddleware } from "../middlewares/refreshTokenCheckMiddleware";
+import { inject, injectable } from "inversify"
+import { Types } from "../../inversifyTypes"
 
+@injectable()
 export default class SecurityRouter {
     public readonly router: Router
-    private readonly service: DeviceSessionService 
-    private readonly queryRepo: DeviceSessionQueryRepository
-    private readonly authProvider: AuthMiddlewareProvider
 
     constructor(
-        service:DeviceSessionService,
-        queryRepo:DeviceSessionQueryRepository,
-        authProvider: AuthMiddlewareProvider) {
-            this.service = service
-            this.queryRepo = queryRepo
-            this.authProvider = authProvider
+        @inject(Types.SessionService) private readonly service: SessionService ,
+        @inject(Types.SessionQueryRepository) private readonly queryRepo: ISessionQueryRepository) {            
             this.router = Router()
             this.setRoutes()
     }

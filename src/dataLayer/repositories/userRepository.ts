@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { injectable } from "inversify";
-import { UserRepository as IUserRepository } from "../../logicLayer/interfaces/userRepository";
+import { IUserRepository } from "../../logicLayer/interfaces/userRepository";
 import UserModel, { EmailConfirmation } from "../../logicLayer/models/userModel";
 import UserMapper from "../mappers/userMapper";
 import { User } from "../models/userModel";

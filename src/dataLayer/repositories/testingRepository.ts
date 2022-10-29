@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { TestingRepository as ITestingRepository } from "../../logicLayer/interfaces/testingRepository";
+import { ITestingRepository } from "../../logicLayer/interfaces/testingRepository";
 import { Blog } from "../models/blogModel";
 import { Post } from "../models/postModel";
 import { Comment } from '../models/commentModel'

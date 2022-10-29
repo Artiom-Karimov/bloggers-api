@@ -1,6 +1,6 @@
 import PasswordRecoveryModel from "../models/passwordRecoveryModel";
 
-export interface PasswordRecoveryRepository {
+export interface IRecoveryRepository {
     create(data:PasswordRecoveryModel): Promise<string|undefined>
     get(code:string): Promise<PasswordRecoveryModel|undefined>
     delete(code:string): Promise<boolean>

@@ -1,7 +1,7 @@
 import LikeModel from "../models/likeModel";
 import PostModel, { PostInputModel } from "../models/postModel";
 
-export interface PostRepository {
+export interface IPostRepository {
     get(id:string): Promise<PostModel|undefined>
     create(post:PostModel): Promise<PostModel|undefined>
     update(id:string,data:PostInputModel): Promise<boolean>

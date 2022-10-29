@@ -2,12 +2,12 @@ import { injectable } from "inversify"
 import EmailSender from "./emailSender"
 import RecoveryEmailConstructor from "./recoveryEmailConstructor"
 
-export interface RecoverEmailSender {
+export interface IRecoveryEmailSender {
     send(email:string,code:string): Promise<boolean>
 }
 
 @injectable()
-export default class RecoveryEmailSender extends EmailSender implements RecoverEmailSender {
+export default class RecoveryEmailSender extends EmailSender implements IRecoveryEmailSender {
 
     constructor() {
         super()

@@ -1,15 +1,14 @@
 import "reflect-metadata";
 import BlogModel, { BlogInputModel } from "../models/blogModel";
-import { BlogRepository } from "../interfaces/blogRepositoty";
+import { IBlogRepository } from "../interfaces/blogRepositoty";
 import IdGenerator from "../utils/idGenerator";
 import DateGenerator from "../utils/dateGenerator";
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
+import { Types } from "../../inversifyTypes";
 
 @injectable()
 export default class BlogService {
-    private readonly repo: BlogRepository
-
-    constructor(repo:BlogRepository) {
+    constructor(@inject(Types.BlogRepository) private readonly repo:IBlogRepository) {
         this.repo = repo
     }
     public async get(id:string): Promise<BlogModel|undefined> {

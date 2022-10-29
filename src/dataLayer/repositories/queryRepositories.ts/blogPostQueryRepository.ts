@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { injectable } from "inversify";
-import { BlogPostQueryRepository as IBlogPostQueryRepository } from "../../../presentationLayer/interfaces/blogPostQueryRepository";
+import { inject, injectable } from "inversify";
+import { IBlogPostQueryRepository } from "../../../presentationLayer/interfaces/blogPostQueryRepository";
 import GetBlogQueryParams from "../../../presentationLayer/models/queryParams/getBlogsQueryParams";
 import getPostQueryParams from "../../../presentationLayer/models/queryParams/getPostsQueryParams";
 import BlogViewModel from "../../../presentationLayer/models/viewModels/blogViewModel";
@@ -11,11 +11,12 @@ import PostMapper from "../../mappers/postMapper";
 import { Blog, IBlog } from "../../models/blogModel";
 import { IPost, Post } from "../../models/postModel";
 import SortFactory from "../utils/sortFactory";
-import LikeQueryRepository from "./likeQueryRepository";
+import PostLikeQueryRepository from "./postLikeQueryRepository";
+import { Types } from "../../../inversifyTypes";
 
 @injectable()
 export default class BlogPostQueryRepository implements IBlogPostQueryRepository {
-    constructor(private readonly likeRepo:LikeQueryRepository) {}
+    constructor(@inject(Types.PostLikeRepository) private readonly likeRepo:PostLikeQueryRepository) {}
 
     public async getBlogs(params: GetBlogQueryParams): Promise<PageViewModel<BlogViewModel>> {
         const filter = this.getFilter(params.searchNameTerm)

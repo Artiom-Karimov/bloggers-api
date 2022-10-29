@@ -1,21 +1,22 @@
 import "reflect-metadata";
-import { injectable } from "inversify";
-import { RecoverEmailSender } from "../../email/recoveryEmailSender";
-import { PasswordRecoveryRepository } from "../interfaces/passwordRecoveryRepository";
+import { inject, injectable } from "inversify";
+import { IRecoveryEmailSender } from "../../email/recoveryEmailSender";
+import { IRecoveryRepository } from "../interfaces/recoveryRepository";
 import { AuthError } from "../models/authError";
 import { ClientAction } from "../models/clientActionModel";
 import { RecoverPasswordModelType, SetNewPasswordModelType } from "../models/clientActionTypes";
 import PasswordRecoveryModel from "../models/passwordRecoveryModel";
 import ClientActionService from "./clientActionService";
 import UserService from "./userService";
+import { Types } from "../../inversifyTypes";
 
 @injectable()
-export default class PasswordRecoveryService {
+export default class RecoveryService {
     constructor(
-        private readonly repo: PasswordRecoveryRepository,
-        private readonly actionService: ClientActionService,
-        private readonly userService: UserService,
-        private readonly recoverySender: RecoverEmailSender
+        @inject(Types.RecoveryRepository) private readonly repo: IRecoveryRepository,
+        @inject(Types.ClientActionService) private readonly actionService: ClientActionService,
+        @inject(Types.UserService) private readonly userService: UserService,
+        @inject(Types.RecoveryEmailSender) private readonly recoverySender: IRecoveryEmailSender
         ) {}
 
     public async sendRecoveryEmail(data:RecoverPasswordModelType): Promise<AuthError> {

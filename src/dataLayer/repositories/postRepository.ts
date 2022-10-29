@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { injectable } from "inversify";
 import { UpdateResult } from "mongodb";
-import { PostRepository as IPostRepository } from "../../logicLayer/interfaces/postRepository";
+import { IPostRepository } from "../../logicLayer/interfaces/postRepository";
 import LikeModel from "../../logicLayer/models/likeModel";
 import PostModel, { PostInputModel } from "../../logicLayer/models/postModel";
 import LikeMapper from "../mappers/likeMapper";

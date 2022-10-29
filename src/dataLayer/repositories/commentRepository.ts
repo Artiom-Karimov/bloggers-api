@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { injectable } from "inversify";
-import { CommentRepository as ICommentRepository } from "../../logicLayer/interfaces/commentRepository";
+import { ICommentRepository } from "../../logicLayer/interfaces/commentRepository";
 import CommentModel from "../../logicLayer/models/commentModel";
 import LikeModel from "../../logicLayer/models/likeModel";
 import CommentMapper from "../mappers/commentMapper";

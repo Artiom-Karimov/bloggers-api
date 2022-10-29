@@ -1,10 +1,11 @@
 import "reflect-metadata";
-import { injectable } from "inversify";
-import { DeviceSessionRepository } from "../interfaces/deviceSessionRepository";
-import { DeviceSessionCreateType } from "../models/deviceSessionModel";
+import { inject, injectable } from "inversify";
+import { ISessionRepository } from "../interfaces/sessionRepository";
+import { SessionCreateType } from "../models/sessionModel";
 import TokenPair from "../models/tokenPair";
-import DeviceSessionFactory from "../utils/deviceSessionFactory";
+import SessionFactory from "../utils/sessionFactory";
 import JwtTokenOperator, { TokenPayload } from "../utils/jwtTokenOperator";
+import { Types } from "../../inversifyTypes";
 
 export enum DeviceSessionError {
     NoError,
@@ -14,13 +15,13 @@ export enum DeviceSessionError {
 }
 
 @injectable()
-export default class DeviceSessionService {
+export default class SessionService {
 
-    constructor(private readonly repo:DeviceSessionRepository) {}
+    constructor(@inject(Types.SessionRepository) private readonly repo:ISessionRepository) {}
 
-    public async createDevice(data:DeviceSessionCreateType)
+    public async createDevice(data:SessionCreateType)
     : Promise<TokenPair|undefined> {
-        const device = DeviceSessionFactory.createNew(data)
+        const device = SessionFactory.createNew(data)
 
         const added = await this.repo.create(device)
         if(!added) return undefined
@@ -31,11 +32,11 @@ export default class DeviceSessionService {
             issuedAt:device.issuedAt
         })
     }
-    public async updateDevice(oldToken:TokenPayload,data:DeviceSessionCreateType)
+    public async updateDevice(oldToken:TokenPayload,data:SessionCreateType)
     : Promise<TokenPair|undefined> {
         if(!await this.checkTokenExists(oldToken)) return undefined
 
-        const device = DeviceSessionFactory.createUpdate(oldToken.deviceId,data)
+        const device = SessionFactory.createUpdate(oldToken.deviceId,data)
 
         const updated = await this.repo.update(device)
         if(!updated) return undefined
