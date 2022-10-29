@@ -1,6 +1,6 @@
 import UserModel, { EmailConfirmation } from "../models/userModel";
 
-export interface UserRepository {
+export interface IUserRepository {
     get(id:string): Promise<UserModel|undefined>
     getByLogin(login:string): Promise<UserModel|undefined>
     getByEmail(email:string): Promise<UserModel|undefined>

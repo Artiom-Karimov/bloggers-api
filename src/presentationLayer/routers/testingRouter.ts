@@ -1,10 +1,13 @@
-import { Request, Response, Router } from "express";
-import TestingService from "../../logicLayer/services/testingService";
+import { Request, Response, Router } from "express"
+import TestingService from "../../logicLayer/services/testingService"
+import { inject, injectable } from 'inversify'
+import { Types } from "../../inversifyTypes"
 
+@injectable()
 export default class TestingRouter {
     public readonly router: Router
     
-    constructor(private readonly service: TestingService) {
+    constructor(@inject(Types.TestingService) private readonly service: TestingService) {
         this.router = Router()
         this.setRoutes()
     }

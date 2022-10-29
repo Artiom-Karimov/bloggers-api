@@ -1,12 +1,15 @@
+import "reflect-metadata";
 import { Model } from "mongoose"
 import ExtendedLikesInfoModel from "../../../presentationLayer/models/viewModels/extendedLikesInfoModel"
 import LikesInfoViewModel from "../../../presentationLayer/models/viewModels/likesInfoViewModel"
 import LikeViewModel from "../../../presentationLayer/models/viewModels/likeViewModel"
 import { ILike } from "../../models/likeModel"
 import { User } from "../../models/userModel"
+import { injectable, unmanaged } from "inversify";
 
+@injectable()
 export default class LikeQueryRepository {
-    constructor(private readonly model:Model<ILike>) {}
+    constructor(@unmanaged() protected readonly model:Model<ILike>) {}
 
     public async getExtendedLikes(entityId: string, userId:string|undefined): Promise<ExtendedLikesInfoModel> {
         const basicLikes = await this.getLikes(entityId,userId)
@@ -24,23 +27,23 @@ export default class LikeQueryRepository {
             return LikesInfoViewModel.createEmpty()
         }
     }
-    private async getLikesCount(entityId:string): Promise<number> {
+    protected async getLikesCount(entityId:string): Promise<number> {
         return this.model.countDocuments({entityId:entityId}).where('status').equals('Like')
     }
-    private async getDislikesCount(entityId:string): Promise<number> {
+    protected async getDislikesCount(entityId:string): Promise<number> {
         return this.model.countDocuments({entityId:entityId}).where('status').equals('Dislike')
     }
-    private async getUserLike(entityId:string,userId:string|undefined): Promise<string> {
+    protected async getUserLike(entityId:string,userId:string|undefined): Promise<string> {
         if(!userId) return 'None'
         const result = await this.model.findOne({entityId:entityId,userId:userId})
         return result ? result.status : 'None'
     }
-    private async getNewestLikes(entityId:string): Promise<LikeViewModel[]> {
+    protected async getNewestLikes(entityId:string): Promise<LikeViewModel[]> {
         const dbLikes = await this.getDbNewestLikes(entityId)
         const promises = dbLikes.map(l => this.getLikeView(l))
         return Promise.all(promises)
     }
-    private async getDbNewestLikes(entityId:string): Promise<ILike[]> {
+    protected async getDbNewestLikes(entityId:string): Promise<ILike[]> {
         try {
             return this.model.find({entityId:entityId})
                 .where('status').equals('Like')
@@ -50,7 +53,7 @@ export default class LikeQueryRepository {
             return []
         }
     }
-    private async getLikeView(dbLike:ILike): Promise<LikeViewModel> {
+    protected async getLikeView(dbLike:ILike): Promise<LikeViewModel> {
         const user = await User.findOne({_id:dbLike.userId})
         return new LikeViewModel(
             dbLike.lastModified.toISOString(),

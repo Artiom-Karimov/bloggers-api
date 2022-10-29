@@ -1,9 +1,12 @@
-import { DeviceSessionQueryRepository as IDeviceSessionQueryRepository } from "../../../presentationLayer/interfaces/deviceSessionQueryRepository";
+import "reflect-metadata";
+import { injectable } from "inversify";
+import { ISessionQueryRepository } from "../../../presentationLayer/interfaces/sessionQueryRepository";
 import DeviceSessionViewModel from "../../../presentationLayer/models/viewModels/deviceSessionViewModel";
 import DeviceSessionMapper from "../../mappers/deviceSessionMapper";
 import { DeviceSession } from "../../models/deviceSessionModel";
 
-export default class DeviceSessionQueryRepository implements IDeviceSessionQueryRepository {
+@injectable()
+export default class SessionQueryRepository implements ISessionQueryRepository {
     public async getByUser(id: string): Promise<DeviceSessionViewModel[]> {
         try {
             const sessions = await DeviceSession.find({userId:id}).exec()

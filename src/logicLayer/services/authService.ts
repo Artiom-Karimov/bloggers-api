@@ -1,22 +1,26 @@
-import DeviceSessionService, { DeviceSessionError } from "./deviceSessionService";
+import "reflect-metadata";
+import SessionService, { DeviceSessionError } from "./sessionService";
 import UserService from "./userService";
 import Hasher from "../utils/hasher"
 import { LoginModelType, RegisterModelType, ResendEmailModelType, RenewTokenModelType, ConfirmEmailModelType, RecoverPasswordModelType } from "../models/clientActionTypes"
 import JwtTokenOperator from "../utils/jwtTokenOperator"
 import UserModel from "../models/userModel";
-import { ConfirmEmailSender } from "../../email/confirmationEmailSender";
+import { IConfirmationEmailSender } from "../../email/confirmationEmailSender";
 import { AuthError } from "../models/authError";
 import TokenPair from "../models/tokenPair";
 import ClientActionService from "./clientActionService";
 import { ClientAction } from "../models/clientActionModel";
+import { inject, injectable } from "inversify";
+import { Types } from "../../inversifyTypes";
 
+@injectable()
 export default class AuthService {
     
     constructor(
-        private readonly userService: UserService,
-        private readonly sessionService: DeviceSessionService,
-        private readonly actionService: ClientActionService,
-        private readonly confirmSender: ConfirmEmailSender
+        @inject(Types.UserService) private readonly userService: UserService,
+        @inject(Types.SessionService) private readonly sessionService: SessionService,
+        @inject(Types.ClientActionService) private readonly actionService: ClientActionService,
+        @inject(Types.ConfirmEmailSender) private readonly confirmSender: IConfirmationEmailSender
     ) {}
     public async register(data:RegisterModelType): Promise<AuthError> {
         if(this.actionService.updateAndCheckLimit(data.ip,ClientAction.Register)) return AuthError.ActionLimit

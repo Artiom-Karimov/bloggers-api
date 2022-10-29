@@ -7,42 +7,32 @@ import { commentValidation, likeStatusValidation, postValidation } from '../vali
 import { APIErrorResult } from '../validation/apiErrorResultFormatter'
 import BlogService from '../../logicLayer/services/blogService';
 import GetPostsQueryParams from '../models/queryParams/getPostsQueryParams';
-import { BlogPostQueryRepository } from '../interfaces/blogPostQueryRepository';
+import { IBlogPostQueryRepository } from '../interfaces/blogPostQueryRepository';
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider";
 import GetCommentsQueryParams from '../models/queryParams/getCommentsQueryParams';
-import { CommentQueryRepository } from '../interfaces/commentQueryRepository';
+import { ICommentQueryRepository } from '../interfaces/commentQueryRepository';
 import CommentService from '../../logicLayer/services/commentService';
 import { CommentCreateModel } from '../../logicLayer/models/commentModel';
+import { inject, injectable } from 'inversify';
+import { Types } from "../../inversifyTypes"
 
 const blogIdErrorMessage = 'blogId should be an existing blog id'
 const blogNotFoundResult = new APIErrorResult([{message:blogIdErrorMessage,field:'blogId'}])
 
+@injectable()
 export default class PostRouter {
     public readonly router: Router
-    private readonly posts: PostService
-    private readonly blogs: BlogService
-    private readonly queryRepo: BlogPostQueryRepository
-    private readonly comments: CommentService
-    private readonly commentQueryRepo: CommentQueryRepository
-    private authProvider: AuthMiddlewareProvider
 
     constructor(
-        posts:PostService,
-        blogs:BlogService,
-        comments:CommentService,
-        queryRepo:BlogPostQueryRepository,
-        commentQueryRepo:CommentQueryRepository,
-        authProvider:AuthMiddlewareProvider
-        ) {
-        this.posts = posts
-        this.blogs = blogs
-        this.comments = comments
-        this.queryRepo = queryRepo
-        this.commentQueryRepo = commentQueryRepo
-        this.authProvider = authProvider
-        this.router = Router()
-        this.setRoutes()
-        this.setCommentRoutes()
+        @inject(Types.PostService) private readonly posts: PostService,
+        @inject(Types.BlogService) private readonly blogs: BlogService,
+        @inject(Types.CommentService) private readonly comments: CommentService,
+        @inject(Types.BlogPostQueryRepository) private readonly queryRepo: IBlogPostQueryRepository,
+        @inject(Types.CommentQueryRepository) private readonly commentQueryRepo: ICommentQueryRepository,
+        @inject(Types.AuthMiddlewareProvider) private readonly authProvider: AuthMiddlewareProvider) {
+            this.router = Router()
+            this.setRoutes()
+            this.setCommentRoutes()
     }
 
     private setRoutes() {

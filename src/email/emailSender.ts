@@ -1,6 +1,8 @@
+import { injectable } from 'inversify'
 import nodemailer from 'nodemailer'
 import { email as config } from '../config/config'
 
+@injectable()
 export default abstract class EmailSender {
     protected readonly transporter: nodemailer.Transporter<nodemailer.SentMessageInfo> 
 

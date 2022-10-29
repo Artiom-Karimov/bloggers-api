@@ -1,23 +1,23 @@
 import { Router, Request, Response } from "express"
-import { CommentQueryRepository } from "../interfaces/commentQueryRepository"
+import { ICommentQueryRepository } from "../interfaces/commentQueryRepository"
 import CommentService from "../../logicLayer/services/commentService"
 import AuthMiddlewareProvider from "../middlewares/authMiddlewareProvider"
 import { validationMiddleware } from "../middlewares/validationMiddleware"
 import { commentValidation, likeStatusValidation } from "../validation/bodyValidators"
 import { LikeStatus } from "../../logicLayer/models/likeModel"
+import { inject, injectable } from "inversify"
+import { Types } from "../../inversifyTypes"
 
+@injectable()
 export default class CommentRouter {
     public readonly router: Router
-    private readonly service: CommentService
-    private readonly queryRepo: CommentQueryRepository
-    private authProvider: AuthMiddlewareProvider
 
-    constructor(service:CommentService,queryRepo:CommentQueryRepository,authProvider:AuthMiddlewareProvider) {
-        this.router = Router()
-        this.service = service
-        this.queryRepo = queryRepo
-        this.authProvider = authProvider
-        this.setRoutes()
+    constructor(
+        @inject(Types.CommentService) private readonly service: CommentService,
+        @inject(Types.CommentQueryRepository) private readonly queryRepo: ICommentQueryRepository,
+        @inject(Types.AuthMiddlewareProvider) private readonly authProvider: AuthMiddlewareProvider) {
+            this.router = Router()
+            this.setRoutes()
     }
     private setRoutes() {
         this.router.get('/:id', 

@@ -8,11 +8,11 @@ import CommentRepository from '../dataLayer/repositories/commentRepository'
 import CommentQueryRepository from '../dataLayer/repositories/queryRepositories.ts/commentQueryRepository'
 import UserRepository from '../dataLayer/repositories/userRepository'
 import UserQueryRepository from '../dataLayer/repositories/queryRepositories.ts/userQueryRepository'
-import DeviceSessionRepository from '../dataLayer/repositories/deviceSessionRepository'
-import DeviceSessionQueryRepository from '../dataLayer/repositories/queryRepositories.ts/deviceSessionQueryRepository'
+import SessionRepository from '../dataLayer/repositories/sessionRepository'
+import SessionQueryRepository from '../dataLayer/repositories/queryRepositories.ts/sessionQueryRepository'
 import TestingRepository from '../dataLayer/repositories/testingRepository'
 
-import { ConfirmEmailSender } from '../email/confirmationEmailSender'
+import { IConfirmationEmailSender } from '../email/confirmationEmailSender'
 import BlogService from '../logicLayer/services/blogService'
 import PostService from '../logicLayer/services/postService'
 import UserService from '../logicLayer/services/userService'
@@ -24,7 +24,7 @@ import PostRouter from '../presentationLayer/routers/postRouter'
 import UserRouter from '../presentationLayer/routers/userRouter'
 import BloggersApp from '../presentationLayer/bloggersApp'
 import AuthMiddlewareProvider from '../presentationLayer/middlewares/authMiddlewareProvider'
-import DeviceSessionService from '../logicLayer/services/deviceSessionService'
+import SessionService from '../logicLayer/services/sessionService'
 import AuthService from '../logicLayer/services/authService'
 import ClientActionRepository from '../logicLayer/utils/clientActionCollection'
 import SecurityRouter from '../presentationLayer/routers/securityRouter'
@@ -33,11 +33,11 @@ import TestingRouter from '../presentationLayer/routers/testingRouter'
 import TestingService from '../logicLayer/services/testingService'
 
 import mongoose from 'mongoose'
-import PasswordRecoveryRepository from '../dataLayer/repositories/passwordRecoveryRepository'
-import PasswordRecoveryService from '../logicLayer/services/passwordRecoveryService'
-import { RecoverEmailSender } from '../email/recoveryEmailSender'
-import LikeQueryRepository from '../dataLayer/repositories/queryRepositories.ts/likeQueryRepository'
-import { CommentLike, PostLike } from '../dataLayer/models/likeModel'
+import RecoveryRepository from '../dataLayer/repositories/recoveryRepository'
+import RecoveryService from '../logicLayer/services/recoveryService'
+import { IRecoveryEmailSender } from '../email/recoveryEmailSender'
+import PostLikeQueryRepository from '../dataLayer/repositories/queryRepositories.ts/postLikeQueryRepository'
+import CommentLikeQueryRepository from '../dataLayer/repositories/queryRepositories.ts/commentLikeQueryRepository'
 
 const login = config.userName
 const password = config.password
@@ -48,23 +48,23 @@ const blogRepository = new BlogRepository()
 const postRepository = new PostRepository()
 const userRepository = new UserRepository()
 const commentRepository = new CommentRepository()
-const postLikeRepository = new LikeQueryRepository(PostLike)
+const postLikeRepository = new PostLikeQueryRepository()
 const queryRepository = new BlogPostQueryRepository(postLikeRepository)
 const userQueryRepository = new UserQueryRepository()
-const commentLikeRepository = new LikeQueryRepository(CommentLike)
+const commentLikeRepository = new CommentLikeQueryRepository()
 const commentQueryRepository = new CommentQueryRepository(commentLikeRepository)
-const deviceSessionRepository = new DeviceSessionRepository()
+const deviceSessionRepository = new SessionRepository()
 const clientActionRepository = new ClientActionRepository()
-const deviceSessionQueryRepository = new DeviceSessionQueryRepository()
-const recoveryRepository = new PasswordRecoveryRepository()
+const deviceSessionQueryRepository = new SessionQueryRepository()
+const recoveryRepository = new RecoveryRepository()
 const testingRepository = new TestingRepository()
 
-const fakeConfirmEmailSender: ConfirmEmailSender = {
+const fakeConfirmEmailSender: IConfirmationEmailSender = {
     send(login:string,email:string,code:string): Promise<boolean> {
         return new Promise((resolve, reject) => resolve(true))
     }
 }
-const fakeRecoverEmailSender: RecoverEmailSender = {
+const fakeRecoverEmailSender: IRecoveryEmailSender = {
     send: function (email: string, code: string): Promise<boolean> {
         return new Promise((resolve, reject) => resolve(true))
     }
@@ -72,12 +72,12 @@ const fakeRecoverEmailSender: RecoverEmailSender = {
 
 const blogService = new BlogService(blogRepository)
 const postService = new PostService(postRepository)
-const deviceService = new DeviceSessionService(deviceSessionRepository)
+const sessionService = new SessionService(deviceSessionRepository)
 const userService = new UserService(userRepository)
 const commentService = new CommentService(commentRepository)
 const actionService = new ClientActionService(clientActionRepository)
-const authService = new AuthService(userService,deviceService,actionService,fakeConfirmEmailSender)
-const recoveryService = new PasswordRecoveryService(recoveryRepository,actionService,userService,fakeRecoverEmailSender)
+const authService = new AuthService(userService,sessionService,actionService,fakeConfirmEmailSender)
+const recoveryService = new RecoveryService(recoveryRepository,actionService,userService,fakeRecoverEmailSender)
 const testingService = new TestingService(testingRepository)
 
 const authProvider = new AuthMiddlewareProvider(userService)
@@ -86,18 +86,10 @@ const blogRouter = new BlogRouter(blogService,postService,queryRepository,authPr
 const commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
 const postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)
 const userRouter = new UserRouter(userService,userQueryRepository,authProvider)
-const securityRouter = new SecurityRouter(deviceService,deviceSessionQueryRepository,authProvider)
+const securityRouter = new SecurityRouter(sessionService,deviceSessionQueryRepository)
 const testingRouter = new TestingRouter(testingService)
 
-const app = new BloggersApp({
-    blogRouter,
-    postRouter,
-    userRouter,
-    authRouter,
-    commentRouter,
-    securityRouter,
-    testingRouter
-})
+const app = new BloggersApp(blogRouter,postRouter,userRouter,authRouter,commentRouter,securityRouter,testingRouter)
 
 const initApp = async () => {
     mongoServ = await MongoMemoryServer.create()

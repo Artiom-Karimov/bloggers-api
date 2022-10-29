@@ -1,4 +1,4 @@
-import DeviceSessionModel from "../../logicLayer/models/deviceSessionModel";
+import DeviceSessionModel from "../../logicLayer/models/sessionModel";
 import DeviceSessionViewModel from "../../presentationLayer/models/viewModels/deviceSessionViewModel";
 import { IDeviceSession } from "../models/deviceSessionModel";
 

@@ -1,4 +1,6 @@
-import { CommentQueryRepository as ICommentQueryRepository } from "../../../presentationLayer/interfaces/commentQueryRepository";
+import "reflect-metadata";
+import { inject, injectable } from "inversify";
+import { ICommentQueryRepository } from "../../../presentationLayer/interfaces/commentQueryRepository";
 import GetCommentsQueryParams from "../../../presentationLayer/models/queryParams/getCommentsQueryParams";
 import CommentViewModel from "../../../presentationLayer/models/viewModels/commentViewModel";
 import LikesInfoViewModel from "../../../presentationLayer/models/viewModels/likesInfoViewModel";
@@ -6,10 +8,12 @@ import PageViewModel from "../../../presentationLayer/models/viewModels/pageView
 import CommentMapper from "../../mappers/commentMapper";
 import { Comment, IComment } from "../../models/commentModel";
 import SortFactory from "../utils/sortFactory";
-import LikeQueryRepository from "./likeQueryRepository";
+import CommentLikeQueryRepository from "./commentLikeQueryRepository";
+import { Types } from "../../../inversifyTypes";
 
+@injectable()
 export default class CommentQueryRepository implements ICommentQueryRepository {
-    constructor(private readonly likeRepo:LikeQueryRepository) {}
+    constructor(@inject(Types.CommentLikeRepository) private readonly likeRepo:CommentLikeQueryRepository) {}
 
     public async getWithoutLikes(id:string): Promise<CommentViewModel | undefined> {
         try {

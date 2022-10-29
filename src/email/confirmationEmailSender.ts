@@ -1,11 +1,13 @@
 import EmailSender from "./emailSender";
 import ConfirmationEmailConstructor from "./confirmationEmailConstructor";
+import { injectable } from "inversify";
 
-export interface ConfirmEmailSender {
+export interface IConfirmationEmailSender {
     send(login:string,email:string,code:string): Promise<boolean>
 }
 
-export default class ConfirmationEmailSender extends EmailSender implements ConfirmEmailSender {
+@injectable()
+export default class ConfirmationEmailSender extends EmailSender implements IConfirmationEmailSender {
 
     constructor() {
         super()

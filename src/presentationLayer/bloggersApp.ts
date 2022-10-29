@@ -12,22 +12,23 @@ import AuthRouter from './routers/authRouter'
 import CommentRouter from './routers/commentRouter'
 import SecurityRouter from './routers/securityRouter'
 import TestingRouter from './routers/testingRouter'
+import { inject, injectable } from 'inversify'
+import { Types } from '../inversifyTypes'
 
-export type ConstructorParams = {
-    blogRouter?:BlogRouter,
-    postRouter?:PostRouter,
-    userRouter?:UserRouter,
-    authRouter?:AuthRouter,
-    commentRouter?:CommentRouter,
-    securityRouter?:SecurityRouter,
-    testingRouter?:TestingRouter
-}
-
+@injectable()
 export default class BloggersApp {
     public readonly port: number
     public readonly server: http.Server
 
-    constructor(params:ConstructorParams) {
+    constructor(
+        @inject(Types.BlogRouter) blogRouter:BlogRouter,
+        @inject(Types.PostRouter) postRouter:PostRouter,
+        @inject(Types.UserRouter) userRouter:UserRouter,
+        @inject(Types.AuthRouter) authRouter:AuthRouter,
+        @inject(Types.CommentRouter) commentRouter:CommentRouter,
+        @inject(Types.SecurityRouter) securityRouter:SecurityRouter,
+        @inject(Types.TestingRouter) testingRouter:TestingRouter,
+    ) {
         this.port = config.port
 
         const app = express()
@@ -38,13 +39,13 @@ export default class BloggersApp {
         app.use(cookieParser())
         app.set('trust proxy', true)
         
-        if(params.blogRouter) app.use('/blogs', params.blogRouter.router)
-        if(params.postRouter) app.use('/posts', params.postRouter.router)
-        if(params.userRouter) app.use('/users', params.userRouter.router)
-        if(params.authRouter) app.use('/auth', params.authRouter.router)
-        if(params.commentRouter) app.use('/comments', params.commentRouter.router)
-        if(params.securityRouter) app.use('/security', params.securityRouter.router)
-        if(params.testingRouter) app.use('/testing', params.testingRouter.router)
+        app.use('/blogs', blogRouter.router)
+        app.use('/posts', postRouter.router)
+        app.use('/users', userRouter.router)
+        app.use('/auth', authRouter.router)
+        app.use('/comments', commentRouter.router)
+        app.use('/security', securityRouter.router)
+        app.use('/testing', testingRouter.router)
 
         app.get('/', (req: Request, res: Response) => {
             res.status(200).send('<h1>Положь трубку!</h1>')

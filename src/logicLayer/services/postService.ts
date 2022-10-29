@@ -1,14 +1,16 @@
-import { PostRepository } from "../interfaces/postRepository";
+import "reflect-metadata";
+import { inject, injectable } from "inversify";
+import { IPostRepository } from "../interfaces/postRepository";
 import { PutLikeInfoModelType } from "../models/clientActionTypes";
 import LikeModel from "../models/likeModel";
 import PostModel, { PostInputModel } from "../models/postModel";
 import DateGenerator from "../utils/dateGenerator";
 import IdGenerator from "../utils/idGenerator";
+import { Types } from "../../inversifyTypes";
 
+@injectable()
 export default class PostService {
-    private readonly repo: PostRepository
-
-    constructor(repo: PostRepository) {
+    constructor(@inject(Types.PostRepository) private readonly repo: IPostRepository) {
         this.repo = repo
     }
     public async get(id:string): Promise<PostModel|undefined> {

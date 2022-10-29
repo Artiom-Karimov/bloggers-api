@@ -1,12 +1,15 @@
-import { UserRepository } from "../interfaces/userRepository"
+import "reflect-metadata";
+import { IUserRepository } from "../interfaces/userRepository"
 import UserModel, { UserInputModel } from "../models/userModel"
 import UserFactory from "../utils/userFactory"
 import EmailConfirmationFactory from "../utils/emailConfirmationFactory"
 import Hasher from "../utils/hasher"
+import { inject, injectable } from "inversify"
+import { Types } from "../../inversifyTypes";
 
+@injectable()
 export default class UserService {    
-
-    constructor(private readonly repo: UserRepository) {}
+    constructor(@inject(Types.UserRepository) private readonly repo: IUserRepository) {}
         
     public async get(id:string): Promise<UserModel|undefined> {
         return this.repo.get(id)

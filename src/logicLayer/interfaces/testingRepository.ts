@@ -1,3 +1,3 @@
-export interface TestingRepository {
+export interface ITestingRepository {
     dropAllData(): Promise<void>
 }

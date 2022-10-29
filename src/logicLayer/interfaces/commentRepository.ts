@@ -1,7 +1,7 @@
 import CommentModel from "../models/commentModel";
 import LikeModel, { LikeStatus } from "../models/likeModel";
 
-export interface CommentRepository {
+export interface ICommentRepository {
     get(id:string): Promise<CommentModel|undefined>
     create(comment:CommentModel): Promise<string|undefined>
     update(id:string,content:string): Promise<boolean>

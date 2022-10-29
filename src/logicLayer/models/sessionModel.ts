@@ -1,10 +1,10 @@
-export type DeviceSessionCreateType = {
+export type SessionCreateType = {
     ip:string,
     deviceName:string,
     userId:string,
 }
 
-export default class DeviceSessionModel {
+export default class SessionModel {
     constructor(
         public deviceId:string,
         public ip:string,

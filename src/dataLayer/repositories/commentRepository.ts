@@ -1,4 +1,6 @@
-import { CommentRepository as ICommentRepository } from "../../logicLayer/interfaces/commentRepository";
+import "reflect-metadata";
+import { injectable } from "inversify";
+import { ICommentRepository } from "../../logicLayer/interfaces/commentRepository";
 import CommentModel from "../../logicLayer/models/commentModel";
 import LikeModel from "../../logicLayer/models/likeModel";
 import CommentMapper from "../mappers/commentMapper";
@@ -6,6 +8,7 @@ import LikeMapper from "../mappers/likeMapper";
 import { Comment } from "../models/commentModel";
 import { CommentLike } from "../models/likeModel";
 
+@injectable()
 export default class CommentRepository implements ICommentRepository {
     public async get(id: string): Promise<CommentModel | undefined> {
         try {

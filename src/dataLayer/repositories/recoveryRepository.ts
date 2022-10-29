@@ -1,8 +1,12 @@
+import "reflect-metadata";
+import { IRecoveryRepository } from "../../logicLayer/interfaces/recoveryRepository";
 import { PasswordRecovery } from "../models/passwordRecoveryModel";
 import PasswordRecoveryMapper from "../mappers/passwordRecoveryMapper";
 import PasswordRecoveryModel from "../../logicLayer/models/passwordRecoveryModel";
+import { injectable } from "inversify";
 
-export default class PasswordRecoveryRepository {
+@injectable()
+export default class RecoveryRepository implements IRecoveryRepository {
     public async create(data:PasswordRecoveryModel): Promise<string|undefined> {
         try {
             const newModel = new PasswordRecovery(PasswordRecoveryMapper.fromBusiness(data))
