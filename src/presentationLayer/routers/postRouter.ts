@@ -58,11 +58,7 @@ export default class PostRouter {
             const post = await this.queryRepo.getPost(req.params.id, req.headers.userId as string|undefined)
 
             if(!post) { res.sendStatus(404); return }
-            //
-            // Change this when tests will be right
-            //
-            const resultForWrongTest = new OldPostViewModel(post!)
-            res.status(200).send(resultForWrongTest)
+            res.status(200).send(post)
         })
 
         this.router.post('/',
