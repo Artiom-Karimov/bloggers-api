@@ -62,14 +62,7 @@ export default class SessionService {
         const payload = await this.unpackAndCheck(refreshToken)
         if (!payload) return false
 
-        const devices = await this.repo.getByUser(payload.userId)
-        if (devices.length === 0) return false
-
-        // Move this to repo
-        const promises = devices.filter(d => d.deviceId !== payload.deviceId)
-            .map(d => this.repo.delete(d.deviceId))
-        const results = await Promise.all(promises)
-        return results.every(r => r)
+        return this.repo.deleteAllButOne(payload.userId, payload.deviceId);
     }
     public async checkTokenExists(data: TokenPayload): Promise<boolean> {
         const model = await this.repo.get(data.deviceId)
