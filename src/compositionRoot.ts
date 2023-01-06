@@ -9,7 +9,6 @@ import { IPostRepository } from './logicLayer/interfaces/postRepository'
 import { IUserRepository } from './logicLayer/interfaces/userRepository'
 import { ICommentRepository } from './logicLayer/interfaces/commentRepository'
 import { ISessionRepository } from './logicLayer/interfaces/sessionRepository'
-import { IClientActionRepository } from './logicLayer/interfaces/clientActionRepository'
 import { ITestingRepository } from './logicLayer/interfaces/testingRepository'
 import { IRecoveryRepository } from './logicLayer/interfaces/recoveryRepository'
 
@@ -23,7 +22,6 @@ import PostRepository from './dataLayer/repositories/postRepository'
 import UserRepository from './dataLayer/repositories/userRepository'
 import CommentRepository from './dataLayer/repositories/commentRepository'
 import SessionRepository from './dataLayer/repositories/sessionRepository'
-import ClientActionCollection from './logicLayer/utils/clientActionCollection'
 import TestingRepository from './dataLayer/repositories/testingRepository'
 import RecoveryRepository from './dataLayer/repositories/recoveryRepository'
 
@@ -42,7 +40,6 @@ import PostService from './logicLayer/services/postService'
 import SessionService from './logicLayer/services/sessionService'
 import UserService from './logicLayer/services/userService'
 import CommentService from './logicLayer/services/commentService'
-import ClientActionService from './logicLayer/services/clientActionService'
 import AuthService from './logicLayer/services/authService'
 import TestingService from './logicLayer/services/testingService'
 import RecoveryService from './logicLayer/services/recoveryService'
@@ -70,7 +67,6 @@ export default class CompositionRoot {
         this.container.bind<IUserRepository>(Types.UserRepository).to(UserRepository)
         this.container.bind<ICommentRepository>(Types.CommentRepository).to(CommentRepository)
         this.container.bind<ISessionRepository>(Types.SessionRepository).to(SessionRepository)
-        this.container.bind<IClientActionRepository>(Types.ClientActionRepository).to(ClientActionCollection)
         this.container.bind<ITestingRepository>(Types.TestingRepository).to(TestingRepository)
         this.container.bind<IRecoveryRepository>(Types.RecoveryRepository).to(RecoveryRepository)
 
@@ -89,7 +85,6 @@ export default class CompositionRoot {
         this.container.bind<SessionService>(Types.SessionService).to(SessionService)
         this.container.bind<UserService>(Types.UserService).to(UserService)
         this.container.bind<CommentService>(Types.CommentService).to(CommentService)
-        this.container.bind<ClientActionService>(Types.ClientActionService).to(ClientActionService)
         this.container.bind<AuthService>(Types.AuthService).to(AuthService)
         this.container.bind<TestingService>(Types.TestingService).to(TestingService)
         this.container.bind<RecoveryService>(Types.RecoveryService).to(RecoveryService)
@@ -103,7 +98,7 @@ export default class CompositionRoot {
         this.container.bind<SecurityRouter>(Types.SecurityRouter).to(SecurityRouter)
         this.container.bind<AuthRouter>(Types.AuthRouter).to(AuthRouter)
         this.container.bind<TestingRouter>(Types.TestingRouter).to(TestingRouter)
-        
+
         this.container.bind<BloggersApp>(Types.BloggersApp).to(BloggersApp)
     }
 

@@ -17,67 +17,68 @@ export enum DeviceSessionError {
 @injectable()
 export default class SessionService {
 
-    constructor(@inject(Types.SessionRepository) private readonly repo:ISessionRepository) {}
+    constructor(@inject(Types.SessionRepository) private readonly repo: ISessionRepository) { }
 
-    public async createDevice(data:SessionCreateType)
-    : Promise<TokenPair|undefined> {
+    public async createDevice(data: SessionCreateType)
+        : Promise<TokenPair | undefined> {
         const device = SessionFactory.createNew(data)
 
         const added = await this.repo.create(device)
-        if(!added) return undefined
-
+        if (!added) return undefined
+        // Pass date from device
         return JwtTokenOperator.createTokenPair({
-            userId:device.userId,
-            deviceId:device.deviceId,
-            issuedAt:device.issuedAt
+            userId: device.userId,
+            deviceId: device.deviceId,
+            issuedAt: device.issuedAt
         })
     }
-    public async updateDevice(oldToken:TokenPayload,data:SessionCreateType)
-    : Promise<TokenPair|undefined> {
-        if(!await this.checkTokenExists(oldToken)) return undefined
+    public async updateDevice(oldToken: TokenPayload, data: SessionCreateType)
+        : Promise<TokenPair | undefined> {
+        if (!await this.checkTokenExists(oldToken)) return undefined
 
-        const device = SessionFactory.createUpdate(oldToken.deviceId,data)
+        const device = SessionFactory.createUpdate(oldToken.deviceId, data)
 
         const updated = await this.repo.update(device)
-        if(!updated) return undefined
-
+        if (!updated) return undefined
+        // Pass date from device
         return JwtTokenOperator.createTokenPair({
-            userId:device.userId,
-            deviceId:device.deviceId,
-            issuedAt:device.issuedAt
+            userId: device.userId,
+            deviceId: device.deviceId,
+            issuedAt: device.issuedAt
         })
     }
-    public async deleteDevice(refreshToken:string,deviceId:string): Promise<DeviceSessionError> {
+    public async deleteDevice(refreshToken: string, deviceId: string): Promise<DeviceSessionError> {
         const payload = await this.unpackAndCheck(refreshToken)
-        if(!payload) return DeviceSessionError.TokenError
+        if (!payload) return DeviceSessionError.TokenError
 
         const device = await this.repo.get(deviceId)
-        if(!device) return DeviceSessionError.NotFoundError
-        if(device.userId !== payload.userId) return DeviceSessionError.WrongUserError
+        if (!device) return DeviceSessionError.NotFoundError
+        if (device.userId !== payload.userId) return DeviceSessionError.WrongUserError
 
         const deleted = await this.repo.delete(deviceId)
         return deleted ? DeviceSessionError.NoError : DeviceSessionError.NotFoundError
     }
-    public async deleteAllExceptOne(refreshToken:string): Promise<boolean> {
+    public async deleteAllExceptOne(refreshToken: string): Promise<boolean> {
         const payload = await this.unpackAndCheck(refreshToken)
-        if(!payload) return false
+        if (!payload) return false
 
         const devices = await this.repo.getByUser(payload.userId)
-        if(devices.length === 0) return false
+        if (devices.length === 0) return false
 
+        // Move this to repo
         const promises = devices.filter(d => d.deviceId !== payload.deviceId)
             .map(d => this.repo.delete(d.deviceId))
         const results = await Promise.all(promises)
         return results.every(r => r)
     }
-    public async checkTokenExists(data:TokenPayload): Promise<boolean> {
+    public async checkTokenExists(data: TokenPayload): Promise<boolean> {
         const model = await this.repo.get(data.deviceId)
-        if(!model) return false
+        if (!model) return false
         return (model.issuedAt === data.issuedAt && model.userId === data.userId)
     }
-    public async unpackAndCheck(refreshToken:string): Promise<TokenPayload|undefined> {
+    public async unpackAndCheck(refreshToken: string): Promise<TokenPayload | undefined> {
         const payload = JwtTokenOperator.unpackRefreshToken(refreshToken)
-        if(!payload) return undefined
+        if (!payload) return undefined
         const exists = await this.checkTokenExists(payload)
         return exists ? payload : undefined
     }

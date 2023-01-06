@@ -1,7 +1,7 @@
 import request from 'supertest'
 
 import { BlogInputModel } from "../../logicLayer/models/blogModel"
-import { CommentInputModel } from '../../logicLayer/models/commentModel'
+import { CommentCreateModel } from '../../logicLayer/models/commentModel'
 import { PostInputModel } from "../../logicLayer/models/postModel"
 import { UserInputModel } from '../../logicLayer/models/userModel'
 import * as root from '../testCompositionRoot'
@@ -9,9 +9,9 @@ import * as root from '../testCompositionRoot'
 export let sampleBlogInputs: Array<BlogInputModel> = []
 export let samplePostInputs: Array<PostInputModel> = []
 export let sampleUserInputs: Array<UserInputModel> = []
-export let sampleCommentInputs: Array<CommentInputModel> = []
+export let sampleCommentInputs: Array<CommentCreateModel> = []
 
-export const timeout = (ms:number) => {
+export const timeout = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -34,7 +34,7 @@ export const createBlogSamples = async () => {
     })
     await Promise.all(blogs)
 }
-export const createPostSamplesByBlog = async (blogId:string, blogName: string) => {
+export const createPostSamplesByBlog = async (blogId: string, blogName: string) => {
     const posts = samplePostInputs.map((data) => {
         data.blogId = blogId
         data.blogName = blogName
@@ -55,10 +55,10 @@ export const createUserSamples = async (): Promise<any[]> => {
     const responses = await Promise.all(promises)
     return responses.map(r => r.body)
 }
-export const createCommentSamples = async (userToken:string): Promise<string[]> => {
+export const createCommentSamples = async (userToken: string): Promise<string[]> => {
     const promises = sampleCommentInputs.map(c => {
         return request(root.app.server).post(`/posts/${c.postId}/comments`)
-            .auth(userToken, {type: "bearer"}).send({ content: c.content })
+            .auth(userToken, { type: "bearer" }).send({ content: c.content })
     })
     const responses = await Promise.all(promises)
     return responses.map(r => r.body.id)
@@ -74,24 +74,24 @@ export const createPost = async (data: PostInputModel): Promise<string> => {
     const created = await request(root.app.server).post('/posts').auth(root.login, root.password).send(data)
     return created.body.id
 }
-export const createUser = async (login:string,email:string,password:string): Promise<string> => {
+export const createUser = async (login: string, email: string, password: string): Promise<string> => {
     const userInput: UserInputModel = {
-        login:login,
-        email:email,
-        password:password
-    } 
+        login: login,
+        email: email,
+        password: password
+    }
     const created = await request(root.app.server)
         .post('/users').auth(root.login, root.password).send(userInput)
     return created.body.id
 }
-export const createUserToken = async (login:string,email:string,password:string): Promise<string> => {    
-    const id = await createUser(login,email,password)
+export const createUserToken = async (login: string, email: string, password: string): Promise<string> => {
+    const id = await createUser(login, email, password)
     const authorized = await request(root.app.server).post('/auth/login')
-        .send({ login:login, password:password })
+        .send({ login: login, password: password })
     return authorized.body.accessToken
 }
 
-export const parseRefreshCookie = (cookies:string[]):string => {
+export const parseRefreshCookie = (cookies: string[]): string => {
     const cookie = cookies.find((q) => q.includes('refreshToken'))
     return cookie ? cookie : ''
 }
