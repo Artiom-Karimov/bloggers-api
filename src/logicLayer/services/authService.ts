@@ -2,9 +2,9 @@ import "reflect-metadata";
 import SessionService, { DeviceSessionError } from "./sessionService";
 import UserService from "./userService";
 import Hasher from "../utils/hasher"
-import { LoginModelType, RegisterModelType, ResendEmailModelType, RenewTokenModelType, ConfirmEmailModelType, RecoverPasswordModelType } from "../models/clientActionTypes"
+import { LoginModelType, RenewTokenModelType, ConfirmEmailModelType } from "../models/clientActionTypes"
 import JwtTokenOperator from "../utils/jwtTokenOperator"
-import UserModel from "../models/userModel";
+import UserModel, { UserInputModel } from "../models/userModel";
 import { IConfirmationEmailSender } from "../../email/confirmationEmailSender";
 import { AuthError } from "../models/authError";
 import TokenPair from "../models/tokenPair";
@@ -19,7 +19,7 @@ export default class AuthService {
         @inject(Types.SessionService) private readonly sessionService: SessionService,
         @inject(Types.ConfirmEmailSender) private readonly confirmSender: IConfirmationEmailSender
     ) { }
-    public async register(data: RegisterModelType): Promise<AuthError> {
+    public async register(data: UserInputModel): Promise<AuthError> {
         const existsError = await this.loginOrEmailExists(data)
         if (existsError !== AuthError.NoError) return existsError
 
@@ -30,8 +30,8 @@ export default class AuthService {
 
         return AuthError.NoError
     }
-    public async resendConfirmationEmail(data: ResendEmailModelType): Promise<AuthError> {
-        const user = await this.userService.getByEmail(data.email)
+    public async resendConfirmationEmail(email: string): Promise<AuthError> {
+        const user = await this.userService.getByEmail(email)
         if (!user) return AuthError.WrongCredentials
 
         if (user.emailConfirmation.confirmed) return AuthError.AlreadyConfirmed
@@ -55,11 +55,11 @@ export default class AuthService {
 
         return AuthError.Unknown
     }
-    public async confirmRegitrationByCodeOnly(data: ConfirmEmailModelType): Promise<AuthError> {
-        const user = await this.userService.getByConfirmCode(data.code)
+    public async confirmRegitrationByCodeOnly(code: string): Promise<AuthError> {
+        const user = await this.userService.getByConfirmCode(code)
         if (!user ||
             user.emailConfirmation.codeExpiration < new Date().getDate() ||
-            data.code !== user.emailConfirmation.code) {
+            code !== user.emailConfirmation.code) {
             return AuthError.WrongCode
         }
         if (await this.userService.setEmailConfirmed(user.id)) return AuthError.NoError
@@ -106,14 +106,12 @@ export default class AuthService {
         if (!user.emailConfirmation.confirmed) return false
         return Hasher.check(password, { hash: user.accountData.passwordHash, salt: user.accountData.salt })
     }
-    private async createAndGetUser(data: RegisterModelType): Promise<UserModel | undefined> {
-        const createdId = await this.userService.createUnconfirmed({
-            login: data.login, email: data.email, password: data.password
-        })
+    private async createAndGetUser(data: UserInputModel): Promise<UserModel | undefined> {
+        const createdId = await this.userService.createUnconfirmed(data)
         if (!createdId) return undefined
         return this.userService.get(createdId)
     }
-    private async loginOrEmailExists(data: RegisterModelType): Promise<AuthError> {
+    private async loginOrEmailExists(data: UserInputModel): Promise<AuthError> {
         const loginExists = this.userService.loginExists(data.login)
         const emailExists = this.userService.emailExists(data.email)
         if (await loginExists) return AuthError.LoginExists

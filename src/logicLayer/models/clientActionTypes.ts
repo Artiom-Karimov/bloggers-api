@@ -1,45 +1,26 @@
 import { LikeStatus } from "./likeModel"
 
 export type LoginModelType = {
-    login:string,
-    password:string,
-    ip:string,
-    deviceName:string
-}
-export type RegisterModelType = {
-    login:string,
-    email:string,
-    password:string,
-    ip:string,
-    deviceName:string
-}
-export type ResendEmailModelType = {
-    email:string,
-    ip:string,
-    deviceName:string
+    login: string,
+    password: string,
+    ip: string,
+    deviceName: string,
 }
 export type RenewTokenModelType = {
-    refreshToken:string,
-    ip:string,
-    deviceName:string
+    refreshToken: string,
+    ip: string,
+    deviceName: string,
 }
 export type ConfirmEmailModelType = {
-    login:string,
-    ip:string,
-    deviceName:string,
-    code:string
-}
-export type RecoverPasswordModelType = {
-    ip:string,
-    email:string
+    login: string,
+    code: string
 }
 export type SetNewPasswordModelType = {
-    ip:string,
-    password:string,
-    code:string
+    password: string,
+    code: string
 }
 export type PutLikeInfoModelType = {
-    userId:string,
-    entityId:string,
-    status:LikeStatus
+    userId: string,
+    entityId: string,
+    status: LikeStatus
 }

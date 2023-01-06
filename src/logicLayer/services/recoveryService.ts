@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import { IRecoveryEmailSender } from "../../email/recoveryEmailSender";
 import { IRecoveryRepository } from "../interfaces/recoveryRepository";
 import { AuthError } from "../models/authError";
-import { RecoverPasswordModelType, SetNewPasswordModelType } from "../models/clientActionTypes";
+import { SetNewPasswordModelType } from "../models/clientActionTypes";
 import PasswordRecoveryModel from "../models/passwordRecoveryModel";
 import UserService from "./userService";
 import { Types } from "../../inversifyTypes";
@@ -16,14 +16,14 @@ export default class RecoveryService {
         @inject(Types.RecoveryEmailSender) private readonly recoverySender: IRecoveryEmailSender
     ) { }
 
-    public async sendRecoveryEmail(data: RecoverPasswordModelType): Promise<AuthError> {
-        const user = await this.userService.getByEmail(data.email)
+    public async sendRecoveryEmail(email: string): Promise<AuthError> {
+        const user = await this.userService.getByEmail(email)
         if (!user) return AuthError.UserNotFound
 
         const createdCode = await this.repo.create(PasswordRecoveryModel.create(user.id))
         if (!createdCode) return AuthError.Unknown
 
-        this.recoverySender.send(data.email, createdCode)
+        this.recoverySender.send(email, createdCode)
         return AuthError.NoError
     }
     public async setNewPassword(data: SetNewPasswordModelType): Promise<AuthError> {

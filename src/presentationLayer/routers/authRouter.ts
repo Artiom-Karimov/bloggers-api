@@ -38,48 +38,30 @@ export default class AuthRouter {
                     login: req.body.login,
                     email: req.body.email,
                     password: req.body.password,
-                    ip: req.ip,
-                    deviceName: req.headers["user-agent"] || ''
-                })
-                switch (result) {
-                    case AuthError.NoError: res.sendStatus(204); break;
-                    case AuthError.ActionLimit: res.sendStatus(429); break;
-                    case AuthError.LoginExists: {
-                        res.status(400).send(new APIErrorResult([
-                            { field: 'login', message: 'login already exists' }]))
-                        break;
-                    }
-                    case AuthError.EmailExists: {
-                        res.status(400).send(new APIErrorResult([
-                            { field: 'email', message: 'email already exists' }]))
-                        break;
-                    }
-                    default: res.sendStatus(400)
-                }
-            })
+                });
+
+                if (result === AuthError.NoError) return res.sendStatus(204);
+                if (result === AuthError.LoginExists) return res.status(400).send(new APIErrorResult([
+                    { field: 'login', message: 'login already exists' }]));
+                if (result === AuthError.EmailExists) return res.status(400).send(new APIErrorResult([
+                    { field: 'email', message: 'email already exists' }]));
+                res.sendStatus(400);
+            });
 
         this.router.post('/registration-email-resending',
             ddosMiddleware,
             emailValidation,
             validationMiddleware,
             async (req: Request, res: Response) => {
-                const result = await this.authService.resendConfirmationEmail({
-                    email: req.body.email,
-                    ip: req.ip,
-                    deviceName: req.headers["user-agent"] || ''
-                })
-                switch (result) {
-                    case AuthError.NoError: res.sendStatus(204); break;
-                    case AuthError.ActionLimit: res.sendStatus(429); break;
-                    case AuthError.WrongCredentials:
-                    case AuthError.AlreadyConfirmed: {
-                        res.status(400).send(new APIErrorResult([
-                            { field: 'email', message: 'wrong or already confirmed email' }
-                        ]))
-                        break;
-                    }
-                    default: res.sendStatus(400)
+                const result = await this.authService.resendConfirmationEmail(req.body.email);
+
+                if (result === AuthError.NoError) return res.sendStatus(204);
+                if (result === AuthError.WrongCredentials || result === AuthError.AlreadyConfirmed) {
+                    return res.status(400).send(new APIErrorResult([
+                        { field: 'email', message: 'wrong or already confirmed email' }
+                    ]))
                 }
+                res.sendStatus(400);
             })
 
         this.router.get('/confirm-email',
@@ -89,22 +71,16 @@ export default class AuthRouter {
             async (req: Request, res: Response) => {
                 const result = await this.authService.confirmRegistration({
                     login: req.query.user as string,
-                    ip: req.ip,
-                    deviceName: req.headers["user-agent"] || '',
-                    code: req.query.code as string
+                    code: req.query.code as string,
                 })
-                switch (result) {
-                    case AuthError.NoError: res.sendStatus(204); break;
-                    case AuthError.ActionLimit: res.sendStatus(429); break;
-                    case AuthError.UserNotFound:
-                    case AuthError.WrongCode: {
-                        res.status(400).send(new APIErrorResult([
-                            { field: 'code', message: 'invalid code or user' }
-                        ]))
-                        break;
-                    }
-                    default: res.sendStatus(400)
+
+                if (result === AuthError.NoError) return res.sendStatus(204);
+                if (result === AuthError.UserNotFound || result === AuthError.WrongCode) {
+                    return res.status(400).send(new APIErrorResult([
+                        { field: 'code', message: 'invalid code or user' }
+                    ]))
                 }
+                res.sendStatus(400);
             })
 
         this.router.post('/registration-confirmation',
@@ -112,24 +88,15 @@ export default class AuthRouter {
             confirmCodeValidation,
             validationMiddleware,
             async (req: Request, res: Response) => {
-                const result = await this.authService.confirmRegitrationByCodeOnly({
-                    login: '',
-                    ip: req.ip,
-                    deviceName: req.headers["user-agent"] || '',
-                    code: req.body.code
-                })
-                switch (result) {
-                    case AuthError.NoError: res.sendStatus(204); break;
-                    case AuthError.ActionLimit: res.sendStatus(429); break;
-                    case AuthError.UserNotFound:
-                    case AuthError.WrongCode: {
-                        res.status(400).send(new APIErrorResult([
-                            { field: 'code', message: 'invalid code or user' }
-                        ]))
-                        break;
-                    }
-                    default: res.sendStatus(400)
+                const result = await this.authService.confirmRegitrationByCodeOnly(req.body.code);
+
+                if (result === AuthError.NoError) return res.sendStatus(204);
+                if (result === AuthError.UserNotFound || result === AuthError.WrongCode) {
+                    return res.status(400).send(new APIErrorResult([
+                        { field: 'code', message: 'invalid code or user' }
+                    ]))
                 }
+                res.sendStatus(400);
             })
 
         this.router.post('/login',
@@ -146,16 +113,13 @@ export default class AuthRouter {
                     res.cookie(
                         'refreshToken',
                         result.refreshToken,
-                        this.getCookieSettings()
+                        this.getCookieSettings(),
                     )
-                    res.status(200).send({ accessToken: result.accessToken })
-                    return
+                    res.status(200).send({ accessToken: result.accessToken });
+                    return;
                 }
-                switch (result) {
-                    case AuthError.ActionLimit: res.sendStatus(429); break;
-                    case AuthError.WrongCredentials: res.sendStatus(401); break;
-                    default: res.sendStatus(400)
-                }
+                if (result === AuthError.WrongCredentials) return res.sendStatus(401);
+                res.sendStatus(400);
             })
 
         this.router.post('/refresh-token',
@@ -208,15 +172,8 @@ export default class AuthRouter {
             emailValidation,
             validationMiddleware,
             async (req: Request, res: Response) => {
-                const result = await this.recoveryService.sendRecoveryEmail({
-                    ip: req.ip,
-                    email: req.body.email
-                })
-                if (result === AuthError.ActionLimit) {
-                    res.sendStatus(429)
-                    return
-                }
-                res.sendStatus(204)
+                const result = await this.recoveryService.sendRecoveryEmail(req.body.email);
+                res.sendStatus(204);
             })
 
         this.router.post('/new-password',
@@ -225,17 +182,11 @@ export default class AuthRouter {
             validationMiddleware,
             async (req: Request, res: Response) => {
                 const result = await this.recoveryService.setNewPassword({
-                    ip: req.ip,
                     password: req.body.newPassword,
-                    code: req.body.recoveryCode
-                })
-                if (result === AuthError.ActionLimit) {
-                    res.sendStatus(429); return
-                }
-                if (result === AuthError.NoError) {
-                    res.sendStatus(204); return
-                }
-                res.sendStatus(400)
+                    code: req.body.recoveryCode,
+                });
+                if (result === AuthError.NoError) return res.sendStatus(204);
+                res.sendStatus(400);
             })
     }
     private getCookieSettings(): any {

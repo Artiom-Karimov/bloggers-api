@@ -1,6 +1,5 @@
 export enum AuthError {
     NoError,
-    ActionLimit,
     LoginExists,
     EmailExists,
     AlreadyConfirmed,

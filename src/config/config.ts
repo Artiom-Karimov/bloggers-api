@@ -5,8 +5,8 @@ const password: string = process.env.PASSWORD!
 const cookieMaxAge: number = Number(process.env.cookieMaxAge) || 24 * 3600
 const mongoUri: string = process.env.mongoUri || 'mongodb://0.0.0.0:27017/bloggers'
 const ddos = {
-    TimeoutSeconds: Number(process.env.ddosTimeoutSeconds) || 5,
-    MaxRequests: Number(process.env.ddosMaxRequests) || 10,
+    TimeoutSeconds: Number(process.env.ddosTimeoutSeconds) || 10,
+    MaxRequests: Number(process.env.ddosMaxRequests) || 5,
     disable: process.env.ddosGuardDisable === 'true',
 }
 const jwt = {
