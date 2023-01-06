@@ -1,10 +1,3 @@
-import { convertTypeAcquisitionFromJson } from "typescript"
-
-export type CommentInputModel = {
-    postId: string,
-    userId: string,
-    content: string
-}
 export type CommentCreateModel = {
     postId: string,
     userId: string,
@@ -21,10 +14,10 @@ export default class CommentModel {
     public createdAt: string
 
     constructor(
-        id:string, 
-        data:CommentCreateModel, 
-        createdAt:string
-        ) {
+        id: string,
+        data: CommentCreateModel,
+        createdAt: string
+    ) {
         this.id = id
         this.postId = data.postId
         this.userId = data.userId

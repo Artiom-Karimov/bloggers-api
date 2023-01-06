@@ -26,9 +26,7 @@ import BloggersApp from '../presentationLayer/bloggersApp'
 import AuthMiddlewareProvider from '../presentationLayer/middlewares/authMiddlewareProvider'
 import SessionService from '../logicLayer/services/sessionService'
 import AuthService from '../logicLayer/services/authService'
-import ClientActionRepository from '../logicLayer/utils/clientActionCollection'
 import SecurityRouter from '../presentationLayer/routers/securityRouter'
-import ClientActionService from '../logicLayer/services/clientActionService'
 import TestingRouter from '../presentationLayer/routers/testingRouter'
 import TestingService from '../logicLayer/services/testingService'
 
@@ -54,13 +52,12 @@ const userQueryRepository = new UserQueryRepository()
 const commentLikeRepository = new CommentLikeQueryRepository()
 const commentQueryRepository = new CommentQueryRepository(commentLikeRepository)
 const deviceSessionRepository = new SessionRepository()
-const clientActionRepository = new ClientActionRepository()
 const deviceSessionQueryRepository = new SessionQueryRepository()
 const recoveryRepository = new RecoveryRepository()
 const testingRepository = new TestingRepository()
 
 const fakeConfirmEmailSender: IConfirmationEmailSender = {
-    send(login:string,email:string,code:string): Promise<boolean> {
+    send(login: string, email: string, code: string): Promise<boolean> {
         return new Promise((resolve, reject) => resolve(true))
     }
 }
@@ -75,26 +72,25 @@ const postService = new PostService(postRepository)
 const sessionService = new SessionService(deviceSessionRepository)
 const userService = new UserService(userRepository)
 const commentService = new CommentService(commentRepository)
-const actionService = new ClientActionService(clientActionRepository)
-const authService = new AuthService(userService,sessionService,actionService,fakeConfirmEmailSender)
-const recoveryService = new RecoveryService(recoveryRepository,actionService,userService,fakeRecoverEmailSender)
+const authService = new AuthService(userService, sessionService, fakeConfirmEmailSender)
+const recoveryService = new RecoveryService(recoveryRepository, userService, fakeRecoverEmailSender)
 const testingService = new TestingService(testingRepository)
 
 const authProvider = new AuthMiddlewareProvider(userService)
-const authRouter = new AuthRouter(authService,recoveryService,userQueryRepository,authProvider)
-const blogRouter = new BlogRouter(blogService,postService,queryRepository,authProvider)
-const commentRouter = new CommentRouter(commentService,commentQueryRepository,authProvider)
-const postRouter = new PostRouter(postService,blogService,commentService,queryRepository,commentQueryRepository,authProvider)
-const userRouter = new UserRouter(userService,userQueryRepository,authProvider)
-const securityRouter = new SecurityRouter(sessionService,deviceSessionQueryRepository)
+const authRouter = new AuthRouter(authService, recoveryService, userQueryRepository, authProvider)
+const blogRouter = new BlogRouter(blogService, postService, queryRepository, authProvider)
+const commentRouter = new CommentRouter(commentService, commentQueryRepository, authProvider)
+const postRouter = new PostRouter(postService, blogService, commentService, queryRepository, commentQueryRepository, authProvider)
+const userRouter = new UserRouter(userService, userQueryRepository, authProvider)
+const securityRouter = new SecurityRouter(sessionService, deviceSessionQueryRepository)
 const testingRouter = new TestingRouter(testingService)
 
-const app = new BloggersApp(blogRouter,postRouter,userRouter,authRouter,commentRouter,securityRouter,testingRouter)
+const app = new BloggersApp(blogRouter, postRouter, userRouter, authRouter, commentRouter, securityRouter, testingRouter)
 
 const initApp = async () => {
     mongoServ = await MongoMemoryServer.create()
     const uri = mongoServ.getUri()
-    await mongoose.connect(uri )//+ '/bloggers')
+    await mongoose.connect(uri)//+ '/bloggers')
 }
 
 // const initApp = async () => {
